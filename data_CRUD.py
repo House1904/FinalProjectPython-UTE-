@@ -43,8 +43,13 @@ def add_student_record():
                 return value
 
     new_record = {
+<<<<<<< HEAD
         'Hours_Studied': input_float("Hours Studied (Số giờ học): ", 0, 100),
         'Attendance': input_float("Attendance (Điểm danh, 0-100): ", 0, 100),
+=======
+        'Hours_Studied': input_float("Hours Studied (Số giờ học): "),
+        'Attendance': input_int("Attendance (Điểm danh, 0-100): "),
+>>>>>>> cfa866b0a2e5235474189da0ddf75812ea4225bf
         'Parental_Involvement': input_str("Parental Involvement (Sự tham gia của phụ huynh): ", valid_options=['Low', 'Medium', 'High']),
         'Access_to_Resources': input_str("Access to Resources (Tiếp cận tài nguyên): ", valid_options=['Low', 'Medium', 'High']),
         'Extracurricular_Activities': input_str("Extracurricular Activities (Hoạt động ngoại khóa): ", valid_options=['Yes', 'No']),
@@ -68,7 +73,11 @@ def add_student_record():
     global data  # Cập nhật biến toàn cục
     new_record_df = pd.DataFrame([new_record])  # Chuyển đổi dictionary thành DataFrame
     data = pd.concat([data, new_record_df], ignore_index=True)
+<<<<<<< HEAD
     data.to_csv('data_source\\cleaned_data.csv', index=False)  # Lưu lại vào file CSV
+=======
+    data.to_csv('StudentPerformanceFactors.csv', index=False)  # Lưu lại vào file CSV
+>>>>>>> cfa866b0a2e5235474189da0ddf75812ea4225bf
     print("Thêm thành công dữ liệu sinh viên mới!")
 
 def read_full_data():
@@ -236,7 +245,11 @@ def update_student_record():
                     print(f"Giá trị cho {actual_column_name} không hợp lệ. Vui lòng nhập lại.")
 
         # Lưu lại dữ liệu vào file CSV
+<<<<<<< HEAD
         data.to_csv('data_source\\cleaned_data.csv', index=False)
+=======
+        data.to_csv('StudentPerformanceFactors.csv', index=False)
+>>>>>>> cfa866b0a2e5235474189da0ddf75812ea4225bf
         print("Dữ liệu đã được lưu thành công vào file CSV!")
 
     except ValueError:
@@ -306,7 +319,11 @@ def delete_student_record():
             print(f"Đã xóa thành công dòng {row_index + 1}.")
 
         # Lưu lại dữ liệu vào file CSV
+<<<<<<< HEAD
         data.to_csv('data_source\\cleaned_data.csv', index=False)
+=======
+        data.to_csv('StudentPerformanceFactors.csv', index=False)
+>>>>>>> cfa866b0a2e5235474189da0ddf75812ea4225bf
         print("Dữ liệu đã được lưu thành công vào file CSV!")
 
     except ValueError:
