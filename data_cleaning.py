@@ -1,5 +1,6 @@
-﻿﻿import numpy as np
+﻿import numpy as np
 import pandas as pd
+from scipy.stats import zscore
 
 # Đọc dữ liệu từ file CSV gốc trong thư mục data
 df = pd.read_csv('data_source/StudentPerformanceFactors.csv')
@@ -9,9 +10,13 @@ print(f"Ma trận DataFrame: {df.shape}")
 print("Năm dòng đầu của DF: ")
 print(df.head())
 
+print(f"Dữ liệu có bị trùng lặp không? {df.duplicated().any()}")
+
 print(f"Số giá trị trùng lặp: {df.duplicated().sum()}")
 
-print("Số giá trị bị NULL: ")
+print("Kiểm tra xem có giá trị ở thuộc tính nào bị null không?")
+print(df.isnull().any())
+print("Số giá trị bị NULL của từng thuộc tính: ")
 print(df.isnull().sum())
 
 # Xóa các hàng chứa các giá trị bị thiếu
@@ -25,6 +30,15 @@ print(df_na.isnull().sum())
 
 print("\nTóm tắt thống kê cơ bản dữ liệu số:")
 print(df_na.describe())
+
+# Kiểm tra từng cột thuộc tính số xem có giá trị nào ngoại lệ không?
+for col in df.select_dtypes(include=['number']).columns:
+    print(f"Unique values in '{col}': {df[col].unique()}")
+
+# for col in df.select_dtypes(include=['number']).columns:
+#     z_scores = zscore(df[col])
+#     outliers = df[abs(z_scores) > 3]
+#     print(f"Outliers in {col}: {outliers}")
 
 # Loại bỏ các giá trị ngoại lệ
 df_cleaned = df_na[df_na['Exam_Score'] <= 100]
