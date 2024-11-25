@@ -112,7 +112,7 @@ def save_to_csv(data):
     except Exception as e:
         messagebox.showerror("Error", f"Failed to save survey: {e}")
 
-# Tạo giao diện Tkinter
+# Tạo giao diện
 def create_survey():
     def submit():
         answers = {}
@@ -203,7 +203,6 @@ def create_survey():
                        pady=10)
 
     makecenter(root)
-
     root.mainloop()
 
 # Chạy giao diện
