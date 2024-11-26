@@ -598,6 +598,181 @@ def search_by_attribute(data):
 
     print("Kết quả tìm kiếm:")
     paginate(filtered_data)
+# Chức năng trích lọc dữ liệu 1 số có giá trị số
+def filter_numeric_columns():
+    """Lọc dữ liệu dựa trên các cột số học (float hoặc int)."""
+    
+    # Xác định các cột có kiểu dữ liệu số
+    numeric_columns = data.select_dtypes(include=['float64', 'int64']).columns
+
+    # Hiển thị các cột số để người dùng lựa chọn
+    print("Các cột có sẵn để lọc theo phạm vi:")
+    for idx, col in enumerate(numeric_columns, start=1):
+        print(f"{idx}. {col}")
+
+    # Người dùng nhập chỉ số cột muốn lọc
+    while True:
+        try:
+            column_index = int(input("Nhập chỉ số cột muốn lọc: ").strip()) - 1
+            if 0 <= column_index < len(numeric_columns):
+                column_name = numeric_columns[column_index]
+                break
+            else:
+                print("Chỉ số không hợp lệ. Vui lòng thử lại.")
+        except ValueError:
+            print("Vui lòng nhập một số nguyên hợp lệ.")
+
+    # Xác định phạm vi giá trị của cột được chọn
+    min_possible = data[column_name].min()
+    max_possible = data[column_name].max()
+    print(f"Phạm vi giá trị có thể nhập cho cột '{column_name}': {min_possible} đến {max_possible}")
+
+    # Nhập phạm vi giá trị để lọc
+    while True: 
+        try:
+            min_value = float(input(f"Nhập giá trị nhỏ nhất cho cột '{column_name}': "))
+            max_value = float(input(f"Nhập giá trị lớn nhất cho cột '{column_name}': "))
+            
+            # Kiểm tra nếu giá trị nhập nằm ngoài phạm vi hợp lệ
+            if min_value < min_possible or max_value > max_possible:
+                print("Giá trị nằm ngoài phạm vi. Vui lòng nhập lại.")
+                continue
+
+            if min_value > max_value:
+                print("Giá trị nhỏ nhất không được lớn hơn giá trị lớn nhất. Vui lòng nhập lại.")
+                continue
+
+        # Thực hiện lọc dữ liệu
+            filtered_data = data[(data[column_name] >= min_value) & (data[column_name] <= max_value)]
+            if filtered_data.empty:
+                print("Không có dữ liệu thỏa mãn điều kiện lọc.")
+            else:
+                print("\nKết quả lọc dữ liệu:")
+                paginate(filtered_data)
+                break
+        except ValueError:
+            print("Giá trị nhập không hợp lệ. Vui lòng nhập số.")
+
+def filter_unique_value():
+    """Lọc một giá trị duy nhất."""
+    
+    # Xác định các cột có kiểu dữ liệu số
+    numeric_columns = data.select_dtypes(include=['float64', 'int64']).columns
+
+    # Hiển thị các cột số để người dùng lựa chọn
+    print("Các cột có sẵn để lọc theo phạm vi:")
+    for idx, col in enumerate(numeric_columns, start=1):
+        print(f"{idx}. {col}")
+
+    # Người dùng nhập chỉ số cột muốn lọc
+    while True:
+        try:
+            column_index = int(input("Nhập chỉ số cột muốn lọc: ").strip()) - 1
+            if 0 <= column_index < len(numeric_columns):
+                column_name = numeric_columns[column_index]
+                break
+            else:
+                print("Chỉ số không hợp lệ. Vui lòng thử lại.")
+        except ValueError:
+            print("Vui lòng nhập một số nguyên hợp lệ.")
+
+    # Xác định phạm vi giá trị của cột được chọn
+    min_possible = data[column_name].min()
+    max_possible = data[column_name].max()
+    print(f"Phạm vi giá trị có thể nhập cho cột '{column_name}': {min_possible} đến {max_possible}")
+    # Người dùng nhập giá trị cần lọc
+    while True:
+        try:
+            value = float(input(f"Nhập giá trị cần lọc trong cột '{column_name}': ").strip())
+            if min_possible <= value <= max_possible:
+                # Lọc dữ liệu
+                filtered_data = data[data[column_name] == value]
+                if filtered_data.empty:
+                    print("Không có dữ liệu thỏa mãn điều kiện lọc.")
+                else:
+                    print("\nKết quả lọc dữ liệu:")
+                    paginate(filtered_data)
+                break
+            else:
+                print("Giá trị nằm ngoài phạm vi hợp lệ. Vui lòng thử lại.")
+        except ValueError:
+            print("Vui lòng nhập một giá trị số hợp lệ.")
+
+
+def filter_multiple_values():
+    """Lọc nhiều giá trị."""
+    
+    # Xác định các cột có kiểu dữ liệu số
+    numeric_columns = data.select_dtypes(include=['float64', 'int64']).columns
+
+    # Hiển thị các cột số để người dùng lựa chọn
+    print("Các cột có sẵn để lọc theo phạm vi:")
+    for idx, col in enumerate(numeric_columns, start=1):
+        print(f"{idx}. {col}")
+
+    # Người dùng nhập chỉ số cột muốn lọc
+    while True:
+        try:
+            column_index = int(input("Nhập chỉ số cột muốn lọc: ").strip()) - 1
+            if 0 <= column_index < len(numeric_columns):
+                column_name = numeric_columns[column_index]
+                break
+            else:
+                print("Chỉ số không hợp lệ. Vui lòng thử lại.")
+        except ValueError:
+            print("Vui lòng nhập một số nguyên hợp lệ.")
+    
+    # Lấy phạm vi giá trị hợp lệ trong cột đã chọn
+    min_possible = data[column_name].min()
+    max_possible = data[column_name].max()
+    print(f"Phạm vi giá trị hợp lệ cho cột '{column_name}': {min_possible} đến {max_possible}")
+    
+    # Nhập các giá trị cần lọc
+    while True:
+        try:
+            values_input = input(f"Nhập các giá trị cần lọc trong cột '{column_name}' (cách nhau bởi dấu phẩy): ").split(',')
+            values = [float(value.strip()) for value in values_input]  # Chuyển đổi thành kiểu số
+            # Kiểm tra xem các giá trị có nằm trong phạm vi hợp lệ
+            if all(min_possible <= value <= max_possible for value in values):
+                break
+            else:
+                print(f"Giá trị phải nằm trong phạm vi từ {min_possible} đến {max_possible}. Vui lòng thử lại.")
+        except ValueError:
+            print("Vui lòng nhập các giá trị số hợp lệ, cách nhau bởi dấu phẩy.")
+
+    # Lọc dữ liệu theo các giá trị nhập vào
+    filtered_data = data[data[column_name].isin(values)]
+    
+    # Hiển thị kết quả lọc
+    if filtered_data.empty:
+        print("Không có dữ liệu thỏa mãn điều kiện lọc.")
+    else:
+        print("\nKết quả lọc dữ liệu:")
+        paginate(filtered_data)
+
+
+def numeric_filter_menu():
+    """Hiển thị menu lọc dữ liệu theo cột số."""
+    while True:
+        print("\nChọn một chức năng lọc:")
+        print("1. Lọc một giá trị duy nhất.")
+        print("2. Lọc nhiều giá trị.")
+        print("3. Lọc giá trị trong phạm vi.")
+        print("4. Quay lại menu chính.")
+        
+        sub_choice = input("Nhập lựa chọn của bạn (1-4): ").strip()
+        if sub_choice == '1':
+            filter_unique_value()
+        elif sub_choice == '2':
+            filter_multiple_values()
+        elif sub_choice == '3':
+            filter_numeric_columns()
+        elif sub_choice == '4':
+            break
+        else:
+            print("Lựa chọn không hợp lệ. Vui lòng thử lại.")
+
+
 
 
 if __name__ == "__main__":
@@ -672,7 +847,7 @@ if __name__ == "__main__":
         elif choice == '12':
             search_by_attribute(data)
         elif choice == '13':
-            filter_numeric_columns()
+            numeric_filter_menu()
         elif choice == '14':
             print("Cảm ơn bạn đã sử dụng chương trình! Hẹn gặp lại.")
             break
