@@ -6,19 +6,11 @@ import matplotlib.pyplot as plt
 import warnings
 import matplotlib  # Thêm để chọn backend
 
-warnings.filterwarnings('ignore')
+warnings.filterwarnings('ignore') # Tắt thông báo cảnh báo (warnings)
 
-# Feature Engineering
-import re
+df_cleaned = pd.read_csv('data_source\cleaned_data.csv') # Lấy dữ liệu chuẩn từ file đã làm sạch
 
-rs = 999  # Random seed
-
-df_cleaned = pd.read_csv('data_source\cleaned_data.csv')
-
-print("Kiểu dữ liệu của từng cột: ")
-print(df_cleaned.info())
-print(df_cleaned.head())
-
+# Phân tách biến số và biến phân loại
 num_col = ['Hours_Studied', 'Attendance', 'Previous_Scores']
 cat_col = ['Parental_Involvement', 'Access_to_Resources', 'Sleep_Hours', 'Extracurricular_Activities', 
            'Motivation_Level', 'Internet_Access', 'Tutoring_Sessions', 'Family_Income', 'Teacher_Quality', 
@@ -33,10 +25,11 @@ print(df_cleaned[target].dtype)
 
 # Visualization - Trực quan hoá dữ liệu
 
-# Vẽ histogram cho Exam_Score với bins đã định nghĩa
+# 1. VẼ BIỂU ĐỒ TẦN SUẤT VÀ CỘT CHO CÁC THUỘC TÍNH ĐƠN LẺ (HISTOGRAM và BAR)
+# Histogram cho biến mục tiêu Exam_Score 
 plt.figure(figsize=(10, 6))
 
-sns.histplot(df_cleaned[target], bins = 50, kde=True, color='red', edgecolor = 'black', alpha = 0.5 )
+sns.histplot(df_cleaned[target], bins = 45, kde=True, color='red', edgecolor = 'black', alpha = 0.5 )
 
 plt.title('Distribution of Exam Score')
 plt.xlabel('Exam Score')
@@ -63,7 +56,7 @@ print(f"Phần trăm điểm số trong khoảng 65 đến 69: {percent_between_
 
 # Histogram cho Hours_Studied
 plt.figure(figsize=(10, 6))
-sns.histplot(df_cleaned['Hours_Studied'], bins=30, kde=True, color='blue', edgecolor='black', alpha=0.5)
+sns.histplot(df_cleaned['Hours_Studied'], bins=45, kde=True, color='blue', edgecolor='black', alpha=0.5)
 plt.title('Distribution of Hours Studied')
 plt.xlabel('Hours Studied')
 plt.ylabel('Frequency')
@@ -88,7 +81,7 @@ print(f"Phần trăm số giờ học bài trong khoảng 11 giờ đến 19 gi�
 
 # Histogram cho Attendance
 plt.figure(figsize=(10, 6))
-sns.histplot(df_cleaned['Attendance'], bins=50, kde=True, color='violet', edgecolor='black', alpha=0.5)
+sns.histplot(df_cleaned['Attendance'], bins=45, kde=True, color='violet', edgecolor='black', alpha=0.5)
 plt.title('Distribution of Attendance')
 plt.xlabel('Attendance')
 plt.ylabel('Frequency')
@@ -110,6 +103,30 @@ percent_between_70_and_79 = (len(between_70_and_79) / len(df_cleaned)) * 100
 print(f"Phần trăm tham dự dưới 69: {percent_below_69:.2f}%")
 print(f"Phần trăm tham dự trên 80: {percent_above_80:.2f}%")
 print(f"Phần trăm tham dự trong khoảng 70 đến 79: {percent_between_70_and_79:.2f}%")
+
+# Histogram cho Previous_Scores
+plt.hist(df_cleaned['Previous_Scores'], bins=50, color='green', edgecolor='black', alpha=0.5)
+plt.title('Distribution of Previous Scores')
+plt.xlabel('Previous Scores')
+plt.ylabel('Frequency')
+plt.xlim(50, 100)
+plt.grid(axis='y', alpha=0.75)
+plt.show()
+
+print("-" * 20)
+print("\nNhận định về Distribution of Previous Scoress.")
+
+below_69 = df_cleaned[df_cleaned['Previous_Scores'] <= 69]
+above_90 = df_cleaned[df_cleaned['Previous_Scores'] >= 90]
+between_70_and_89 = df_cleaned[(df_cleaned['Previous_Scores'] >= 70) & (df_cleaned['Previous_Scores'] <= 89)]
+
+percent_below_69 = (len(below_69) / len(df_cleaned)) * 100
+percent_above_90 = (len(above_90) / len(df_cleaned)) * 100
+percent_between_70_and_89 = (len(between_70_and_89) / len(df_cleaned)) * 100
+
+print(f"Phần trăm điểm dưới 69: {percent_below_69:.2f}%")
+print(f"Phần trăm điểm trên 90: {percent_above_90:.2f}%")
+print(f"Phần trăm điểm trong khoảng 70 đến 89 giờ: {percent_between_70_and_89:.2f}%")
 
 # Bar cho Parental_Involvement
 counts = df_cleaned['Parental_Involvement'].value_counts()
@@ -183,14 +200,42 @@ percent_no = (len(no_activitiess) / len(df_cleaned)) * 100
 print(f"Phần trăm có hoạt động ngoại khóa: {percent_yes:.2f}%")
 print(f"Phần trăm không hoạt động ngoại khóa: {percent_no:.2f}%")
 
-# Histogram cho Sleep_Hours
-plt.figure(figsize=(10, 6))
-sns.histplot(df_cleaned['Sleep_Hours'], bins=8, kde=True, color='blue', edgecolor='black', alpha=0.5)
+# # Histogram cho Sleep_Hours
+# plt.figure(figsize=(10, 6))
+# sns.histplot(df_cleaned['Sleep_Hours'], bins=8, kde=True, color='blue', edgecolor='black', alpha=0.5)
+# plt.title('Distribution of Sleep Hours')
+# plt.xlabel('Sleep Hours')
+# plt.ylabel('Frequency')
+# plt.xticks(range(3, 13))
+# plt.grid(axis='y', alpha=0.4)
+# plt.show()
+
+# # Vẽ bar chart cho Sleep_Hours
+# plt.figure(figsize=(10, 6))
+# sns.countplot(x=df_cleaned['Sleep_Hours'], palette='Reds', edgecolor='black')
+# plt.title('Distribution of Sleep Hours')
+# plt.xlabel('Sleep Hours')
+# plt.ylabel('Frequency')
+# plt.xticks(range(3, 13)) 
+# plt.grid(axis='y', alpha=0.4)
+# plt.show()
+
+# Bar cho Sleep_Hours
+# Tính toán tần suất của các giá trị Sleep_Hours
+counts = df_cleaned['Sleep_Hours'].value_counts().sort_index()
+# Màu sắc khác nhau cho từng cột
+colors = ['#FF6347', '#FFD700', '#ADFF2F', '#00BFFF', '#FF69B4', '#8A2BE2', 
+          '#FF4500', '#32CD32', '#FF1493', '#C71585']
+# Vẽ bar chart cho Sleep_Hours
+counts.plot(kind='bar', color=colors[:len(counts)], edgecolor='black', alpha=0.5)
+# Thêm tiêu đề và nhãn cho biểu đồ
 plt.title('Distribution of Sleep Hours')
 plt.xlabel('Sleep Hours')
 plt.ylabel('Frequency')
-plt.xticks(range(3, 13))
-plt.grid(axis='y', alpha=0.4)
+# Cập nhật các giá trị trục x và hiển thị grid cho trục y
+plt.xticks(rotation=0)
+plt.grid(axis='y', alpha=0.75)
+# Hiển thị biểu đồ
 plt.show()
 
 print("-" * 20)
@@ -207,30 +252,6 @@ percent_between_6_and_7 = (len(between_6_and_7) / len(df_cleaned)) * 100
 print(f"Phần trăm số giờ ngủ dưới 5 giờ: {percent_below_5:.2f}%")
 print(f"Phần trăm số giờ ngủ trên 8 giờ: {percent_above_8:.2f}%")
 print(f"Phần trăm số giờ ngủ trong khoảng 6 đến 7 giờ: {percent_between_6_and_7:.2f}%")
-
-# Histogram cho Previous_Scores
-plt.hist(df_cleaned['Previous_Scores'], bins=50, color='green', edgecolor='black', alpha=0.5)
-plt.title('Distribution of Previous Scores')
-plt.xlabel('Previous Scores')
-plt.ylabel('Frequency')
-plt.xlim(50, 100)
-plt.grid(axis='y', alpha=0.75)
-plt.show()
-
-print("-" * 20)
-print("\nNhận định về Distribution of Previous Scoress.")
-
-below_69 = df_cleaned[df_cleaned['Previous_Scores'] <= 69]
-above_90 = df_cleaned[df_cleaned['Previous_Scores'] >= 90]
-between_70_and_89 = df_cleaned[(df_cleaned['Previous_Scores'] >= 70) & (df_cleaned['Previous_Scores'] <= 89)]
-
-percent_below_69 = (len(below_69) / len(df_cleaned)) * 100
-percent_above_90 = (len(above_90) / len(df_cleaned)) * 100
-percent_between_70_and_89 = (len(between_70_and_89) / len(df_cleaned)) * 100
-
-print(f"Phần trăm điểm dưới 69: {percent_below_69:.2f}%")
-print(f"Phần trăm điểm trên 90: {percent_above_90:.2f}%")
-print(f"Phần trăm điểm trong khoảng 70 đến 89 giờ: {percent_between_70_and_89:.2f}%")
 
 # Bar cho Motivation_Level
 counts = df_cleaned['Motivation_Level'].value_counts()
@@ -279,14 +300,32 @@ percent_no = (len(no_access) / len(df_cleaned)) * 100
 print(f"Phần trăm có truy cập Internet: {percent_yes:.2f}%")
 print(f"Phần trăm không truy cập Internet: {percent_no:.2f}%")
 
-# Histogram cho Tutoring_Sessions
-plt.figure(figsize=(10, 6))
-sns.histplot(df_cleaned['Tutoring_Sessions'], bins=8, kde=True, color='purple', edgecolor='black', alpha=0.5)
+# # Histogram cho Tutoring_Sessions
+# plt.figure(figsize=(10, 6))
+# sns.histplot(df_cleaned['Tutoring_Sessions'], bins=8, kde=True, color='purple', edgecolor='black', alpha=0.5)
+# plt.title('Distribution of Tutoring Sessions')
+# plt.xlabel('Tutoring Sessions')
+# plt.ylabel('Frequency')
+# plt.xticks(range(0, 9))
+# plt.grid(axis='y', alpha=0.4)
+# plt.show()
+
+# Bar cho Tutoring_Sessions 
+# Tính số lượng các giá trị của 'Tutoring_Sessions' và sắp xếp theo thứ tự tăng dần
+counts = df_cleaned['Tutoring_Sessions'].value_counts().sort_index()
+# Tạo danh sách các màu để sử dụng cho mỗi cột
+colors = ['purple', 'blue', 'green', 'orange', 'red', 'yellow', 'brown', 'pink', 'cyan']
+# Vẽ bar chart
+counts.plot(kind='bar', color=colors[:len(counts)], edgecolor='black', alpha=0.7)
+# Thêm tiêu đề và nhãn cho biểu đồ
 plt.title('Distribution of Tutoring Sessions')
 plt.xlabel('Tutoring Sessions')
 plt.ylabel('Frequency')
-plt.xticks(range(0, 9))
-plt.grid(axis='y', alpha=0.4)
+# Sắp xếp lại trục X từ 0 đến 8
+plt.xticks(range(9), rotation=0)
+# Hiển thị grid cho trục y
+plt.grid(axis='y', alpha=0.75)
+# Hiển thị biểu đồ
 plt.show()
 
 print("-" * 20)
@@ -401,14 +440,32 @@ print(f"Phần trăm ảnh hưởng tích cực: {percent_po:.2f}%")
 print(f"Phần trăm ảnh hưởng tiêu cực: {percent_ne:.2f}%")
 print(f"Phần trăm ảnh hưởng trung lập: {percent_neu:.2f}%")
 
-# Histogram cho Physical_Activity
-plt.figure(figsize=(10, 6))
-sns.histplot(df_cleaned['Physical_Activity'], bins=8, kde=True, color='teal', edgecolor='black', alpha=0.5)
+# # Histogram cho Physical_Activity
+# plt.figure(figsize=(10, 6))
+# sns.histplot(df_cleaned['Physical_Activity'], bins=8, kde=True, color='teal', edgecolor='black', alpha=0.5)
+# plt.title('Distribution of Physical Activity')
+# plt.xlabel('Physical Activity')
+# plt.ylabel('Frequency')
+# plt.xticks(range(0, 7))
+# plt.grid(axis='y', alpha=0.4)
+# plt.show()
+
+# Bar cho Physical_Activity
+# Tính số lượng các giá trị của 'Physical_Activity' và sắp xếp theo thứ tự tăng dần
+counts = df_cleaned['Physical_Activity'].value_counts().sort_index()
+# Tạo danh sách các màu để sử dụng cho mỗi cột
+colors = ['teal', 'orange', 'blue', 'green', 'purple', 'red', 'pink']
+# Vẽ bar chart
+counts.plot(kind='bar', color=colors[:len(counts)], edgecolor='black', alpha=0.7)
+# Thêm tiêu đề và nhãn cho biểu đồ
 plt.title('Distribution of Physical Activity')
 plt.xlabel('Physical Activity')
 plt.ylabel('Frequency')
-plt.xticks(range(0, 7))
-plt.grid(axis='y', alpha=0.4)
+# Sắp xếp lại trục X từ 0 đến 6
+plt.xticks(range(7), rotation=0)
+# Hiển thị grid cho trục y
+plt.grid(axis='y', alpha=0.75)
+# Hiển thị biểu đồ
 plt.show()
 
 print("-" * 20)
@@ -520,6 +577,7 @@ percent_fe = (len(fe) / len(df_cleaned)) * 100
 print(f"Phần trăm nữ: {percent_fe:.2f}%")
 print(f"Phần trăm nam: {percent_ma:.2f}%")
 
+# 2. VẼ BIỂU ĐỒ BIỂU DIỄN QUAN HỆ PHÂN TÁN (SỐ) VÀ BIỂU ĐỒ HỘP (PHÂN LOẠI) VỚI BIẾN MỤC TIÊU EXAM_SCORE
 # Vẽ biểu đồ phân tán Hours Studied và Exam Score
 # Liệu số giờ học có ảnh hưởng đến điểm số không?
 plt.figure(figsize=(10, 6))
@@ -1002,6 +1060,17 @@ else:
 
 # Hiển thị biểu đồ
 plt.show()
+
+# Lọc chỉ các cột số
+numerical_df = df_cleaned.select_dtypes(include='number')
+# Tính ma trận tương quan cho numerical_df
+corr_df = numerical_df.corr()
+# Vẽ heatmap cho ma trận tương quan của các cột số
+plt.figure(figsize=(8, 6))  # Điều chỉnh kích thước của heatmap
+sns.heatmap(corr_df, annot=True, cmap='coolwarm', fmt=".2f")  # Vẽ heatmap, hiện giá trị tương quan, và sử dụng bảng màu "coolwarm"
+plt.title('Biểu đồ Heatmap của các cột số')  # Thêm tiêu đề
+plt.show()  # Hiển thị biểu đồ
+
 
 
 
