@@ -413,8 +413,10 @@ def update_student_record(data):
     print("Đã cập nhật thành công.")
 
 
+from tabulate import tabulate
+
 def delete_student_record():
-    """Xóa một hoặc nhiều dòng từ DataFrame."""
+    """Xóa một hoặc nhiều dòng từ DataFrame sau khi xác nhận."""
     global data
     try:
         if data.empty:
@@ -424,7 +426,9 @@ def delete_student_record():
         # Nhập các chỉ số dòng cần xóa (hỗ trợ xóa nhiều dòng)
         while True:
             try:
-                row_indices = input(f"Nhập chỉ số dòng cần xóa (phân cách bằng dấu phẩy, từ 0 đến {len(data) - 1}): ").strip()
+                row_indices = input(
+                    f"Nhập chỉ số dòng cần xóa (phân cách bằng dấu phẩy, từ 0 đến {len(data) - 1}): "
+                ).strip()
                 row_indices = [int(idx.strip()) for idx in row_indices.split(",")]
 
                 # Kiểm tra xem tất cả các chỉ số dòng có hợp lệ hay không
@@ -435,15 +439,27 @@ def delete_student_record():
             except ValueError:
                 print("Giá trị nhập không hợp lệ. Vui lòng nhập danh sách các số nguyên phân cách bằng dấu phẩy.")
 
-        # Xóa các dòng và đặt lại chỉ số
-        data = data.drop(index=row_indices).reset_index(drop=True)
-        print(f"Đã xóa thành công các dòng: {row_indices}")
+        # Hiển thị các dòng muốn xóa với dấu gạch phân cách
+        print("\nCác dòng bạn đã chọn để xóa:")
+        rows_to_display = data.loc[row_indices]
+        print(tabulate(rows_to_display, headers="keys", tablefmt="pretty", showindex=True))
 
-        # Lưu lại dữ liệu vào file CSV
-        data.to_csv('data_source\\cleaned_data.csv', index=False)
-        print("Dữ liệu đã được lưu thành công vào file 'cleaned_data.csv'.")
+        # Yêu cầu xác nhận trước khi xóa
+        confirm = input("Bạn có chắc chắn muốn xóa các dòng này? (Yes/No): ").strip().lower()
+        if confirm == "yes":
+            # Xóa các dòng và đặt lại chỉ số
+            data = data.drop(index=row_indices).reset_index(drop=True)
+            print(f"Đã xóa thành công các dòng: {row_indices}")
+
+            # Lưu lại dữ liệu vào file CSV
+            data.to_csv('data_source\\cleaned_data.csv', index=False)
+            print("Dữ liệu đã được lưu thành công vào file 'cleaned_data.csv'.")
+        else:
+            print("Hành động xóa đã bị hủy.")
+
     except Exception as e:
         print(f"Đã xảy ra lỗi: {e}")
+
 
 
 #Sắp xếp giá trị tăng dần của một cột
@@ -549,35 +565,38 @@ def search_by_attribute(data):
         'Distance_from_Home': ['Near', 'Moderate', 'Far'],
         'Gender': ['Male', 'Female']
     }
+
     # Hiển thị danh sách các cột có thể tìm kiếm
     print("Danh sách các cột bạn có thể tìm kiếm:")
     columns_list = list(valid_options.keys())
     for i, column in enumerate(columns_list, start=1):
         print(f"{i}. {column}")
 
-    # Nhập số tương ứng với cột để tìm kiếm
-    column_index = input_int("Nhập số tương ứng với cột muốn tìm kiếm (hoặc 0 để thoát): ", 0, len(columns_list))
-    if column_index == 0:
-        print("Đã thoát tìm kiếm.")
-        return
+    # Nhập số tiêu chí muốn tìm kiếm
+    num_criteria = input_int("Nhập số tiêu chí bạn muốn tìm kiếm (tối thiểu 1): ", 1, len(columns_list))
 
-    # Lấy tên cột từ số tương ứng
-    column = columns_list[column_index - 1]
+    # Khởi tạo bộ lọc cho dữ liệu
+    filters = {}
 
-    # Nhập giá trị cần tìm trong cột đã chọn
-    search_value = input_str(f"Nhập giá trị muốn tìm trong cột '{column}': ", valid_options=valid_options[column])
+    # Lặp qua từng tiêu chí
+    for i in range(num_criteria):
+        print(f"\nTiêu chí {i + 1}:")
+        column_index = input_int("Nhập số tương ứng với cột muốn tìm kiếm: ", 1, len(columns_list))
+        column = columns_list[column_index - 1]
+        search_value = input_str(f"Nhập giá trị muốn tìm trong cột '{column}': ", valid_options=valid_options[column])
+        filters[column] = search_value
 
-    # Lọc dữ liệu dựa trên giá trị tìm kiếm
-    filtered_data = data[data[column] == search_value]
+    # Lọc dữ liệu dựa trên các tiêu chí
+    filtered_data = data
+    for column, value in filters.items():
+        filtered_data = filtered_data[filtered_data[column] == value]
 
     # Kiểm tra và hiển thị kết quả
     if filtered_data.empty:
-        print(f"Không tìm thấy kết quả nào cho '{search_value}' trong cột '{column}'.")
+        print("Không tìm thấy kết quả nào cho các tiêu chí đã chọn.")
         return
 
-    print(f"Kết quả tìm kiếm cho cột '{column}' với giá trị '{search_value}':")
-
-    # Phân trang dữ liệu
+    print("Kết quả tìm kiếm:")
     paginate(filtered_data)
 
 
@@ -585,27 +604,24 @@ if __name__ == "__main__":
     while True:
         print()
         print("╔══════════════════════════════════════════╗")
-        print("║   CHƯƠNG TRÌNH QUẢN LÝ DỮ LIỆU KHẢO SÁT  ║")
+        print("║  CHƯƠNG TRÌNH QUẢN LÝ DỮ LIỆU KHẢO SÁT   ║")
         print("╠══════════════════════════════════════════╣")
         print("║ Vui lòng chọn một tùy chọn:              ║")
-        print("║------------------------------------------║")
+        print("║──────────────────────────────────────────║")
         print("║ 1. Thêm dữ liệu khảo sát mới             ║")
         print("║ 2. Hiển thị toàn bộ dữ liệu              ║")
         print("║ 3. Hiển thị n dòng đầu tiên              ║")
         print("║ 4. Hiển thị n cột đầu tiên               ║")
         print("║ 5. Hiển thị các cột cụ thể               ║")
-        print("║ 6. Hiển thị các cột cụ thể với số hàng   ║")
-        print("║    mong muốn                             ║")
-        print("║ 7. Hiển thị các dòng mong muốn           ║")
-        print("║ 8. Cập nhật dữ liệu                      ║")
-        print("║ 9. Xóa dữ liệu                           ║")
+        print("║ 6. Hiển thị các cột với số hàng cụ thể   ║")
+        print("║ 7. Hiển thị các dòng cụ thể              ║")
+        print("║ 8. Cập nhật dữ liệu mới                  ║")
+        print("║ 9. Xóa dữ liệu theo hàng                 ║")
         print("║ 10. Sắp xếp giá trị tăng dần của một cột ║")
         print("║ 11. Sắp xếp giá trị giảm dần của một cột ║")
-        print("║ 12. Tìm kiếm giá trị trong phạm vi của   ║")
-        print("║     1 cột có giá trị chữ                 ║")
-        print("║ 13. Trích lọc theo giá trị trong phạm vi ║")
-        print("║    của 1 cột có giá trị số               ║")
-        print("║ 14. Thoát                                ║")
+        print("║ 12. Lọc theo thuộc tính có giá trị chữ   ║")
+        print("║ 13. Lọc theo thuộc tính có giá trị số    ║")
+        print("║ 14. THOÁT CHƯƠNG TRÌNH                   ║")
         print("╚══════════════════════════════════════════╝")
         
         choice = input("Nhập lựa chọn của bạn (1-14): ")
@@ -665,4 +681,5 @@ if __name__ == "__main__":
             print("──────────────────────────────────────────")
 
     
+
 
