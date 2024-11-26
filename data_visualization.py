@@ -4,7 +4,6 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import warnings
-import matplotlib  # Thêm để chọn backend
 
 warnings.filterwarnings('ignore') # Tắt thông báo cảnh báo (warnings)
 
@@ -200,26 +199,6 @@ percent_no = (len(no_activitiess) / len(df_cleaned)) * 100
 print(f"Phần trăm có hoạt động ngoại khóa: {percent_yes:.2f}%")
 print(f"Phần trăm không hoạt động ngoại khóa: {percent_no:.2f}%")
 
-# # Histogram cho Sleep_Hours
-# plt.figure(figsize=(10, 6))
-# sns.histplot(df_cleaned['Sleep_Hours'], bins=8, kde=True, color='blue', edgecolor='black', alpha=0.5)
-# plt.title('Distribution of Sleep Hours')
-# plt.xlabel('Sleep Hours')
-# plt.ylabel('Frequency')
-# plt.xticks(range(3, 13))
-# plt.grid(axis='y', alpha=0.4)
-# plt.show()
-
-# # Vẽ bar chart cho Sleep_Hours
-# plt.figure(figsize=(10, 6))
-# sns.countplot(x=df_cleaned['Sleep_Hours'], palette='Reds', edgecolor='black')
-# plt.title('Distribution of Sleep Hours')
-# plt.xlabel('Sleep Hours')
-# plt.ylabel('Frequency')
-# plt.xticks(range(3, 13)) 
-# plt.grid(axis='y', alpha=0.4)
-# plt.show()
-
 # Bar cho Sleep_Hours
 # Tính toán tần suất của các giá trị Sleep_Hours
 counts = df_cleaned['Sleep_Hours'].value_counts().sort_index()
@@ -299,16 +278,6 @@ percent_no = (len(no_access) / len(df_cleaned)) * 100
 
 print(f"Phần trăm có truy cập Internet: {percent_yes:.2f}%")
 print(f"Phần trăm không truy cập Internet: {percent_no:.2f}%")
-
-# # Histogram cho Tutoring_Sessions
-# plt.figure(figsize=(10, 6))
-# sns.histplot(df_cleaned['Tutoring_Sessions'], bins=8, kde=True, color='purple', edgecolor='black', alpha=0.5)
-# plt.title('Distribution of Tutoring Sessions')
-# plt.xlabel('Tutoring Sessions')
-# plt.ylabel('Frequency')
-# plt.xticks(range(0, 9))
-# plt.grid(axis='y', alpha=0.4)
-# plt.show()
 
 # Bar cho Tutoring_Sessions 
 # Tính số lượng các giá trị của 'Tutoring_Sessions' và sắp xếp theo thứ tự tăng dần
@@ -439,16 +408,6 @@ percent_neu = (len(neu_influ) / len(df_cleaned)) * 100
 print(f"Phần trăm ảnh hưởng tích cực: {percent_po:.2f}%")
 print(f"Phần trăm ảnh hưởng tiêu cực: {percent_ne:.2f}%")
 print(f"Phần trăm ảnh hưởng trung lập: {percent_neu:.2f}%")
-
-# # Histogram cho Physical_Activity
-# plt.figure(figsize=(10, 6))
-# sns.histplot(df_cleaned['Physical_Activity'], bins=8, kde=True, color='teal', edgecolor='black', alpha=0.5)
-# plt.title('Distribution of Physical Activity')
-# plt.xlabel('Physical Activity')
-# plt.ylabel('Frequency')
-# plt.xticks(range(0, 7))
-# plt.grid(axis='y', alpha=0.4)
-# plt.show()
 
 # Bar cho Physical_Activity
 # Tính số lượng các giá trị của 'Physical_Activity' và sắp xếp theo thứ tự tăng dần
