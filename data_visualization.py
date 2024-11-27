@@ -261,17 +261,16 @@ def plot_sleep_hours_distribution():
 print("-" * 20)
 print("\nNhận định về Distribution of Sleep Hours.")
 
-below_5 = df_cleaned[df_cleaned['Sleep_Hours'] <= 5]
-above_8 = df_cleaned[df_cleaned['Sleep_Hours'] >= 8]
-between_6_and_7 = df_cleaned[(df_cleaned['Sleep_Hours'] >= 6) & (df_cleaned['Sleep_Hours'] <= 7)]
-
-percent_below_5 = (len(below_5) / len(df_cleaned)) * 100
-percent_above_8 = (len(above_8) / len(df_cleaned)) * 100
-percent_between_6_and_7 = (len(between_6_and_7) / len(df_cleaned)) * 100
-
-print(f"Phần trăm số giờ ngủ dưới 5 giờ: {percent_below_5:.2f}%")
-print(f"Phần trăm số giờ ngủ trên 8 giờ: {percent_above_8:.2f}%")
-print(f"Phần trăm số giờ ngủ trong khoảng 6 đến 7 giờ: {percent_between_6_and_7:.2f}%")
+# Đếm số lần xuất hiện của từng giá trị trong Sleep_Hour
+sleep_hour_counts = df_cleaned['Sleep_Hours'].value_counts()
+    
+# Tính phần trăm
+sleep_hour_percentage = (sleep_hour_counts / len(df_cleaned)) * 100
+    
+# In kết quả
+print("Phần trăm số giờ ngủ của từng giờ:")
+for hour, percent in sleep_hour_percentage.items():
+    print(f"{hour} giờ: {percent:.2f}%")
 
 # Bar cho Motivation_Level
 def plot_motivation_level_distribution():
@@ -346,18 +345,17 @@ def plot_tutoring_sessions_distribution():
 
 print("-" * 20)
 print("\nNhận định về Distribution of Tutoring Sessions.")
-
-below_2 = df_cleaned[df_cleaned['Tutoring_Sessions'] <= 2]
-above_6 = df_cleaned[df_cleaned['Tutoring_Sessions'] >= 6]
-between_3_and_5 = df_cleaned[(df_cleaned['Tutoring_Sessions'] >= 3) & (df_cleaned['Tutoring_Sessions'] <= 5)]
-
-percent_below_2 = (len(below_2) / len(df_cleaned)) * 100
-percent_above_6 = (len(above_6) / len(df_cleaned)) * 100
-percent_between_3_and_5 = (len(between_3_and_5) / len(df_cleaned)) * 100
-
-print(f"Phần trăm số phiên dạy kèm dưới 2 phiên: {percent_below_2:.2f}%")
-print(f"Phần trăm số phiên dạy kèm trên 6 phiên: {percent_above_6:.2f}%")
-print(f"Phần trăm số phiên dạy kèm trong khoảng 3 đến 5 phiên: {percent_between_3_and_5:.2f}%")
+    
+# Đếm số lần xuất hiện của từng giá trị trong Tutoring_Sessions
+tutoring_sessions_counts = df_cleaned['Tutoring_Sessions'].value_counts()
+    
+# Tính phần trăm
+tutoring_sessions_percentage = (tutoring_sessions_counts / len(df_cleaned)) * 100
+    
+# In kết quả
+print("Phần trăm của từng số buổi dạy kèm:")
+for session, percent in tutoring_sessions_percentage.items():
+    print(f"{session} buổi: {percent:.2f}%")
 
 # Bar cho Family_Income
 def plot_family_income_distribution():
@@ -486,18 +484,17 @@ def plot_physical_activity_distribution():
 
 print("-" * 20)
 print("\nNhận định về Distribution of Physical Activity.")
-
-below_1 = df_cleaned[df_cleaned['Physical_Activity'] <= 1]
-above_5 = df_cleaned[df_cleaned['Physical_Activity'] >= 5]
-between_2_and_4 = df_cleaned[(df_cleaned['Physical_Activity'] >= 2) & (df_cleaned['Physical_Activity'] <= 4)]
-
-percent_below_1 = (len(below_2) / len(df_cleaned)) * 100
-percent_above_5 = (len(above_5) / len(df_cleaned)) * 100
-percent_between_2_and_4 = (len(between_2_and_4) / len(df_cleaned)) * 100
-
-print(f"Phần trăm hoạt động thể chất dưới 1 môn: {percent_below_1:.2f}%")
-print(f"Phần trăm hoạt động thể chất trên 5 môn: {percent_above_5:.2f}%")
-print(f"Phần trăm hoạt động thể chất trong khoảng 2 đến 4 môn: {percent_between_2_and_4:.2f}%")
+  
+# Đếm số lần xuất hiện của từng giá trị trong Physical_Activity
+physical_activity_counts = df_cleaned['Physical_Activity'].value_counts()
+    
+# Tính phần trăm
+physical_activity_percentage = (physical_activity_counts / len(df_cleaned)) * 100
+    
+# In kết quả
+print("Phần trăm của từng số giờ hoạt động thể chất:")
+for activity, percent in physical_activity_percentage.items():
+    print(f"{activity} giờ: {percent:.2f}%")
 
 # Bar cho Learning_Disabilities
 def plot_learning_disabilities_distribution():
@@ -811,455 +808,455 @@ def scatterplot_Numcol_and_Exam_Score_with_Learning_Disabilities():
         print(f"T-statistic: {t_stat}, P-value: {p_value}")
         print("Kết luận: Không có sự khác biệt có ý nghĩa thống kê giữa hai nhóm.")
 
-# # Vẽ biểu đồ boxplot Exam_Score và Parental Involvement
-# # Sự tham gia của phụ huynh có ảnh hưởng đến kết quả học tập của học sinh?
-# def boxplot_Parental_Involvement_and_Exam_Score():
-#     global df_cleaned
-#     plt.figure(figsize=(10, 6))
-#     sns.boxplot(x=df_cleaned['Parental_Involvement'], y=df_cleaned['Exam_Score'], palette='Set2')
+# Vẽ biểu đồ boxplot Exam_Score và Parental Involvement
+# Sự tham gia của phụ huynh có ảnh hưởng đến kết quả học tập của học sinh?
+def boxplot_Parental_Involvement_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(x=df_cleaned['Parental_Involvement'], y=df_cleaned['Exam_Score'], palette='Set2')
 
-#     plt.title('Boxplot: Exam Scores by Parental Involvement')
-#     plt.xlabel('Parental Involvement')
-#     plt.ylabel('Exam Score')
-#     plt.show()
+    plt.title('Boxplot: Exam Scores by Parental Involvement')
+    plt.xlabel('Parental Involvement')
+    plt.ylabel('Exam Score')
+    plt.show()
 
-# # Mã hóa cột thành các giá trị số
-# df_cleaned['Parental_Involvement_num'] = df_cleaned['Parental_Involvement'].map({'Low': 0, 'Medium': 1, 'High': 2})
+# Mã hóa cột thành các giá trị số
+df_cleaned['Parental_Involvement_num'] = df_cleaned['Parental_Involvement'].map({'Low': 0, 'Medium': 1, 'High': 2})
 
-# correlation = df_cleaned['Parental_Involvement_num'].corr(df_cleaned['Exam_Score'])
+correlation = df_cleaned['Parental_Involvement_num'].corr(df_cleaned['Exam_Score'])
 
-# print("-" * 20)
-# print(f'Mối tương quan giữa sự tham gia của phụ huynh và điểm thi: {correlation:.2f}')
+print("-" * 20)
+print(f'Mối tương quan giữa sự tham gia của phụ huynh và điểm thi: {correlation:.2f}')
 
-# if correlation > 0.7:
-#     print("Có một mối quan hệ mạnh mẽ giữa sự tham gia của phụ huynh và điểm số.")
-# elif correlation > 0.3:
-#     print("Có một mối quan hệ yếu giữa sự tham gia của phụ huynh và điểm số.")
-# else:
-#     print("Không có mối quan hệ rõ ràng giữa sự tham gia của phụ huynh và điểm số.")
+if correlation > 0.7:
+    print("Có một mối quan hệ mạnh mẽ giữa sự tham gia của phụ huynh và điểm số.")
+elif correlation > 0.3:
+    print("Có một mối quan hệ yếu giữa sự tham gia của phụ huynh và điểm số.")
+else:
+    print("Không có mối quan hệ rõ ràng giữa sự tham gia của phụ huynh và điểm số.")
 
-# # Vẽ biểu đồ boxplot Exam_Score và Access_to_Resources
-# # Mức độ truy cập tài nguyên học tập có liên quan đến kết quả học tập không?
-# def boxplot_Access_to_Resources_and_Exam_Score():
-#     global df_cleaned
-#     plt.figure(figsize=(10, 6))
-#     sns.boxplot(x=df_cleaned['Access_to_Resources'], y=df_cleaned['Exam_Score'], palette='Set2')
+# Vẽ biểu đồ boxplot Exam_Score và Access_to_Resources
+# Mức độ truy cập tài nguyên học tập có liên quan đến kết quả học tập không?
+def boxplot_Access_to_Resources_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(x=df_cleaned['Access_to_Resources'], y=df_cleaned['Exam_Score'], palette='Set2')
 
-#     plt.title('Boxplot: Exam Scores by Access to Resources')
-#     plt.xlabel('Access to Resources')
-#     plt.ylabel('Exam Score')
-#     plt.show()
+    plt.title('Boxplot: Exam Scores by Access to Resources')
+    plt.xlabel('Access to Resources')
+    plt.ylabel('Exam Score')
+    plt.show()
 
-# # Mã hóa cột thành các giá trị số
-# df_cleaned['Access_to_Resources_num'] = df_cleaned['Access_to_Resources'].map({'Low': 0, 'Medium': 1, 'High': 2})
+# Mã hóa cột thành các giá trị số
+df_cleaned['Access_to_Resources_num'] = df_cleaned['Access_to_Resources'].map({'Low': 0, 'Medium': 1, 'High': 2})
 
-# correlation = df_cleaned['Access_to_Resources_num'].corr(df_cleaned['Exam_Score'])
-# print("-" * 20)
-# print(f'Mối tương quan giữa truy cập tài nguyên và điểm thi: {correlation:.2f}')
+correlation = df_cleaned['Access_to_Resources_num'].corr(df_cleaned['Exam_Score'])
+print("-" * 20)
+print(f'Mối tương quan giữa truy cập tài nguyên và điểm thi: {correlation:.2f}')
 
-# if correlation > 0.7:
-#     print("Có một mối quan hệ mạnh mẽ giữa truy cập tài nguyên học tập và điểm số.")
-# elif correlation > 0.3:
-#     print("Có một mối quan hệ yếu giữa truy cập tài nguyên học tập và điểm số.")
-# else:
-#     print("Không có mối quan hệ rõ ràng giữa truy cập tài nguyên học tập và điểm số.")
+if correlation > 0.7:
+    print("Có một mối quan hệ mạnh mẽ giữa truy cập tài nguyên học tập và điểm số.")
+elif correlation > 0.3:
+    print("Có một mối quan hệ yếu giữa truy cập tài nguyên học tập và điểm số.")
+else:
+    print("Không có mối quan hệ rõ ràng giữa truy cập tài nguyên học tập và điểm số.")
 
-# # Vẽ biểu đồ boxplot Exam_Score và Extracurricular_Activities
-# # Học sinh tham gia hoạt động ngoại khóa có điểm số khác so với học sinh không tham gia không?
-# def boxplot_Extracurricular_Activities_and_Exam_Score():
-#     global df_cleaned
-#     plt.figure(figsize=(10, 6))
-#     sns.boxplot(data=df_cleaned, x='Extracurricular_Activities', y='Exam_Score', palette=['pink', 'blue'])
+# Vẽ biểu đồ boxplot Exam_Score và Extracurricular_Activities
+# Học sinh tham gia hoạt động ngoại khóa có điểm số khác so với học sinh không tham gia không?
+def boxplot_Extracurricular_Activities_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(data=df_cleaned, x='Extracurricular_Activities', y='Exam_Score', palette=['pink', 'blue'])
 
-#     plt.title('Boxplot: Exam Score by Extracurricular Activities')
-#     plt.xlabel('Extracurricular Activities')
-#     plt.ylabel('Exam Score')
-#     plt.show()
+    plt.title('Boxplot: Exam Score by Extracurricular Activities')
+    plt.xlabel('Extracurricular Activities')
+    plt.ylabel('Exam Score')
+    plt.show()
 
-# df_cleaned['Extracurricular_Activities_Encoded'] = df_cleaned['Extracurricular_Activities'].map({'Yes': 1, 'No': 0})
+df_cleaned['Extracurricular_Activities_Encoded'] = df_cleaned['Extracurricular_Activities'].map({'Yes': 1, 'No': 0})
 
-# correlation = df_cleaned[['Extracurricular_Activities_Encoded', 'Exam_Score']].corr().iloc[0, 1]
+correlation = df_cleaned[['Extracurricular_Activities_Encoded', 'Exam_Score']].corr().iloc[0, 1]
 
-# print("-" * 20)
-# print(f"Hệ số tương quan giữa việc tham gia hoạt động ngoại khóa và điểm số: {correlation:.2f}")
+print("-" * 20)
+print(f"Hệ số tương quan giữa việc tham gia hoạt động ngoại khóa và điểm số: {correlation:.2f}")
 
-# if correlation > 0.7:
-#     print("Có một mối quan hệ mạnh mẽ giữa học sinh tham gia hoạt động ngoại khóa và điểm số.")
-# elif correlation > 0.3:
-#     print("Có một mối quan hệ yếu giữa học sinh tham gia hoạt động ngoại khóa và điểm số.")
-# else:
-#     print("Không có mối quan hệ rõ ràng giữa học sinh tham gia hoạt động ngoại khóa và điểm số.")
+if correlation > 0.7:
+    print("Có một mối quan hệ mạnh mẽ giữa học sinh tham gia hoạt động ngoại khóa và điểm số.")
+elif correlation > 0.3:
+    print("Có một mối quan hệ yếu giữa học sinh tham gia hoạt động ngoại khóa và điểm số.")
+else:
+    print("Không có mối quan hệ rõ ràng giữa học sinh tham gia hoạt động ngoại khóa và điểm số.")
 
-# plt.grid(axis='y', alpha=0.75)
+plt.grid(axis='y', alpha=0.75)
     
-# # Vẽ biểu đồ boxplot Exam_Score và Sleep_Hours
-# def boxplot_Sleep_Hours_and_Exam_Score():
-#     global df_cleaned
-#     plt.figure(figsize=(10, 6))
+# Vẽ biểu đồ boxplot Exam_Score và Sleep_Hours
+def boxplot_Sleep_Hours_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
 
-#     sns.boxplot(data=df_cleaned, x='Sleep_Hours', y='Exam_Score', palette='Paired')
+    sns.boxplot(data=df_cleaned, x='Sleep_Hours', y='Exam_Score', palette='Paired')
 
-#     plt.title('Boxplot: Exam Score by Sleep Hours')
-#     plt.xlabel('Sleep Hours')
-#     plt.ylabel('Exam Score')
-#     plt.show()
+    plt.title('Boxplot: Exam Score by Sleep Hours')
+    plt.xlabel('Sleep Hours')
+    plt.ylabel('Exam Score')
+    plt.show()
 
-# correlation = df_cleaned[['Sleep_Hours', 'Exam_Score']].corr().iloc[0, 1]
+correlation = df_cleaned[['Sleep_Hours', 'Exam_Score']].corr().iloc[0, 1]
 
-# print("-" * 20)
-# print(f"Hệ số tương quan giữa giờ ngủ và điểm số: {correlation:.2f}")
+print("-" * 20)
+print(f"Hệ số tương quan giữa giờ ngủ và điểm số: {correlation:.2f}")
 
-# if correlation > 0.7:
-#     print("Có một mối quan hệ mạnh mẽ giữa giờ ngủ và điểm số.")
-# elif correlation > 0.3:
-#     print("Có một mối quan hệ yếu giữa giờ ngủ và điểm số.")
-# else:
-#     print("Không có mối quan hệ rõ ràng giữa giờ ngủ và điểm số.")
+if correlation > 0.7:
+    print("Có một mối quan hệ mạnh mẽ giữa giờ ngủ và điểm số.")
+elif correlation > 0.3:
+    print("Có một mối quan hệ yếu giữa giờ ngủ và điểm số.")
+else:
+    print("Không có mối quan hệ rõ ràng giữa giờ ngủ và điểm số.")
 
-# plt.grid(axis='y', alpha=0.75)
+plt.grid(axis='y', alpha=0.75)
 
-# # Vẽ biểu đồ boxplot Exam_Score và Motivation_Level
-# def boxplot_Motivation_Level_and_Exam_Score():
-#     global df_cleaned
-#     plt.figure(figsize=(10, 6))
-#     sns.boxplot(x=df_cleaned['Motivation_Level'], y=df_cleaned['Exam_Score'], palette='Set1')
+# Vẽ biểu đồ boxplot Exam_Score và Motivation_Level
+def boxplot_Motivation_Level_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(x=df_cleaned['Motivation_Level'], y=df_cleaned['Exam_Score'], palette='Set1')
 
-#     plt.title('Boxplot: Exam Scores by Motivation Level')
-#     plt.xlabel('Motivation Level')
-#     plt.ylabel('Exam Score')
-#     plt.show()
+    plt.title('Boxplot: Exam Scores by Motivation Level')
+    plt.xlabel('Motivation Level')
+    plt.ylabel('Exam Score')
+    plt.show()
 
-# # Mã hóa cột thành các giá trị số
-# df_cleaned['Motivation_Level_num'] = df_cleaned['Motivation_Level'].map({'Low': 0, 'Medium': 1, 'High': 2})
+# Mã hóa cột thành các giá trị số
+df_cleaned['Motivation_Level_num'] = df_cleaned['Motivation_Level'].map({'Low': 0, 'Medium': 1, 'High': 2})
 
-# correlation = df_cleaned['Motivation_Level_num'].corr(df_cleaned['Exam_Score'])
-# print("-" * 20)
-# print(f'Mối tương quan giữa động lực và điểm thi: {correlation:.2f}')
+correlation = df_cleaned['Motivation_Level_num'].corr(df_cleaned['Exam_Score'])
+print("-" * 20)
+print(f'Mối tương quan giữa động lực và điểm thi: {correlation:.2f}')
 
-# if correlation > 0.7:
-#     print("Có một mối quan hệ mạnh mẽ giữa động lực và điểm số.")
-# elif correlation > 0.3:
-#     print("Có một mối quan hệ yếu giữa động lực và điểm số.")
-# else:
-#     print("Không có mối quan hệ rõ ràng giữa động lực và điểm số.")
+if correlation > 0.7:
+    print("Có một mối quan hệ mạnh mẽ giữa động lực và điểm số.")
+elif correlation > 0.3:
+    print("Có một mối quan hệ yếu giữa động lực và điểm số.")
+else:
+    print("Không có mối quan hệ rõ ràng giữa động lực và điểm số.")
 
-# # Vẽ biểu đồ boxplot Exam_Score và Internet_Access
-# def boxplot_Internet_Access_and_Exam_Score():
-#     global df_cleaned
-#     plt.figure(figsize=(10, 6))
-#     sns.boxplot(data=df_cleaned, x='Internet_Access', y='Exam_Score', palette=['red', 'pink'])
+# Vẽ biểu đồ boxplot Exam_Score và Internet_Access
+def boxplot_Internet_Access_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(data=df_cleaned, x='Internet_Access', y='Exam_Score', palette=['red', 'pink'])
 
-#     plt.title('Boxplot: Exam Score by Internet Access')
-#     plt.xlabel('Internet Access')
-#     plt.ylabel('Exam Score')
-#     plt.show()
+    plt.title('Boxplot: Exam Score by Internet Access')
+    plt.xlabel('Internet Access')
+    plt.ylabel('Exam Score')
+    plt.show()
 
-# df_cleaned['Internet_Access_num'] = df_cleaned['Internet_Access'].map({'Yes': 1, 'No': 0})
+df_cleaned['Internet_Access_num'] = df_cleaned['Internet_Access'].map({'Yes': 1, 'No': 0})
 
-# correlation = df_cleaned[['Internet_Access_num', 'Exam_Score']].corr().iloc[0, 1]
+correlation = df_cleaned[['Internet_Access_num', 'Exam_Score']].corr().iloc[0, 1]
 
-# print("-" * 20)
-# print(f"Hệ số tương quan giữa việc truy cập Internet và điểm số: {correlation:.2f}")
+print("-" * 20)
+print(f"Hệ số tương quan giữa việc truy cập Internet và điểm số: {correlation:.2f}")
 
-# if correlation > 0.7:
-#     print("Có một mối quan hệ mạnh mẽ giữa việc truy cập Internet và điểm số.")
-# elif correlation > 0.3:
-#     print("Có một mối quan hệ yếu giữa việc truy cập Internet và điểm số.")
-# else:
-#     print("Không có mối quan hệ rõ ràng giữa việc truy cập Internet và điểm số.")
+if correlation > 0.7:
+    print("Có một mối quan hệ mạnh mẽ giữa việc truy cập Internet và điểm số.")
+elif correlation > 0.3:
+    print("Có một mối quan hệ yếu giữa việc truy cập Internet và điểm số.")
+else:
+    print("Không có mối quan hệ rõ ràng giữa việc truy cập Internet và điểm số.")
 
-# plt.grid(axis='y', alpha=0.75)
+plt.grid(axis='y', alpha=0.75)
 
-# # Vẽ biểu đồ boxplot Exam_Score và Tutoring_Sessions
-# def boxplot_Tutoring_Sessions_and_Exam_Score():
-#     global df_cleaned
-#     plt.figure(figsize=(10, 6))
+# Vẽ biểu đồ boxplot Exam_Score và Tutoring_Sessions
+def boxplot_Tutoring_Sessions_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
 
-#     sns.boxplot(data=df_cleaned, x='Tutoring_Sessions', y='Exam_Score', palette='Set3')
+    sns.boxplot(data=df_cleaned, x='Tutoring_Sessions', y='Exam_Score', palette='Set3')
 
-#     plt.title('Boxplot: Exam Score by Tutoring Sessions')
-#     plt.xlabel('Tutoring Sessions')
-#     plt.ylabel('Exam Score')
-#     plt.show()
+    plt.title('Boxplot: Exam Score by Tutoring Sessions')
+    plt.xlabel('Tutoring Sessions')
+    plt.ylabel('Exam Score')
+    plt.show()
 
-# correlation = df_cleaned[['Tutoring_Sessions', 'Exam_Score']].corr().iloc[0, 1]
+correlation = df_cleaned[['Tutoring_Sessions', 'Exam_Score']].corr().iloc[0, 1]
 
-# print("-" * 20)
-# print(f"Hệ số tương quan giữa các phiên dạy kèm và điểm số: {correlation:.2f}")
+print("-" * 20)
+print(f"Hệ số tương quan giữa các phiên dạy kèm và điểm số: {correlation:.2f}")
 
-# if correlation > 0.7:
-#     print("Có một mối quan hệ mạnh mẽ giữa các phiên dạy kèm và điểm số.")
-# elif correlation > 0.3:
-#     print("Có một mối quan hệ yếu giữa các phiên dạy kèm và điểm số.")
-# else:
-#     print("Không có mối quan hệ rõ ràng giữa các phiên dạy kèm và điểm số.")
+if correlation > 0.7:
+    print("Có một mối quan hệ mạnh mẽ giữa các phiên dạy kèm và điểm số.")
+elif correlation > 0.3:
+    print("Có một mối quan hệ yếu giữa các phiên dạy kèm và điểm số.")
+else:
+    print("Không có mối quan hệ rõ ràng giữa các phiên dạy kèm và điểm số.")
 
-# plt.grid(axis='y', alpha=0.75)
+plt.grid(axis='y', alpha=0.75)
     
-# # Vẽ biểu đồ boxplot Exam_Score và Family_Income
-# # Có mối liên hệ giữa thu nhập gia đình và điểm số học tập không?
-# def boxplot_Family_Income_and_Exam_Score():
-#     global df_cleaned
-#     plt.figure(figsize=(10, 6))
-#     sns.boxplot(x=df_cleaned['Family_Income'], y=df_cleaned['Exam_Score'], palette='Set2')
+# Vẽ biểu đồ boxplot Exam_Score và Family_Income
+# Có mối liên hệ giữa thu nhập gia đình và điểm số học tập không?
+def boxplot_Family_Income_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(x=df_cleaned['Family_Income'], y=df_cleaned['Exam_Score'], palette='Set2')
 
-#     plt.title('Boxplot: Exam Scores by Family Income')
-#     plt.xlabel('Access to Resources')
-#     plt.ylabel('Exam Score')
-#     # Hiển thị biểu đồ
-#     plt.show()
+    plt.title('Boxplot: Exam Scores by Family Income')
+    plt.xlabel('Access to Resources')
+    plt.ylabel('Exam Score')
+    # Hiển thị biểu đồ
+    plt.show()
 
-# # Mã hóa cột thành các giá trị số
-# df_cleaned['Family_Income_num'] = df_cleaned['Family_Income'].map({'Low': 0, 'Medium': 1, 'High': 2})
+# Mã hóa cột thành các giá trị số
+df_cleaned['Family_Income_num'] = df_cleaned['Family_Income'].map({'Low': 0, 'Medium': 1, 'High': 2})
 
-# # Tính toán mối tương quan
-# correlation = df_cleaned['Family_Income_num'].corr(df_cleaned['Exam_Score'])
-# print("-" * 20)
-# print(f'Mối tương quan giữa thu nhập gia đình và điểm thi: {correlation:.2f}')
+# Tính toán mối tương quan
+correlation = df_cleaned['Family_Income_num'].corr(df_cleaned['Exam_Score'])
+print("-" * 20)
+print(f'Mối tương quan giữa thu nhập gia đình và điểm thi: {correlation:.2f}')
 
-# # Nhận xét về kết quả
-# if correlation > 0.7:
-#     print("Có một mối quan hệ mạnh mẽ giữa thu nhập gia đình và điểm số.")
-# elif correlation > 0.3:
-#     print("Có một mối quan hệ yếu giữa thu nhập gia đình và điểm số.")
-# else:
-#     print("Không có mối quan hệ rõ ràng giữa thu nhập gia đình và điểm số.")
+# Nhận xét về kết quả
+if correlation > 0.7:
+    print("Có một mối quan hệ mạnh mẽ giữa thu nhập gia đình và điểm số.")
+elif correlation > 0.3:
+    print("Có một mối quan hệ yếu giữa thu nhập gia đình và điểm số.")
+else:
+    print("Không có mối quan hệ rõ ràng giữa thu nhập gia đình và điểm số.")
 
-# # Vẽ biểu đồ boxplot Exam_Score và Teacher_Quality
-# # Chất lượng giáo viên có ảnh hưởng như thế nào đến kết quả học tập?
-# def boxplot_Teacher_Quality_and_Exam_Score():
-#     global df_cleaned
-#     plt.figure(figsize=(10, 6))
-#     sns.boxplot(x=df_cleaned['Teacher_Quality'], y=df_cleaned['Exam_Score'], palette='Set1')
+# Vẽ biểu đồ boxplot Exam_Score và Teacher_Quality
+# Chất lượng giáo viên có ảnh hưởng như thế nào đến kết quả học tập?
+def boxplot_Teacher_Quality_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(x=df_cleaned['Teacher_Quality'], y=df_cleaned['Exam_Score'], palette='Set1')
 
-#     plt.title('Boxplot: Exam Scores by Teacher Quality')
-#     plt.xlabel('Teacher Quality')
-#     plt.ylabel('Exam Score')
-#     # Hiển thị biểu đồ
-#     plt.show()
+    plt.title('Boxplot: Exam Scores by Teacher Quality')
+    plt.xlabel('Teacher Quality')
+    plt.ylabel('Exam Score')
+    # Hiển thị biểu đồ
+    plt.show()
 
-# # Mã hóa cột thành các giá trị số
-# df_cleaned['Teacher_Quality_num'] = df_cleaned['Teacher_Quality'].map({'Low': 0, 'Medium': 1, 'High': 2})
+# Mã hóa cột thành các giá trị số
+df_cleaned['Teacher_Quality_num'] = df_cleaned['Teacher_Quality'].map({'Low': 0, 'Medium': 1, 'High': 2})
 
-# # Tính toán mối tương quan
-# correlation = df_cleaned['Teacher_Quality_num'].corr(df_cleaned['Exam_Score'])
-# print("-" * 20)
-# print(f'Mối tương quan giữa chất lượng giáo viên và điểm thi: {correlation:.2f}')
+# Tính toán mối tương quan
+correlation = df_cleaned['Teacher_Quality_num'].corr(df_cleaned['Exam_Score'])
+print("-" * 20)
+print(f'Mối tương quan giữa chất lượng giáo viên và điểm thi: {correlation:.2f}')
 
-# # Nhận xét về kết quả
-# if correlation > 0.7:
-#     print("Có một mối quan hệ mạnh mẽ giữa chất lượng giáo viên và điểm số.")
-# elif correlation > 0.3:
-#     print("Có một mối quan hệ yếu giữa chất lượng giáo viên và điểm số.")
-# else:
-#     print("Không có mối quan hệ rõ ràng giữa chất lượng giáo viên và điểm số.")
+# Nhận xét về kết quả
+if correlation > 0.7:
+    print("Có một mối quan hệ mạnh mẽ giữa chất lượng giáo viên và điểm số.")
+elif correlation > 0.3:
+    print("Có một mối quan hệ yếu giữa chất lượng giáo viên và điểm số.")
+else:
+    print("Không có mối quan hệ rõ ràng giữa chất lượng giáo viên và điểm số.")
 
-# # Vẽ biểu đồ Boxplot cho Exam_Score và School_Type
-# # Loại trường học (công lập hay tư thục) có ảnh hưởng đến thành tích học tập?
-# def boxplot_School_Type_and_Exam_Score():
-#     global df_cleaned
-#     plt.figure(figsize=(10, 6))
-#     sns.boxplot(x=df_cleaned['School_Type'], y=df_cleaned['Exam_Score'], palette='Set2')
+# Vẽ biểu đồ Boxplot cho Exam_Score và School_Type
+# Loại trường học (công lập hay tư thục) có ảnh hưởng đến thành tích học tập?
+def boxplot_School_Type_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(x=df_cleaned['School_Type'], y=df_cleaned['Exam_Score'], palette='Set2')
 
-#     plt.title('Boxplot: Exam Scores by School Type')
-#     plt.xlabel('School Type')
-#     plt.ylabel('Exam Score')
-#     # Hiển thị biểu đồ
-#     plt.show()
+    plt.title('Boxplot: Exam Scores by School Type')
+    plt.xlabel('School Type')
+    plt.ylabel('Exam Score')
+    # Hiển thị biểu đồ
+    plt.show()
 
-# # Mã hóa cột thành các giá trị số
-# df_cleaned['School_Type_num'] = df_cleaned['School_Type'].map({'Public': 0, 'Private': 1})
+# Mã hóa cột thành các giá trị số
+df_cleaned['School_Type_num'] = df_cleaned['School_Type'].map({'Public': 0, 'Private': 1})
 
-# # Tính toán mối tương quan
-# correlation = df_cleaned['School_Type_num'].corr(df_cleaned['Exam_Score'])
-# print("-" * 20)
-# print(f'Mối tương quan giữa loại trường học và điểm thi: {correlation:.2f}')
+# Tính toán mối tương quan
+correlation = df_cleaned['School_Type_num'].corr(df_cleaned['Exam_Score'])
+print("-" * 20)
+print(f'Mối tương quan giữa loại trường học và điểm thi: {correlation:.2f}')
 
-# # Nhận xét về kết quả
+# Nhận xét về kết quả
 
-# if correlation > 0.7:
-#     print("Có một mối quan hệ mạnh mẽ giữa loại trường học và điểm số.")
-# elif correlation > 0.3:
-#     print("Có một mối quan hệ yếu giữa loại trường học và điểm số.")
-# else:
-#     print("Không có mối quan hệ rõ ràng giữa loại trường học và điểm số.")
+if correlation > 0.7:
+    print("Có một mối quan hệ mạnh mẽ giữa loại trường học và điểm số.")
+elif correlation > 0.3:
+    print("Có một mối quan hệ yếu giữa loại trường học và điểm số.")
+else:
+    print("Không có mối quan hệ rõ ràng giữa loại trường học và điểm số.")
 
-# # Vẽ biểu đồ boxplot Exam_Score và Peer_Influence
-# # Sự ảnh hưởng của bạn bè đến điểm số học tập?
-# def boxplot_Peer_Influence_and_Exam_Score():
-#     global df_cleaned
-#     plt.figure(figsize=(10, 6))
-#     sns.boxplot(x=df_cleaned['Peer_Influence'], y=df_cleaned['Exam_Score'], palette='Set3')
+# Vẽ biểu đồ boxplot Exam_Score và Peer_Influence
+# Sự ảnh hưởng của bạn bè đến điểm số học tập?
+def boxplot_Peer_Influence_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(x=df_cleaned['Peer_Influence'], y=df_cleaned['Exam_Score'], palette='Set3')
 
-#     plt.title('Boxplot: Exam Scores by Teacher Quality')
-#     plt.xlabel('Teacher Quality')
-#     plt.ylabel('Exam Score')
-#     # Hiển thị biểu đồ
-#     plt.show()
+    plt.title('Boxplot: Exam Scores by Teacher Quality')
+    plt.xlabel('Teacher Quality')
+    plt.ylabel('Exam Score')
+    # Hiển thị biểu đồ
+    plt.show()
 
-# # Mã hóa cột thành các giá trị số
-# df_cleaned['Peer_Influence_num'] = df_cleaned['Peer_Influence'].map({'Positive': 0, 'Negative': 1, 'Neutral': 2})
+# Mã hóa cột thành các giá trị số
+df_cleaned['Peer_Influence_num'] = df_cleaned['Peer_Influence'].map({'Positive': 0, 'Negative': 1, 'Neutral': 2})
 
-# # Tính toán mối tương quan
-# correlation = df_cleaned['Peer_Influence_num'].corr(df_cleaned['Exam_Score'])
-# print("-" * 20)
-# print(f'Mối tương quan giữa sự ảnh hưởng của bạn bè và điểm thi: {correlation:.2f}')
+# Tính toán mối tương quan
+correlation = df_cleaned['Peer_Influence_num'].corr(df_cleaned['Exam_Score'])
+print("-" * 20)
+print(f'Mối tương quan giữa sự ảnh hưởng của bạn bè và điểm thi: {correlation:.2f}')
 
-# # Nhận xét về kết quả
-# if correlation > 0.7:
-#     print("Có một mối quan hệ mạnh mẽ giữa sự ảnh hưởng của bạn bè và điểm số.")
-# elif correlation > 0.3:
-#     print("Có một mối quan hệ yếu giữa sự ảnh hưởng của bạn bè và điểm số.")
-# else:
-#     print("Không có mối quan hệ rõ ràng giữa sự ảnh hưởng của bạn bè và điểm số.")
+# Nhận xét về kết quả
+if correlation > 0.7:
+    print("Có một mối quan hệ mạnh mẽ giữa sự ảnh hưởng của bạn bè và điểm số.")
+elif correlation > 0.3:
+    print("Có một mối quan hệ yếu giữa sự ảnh hưởng của bạn bè và điểm số.")
+else:
+    print("Không có mối quan hệ rõ ràng giữa sự ảnh hưởng của bạn bè và điểm số.")
 
-# # Vẽ biểu đồ boxplot Exam_Score và Physical_Activity
-# def boxplot_Physical_Activity_and_Exam_Score():
-#     global df_cleaned
-#     plt.figure(figsize=(10, 6))
+# Vẽ biểu đồ boxplot Exam_Score và Physical_Activity
+def boxplot_Physical_Activity_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
 
-#     sns.boxplot(data=df_cleaned, x='Physical_Activity', y='Exam_Score', palette='tab20')
+    sns.boxplot(data=df_cleaned, x='Physical_Activity', y='Exam_Score', palette='tab20')
 
-#     plt.title('Boxplot: Exam Score by Physical Activity')
-#     plt.xlabel('Physical Activity')
-#     plt.ylabel('Exam Score')
-#     plt.show()
+    plt.title('Boxplot: Exam Score by Physical Activity')
+    plt.xlabel('Physical Activity')
+    plt.ylabel('Exam Score')
+    plt.show()
 
-# correlation = df_cleaned[['Physical_Activity', 'Exam_Score']].corr().iloc[0, 1]
+correlation = df_cleaned[['Physical_Activity', 'Exam_Score']].corr().iloc[0, 1]
 
-# print("-" * 20)
-# print(f"Hệ số tương quan giữa hoạt động thể chất và điểm số: {correlation:.2f}")
+print("-" * 20)
+print(f"Hệ số tương quan giữa hoạt động thể chất và điểm số: {correlation:.2f}")
 
-# if correlation > 0.7:
-#     print("Có một mối quan hệ mạnh mẽ giữa hoạt động thể chất và điểm số.")
-# elif correlation > 0.3:
-#     print("Có một mối quan hệ yếu giữa hoạt động thể chất và điểm số.")
-# else:
-#     print("Không có mối quan hệ rõ ràng giữa hoạt động thể chất và điểm số.")
+if correlation > 0.7:
+    print("Có một mối quan hệ mạnh mẽ giữa hoạt động thể chất và điểm số.")
+elif correlation > 0.3:
+    print("Có một mối quan hệ yếu giữa hoạt động thể chất và điểm số.")
+else:
+    print("Không có mối quan hệ rõ ràng giữa hoạt động thể chất và điểm số.")
 
-# plt.grid(axis='y', alpha=0.75)
+plt.grid(axis='y', alpha=0.75)
 
-# # Vẽ biểu đồ Boxplot cho Exam_Score và Learning_Disabilities
-# def boxplot_Learning_Disabilities_and_Exam_Score():
-#     global df_cleaned
-#     plt.figure(figsize=(10, 6))
-#     sns.boxplot(x=df_cleaned['Learning_Disabilities'], y=df_cleaned['Exam_Score'], palette='Set2')
+# Vẽ biểu đồ Boxplot cho Exam_Score và Learning_Disabilities
+def boxplot_Learning_Disabilities_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(x=df_cleaned['Learning_Disabilities'], y=df_cleaned['Exam_Score'], palette='Set2')
 
-#     plt.title('Boxplot: Exam Scores by School Type')
-#     plt.xlabel('School Type')
-#     plt.ylabel('Exam Score')
-#     # Hiển thị biểu đồ
-#     plt.show()
+    plt.title('Boxplot: Exam Scores by School Type')
+    plt.xlabel('School Type')
+    plt.ylabel('Exam Score')
+    # Hiển thị biểu đồ
+    plt.show()
 
-# # Mã hóa cột thành các giá trị số
-# df_cleaned['Learning_Disabilities_num'] = df_cleaned['Learning_Disabilities'].map({'No': 0, 'Yes': 1})
+# Mã hóa cột thành các giá trị số
+df_cleaned['Learning_Disabilities_num'] = df_cleaned['Learning_Disabilities'].map({'No': 0, 'Yes': 1})
 
-# # Tính toán mối tương quan
-# correlation = df_cleaned['Learning_Disabilities_num'].corr(df_cleaned['Exam_Score'])
-# print("-" * 20)
-# print(f'Mối tương quan giữa khuyết tập học tập và điểm thi: {correlation:.2f}')
+# Tính toán mối tương quan
+correlation = df_cleaned['Learning_Disabilities_num'].corr(df_cleaned['Exam_Score'])
+print("-" * 20)
+print(f'Mối tương quan giữa khuyết tập học tập và điểm thi: {correlation:.2f}')
 
-# if correlation > 0.7:
-#     print("Có một mối quan hệ mạnh mẽ giữa khuyết tật học tập và điểm số.")
-# elif correlation > 0.3:
-#     print("Có một mối quan hệ yếu giữa khuyết tật học tập và điểm số.")
-# else:
-#     print("Không có mối quan hệ rõ ràng giữa khuyết tật học tập và điểm số.")
+if correlation > 0.7:
+    print("Có một mối quan hệ mạnh mẽ giữa khuyết tật học tập và điểm số.")
+elif correlation > 0.3:
+    print("Có một mối quan hệ yếu giữa khuyết tật học tập và điểm số.")
+else:
+    print("Không có mối quan hệ rõ ràng giữa khuyết tật học tập và điểm số.")
 
-# # Vẽ biểu đồ boxplot Exam_Score và Parental_Education_Level
-# def boxplot_Parental_Education_Level_and_Exam_Score():
-#     global df_cleaned
-#     plt.figure(figsize=(10, 6))
-#     sns.boxplot(x=df_cleaned['Parental_Education_Level'], y=df_cleaned['Exam_Score'], palette='Set3')
+# Vẽ biểu đồ boxplot Exam_Score và Parental_Education_Level
+def boxplot_Parental_Education_Level_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(x=df_cleaned['Parental_Education_Level'], y=df_cleaned['Exam_Score'], palette='Set3')
 
-#     plt.title('Boxplot: Exam Scores by Parental Education Level')
-#     plt.xlabel('Parental Education Level')
-#     plt.ylabel('Exam Score')
-#     # Hiển thị biểu đồ
-#     plt.show()
+    plt.title('Boxplot: Exam Scores by Parental Education Level')
+    plt.xlabel('Parental Education Level')
+    plt.ylabel('Exam Score')
+    # Hiển thị biểu đồ
+    plt.show()
 
-# # Mã hóa cột thành các giá trị số
-# df_cleaned['Parental_Education_Level_num'] = df_cleaned['Parental_Education_Level'].map({'High School': 0, 'College': 1, 'Postgraduate': 2})
+# Mã hóa cột thành các giá trị số
+df_cleaned['Parental_Education_Level_num'] = df_cleaned['Parental_Education_Level'].map({'High School': 0, 'College': 1, 'Postgraduate': 2})
 
-# # Tính toán mối tương quan
-# correlation = df_cleaned['Parental_Education_Level_num'].corr(df_cleaned['Exam_Score'])
-# print("-" * 20)
-# print(f'Mối tương quan giữa mức độ học tập của ba mẹ và điểm thi: {correlation:.2f}')
+# Tính toán mối tương quan
+correlation = df_cleaned['Parental_Education_Level_num'].corr(df_cleaned['Exam_Score'])
+print("-" * 20)
+print(f'Mối tương quan giữa mức độ học tập của ba mẹ và điểm thi: {correlation:.2f}')
 
-# # Nhận xét về kết quả
-# if correlation > 0.7:
-#     print("Có một mối quan hệ mạnh mẽ giữa mức độ học tập của ba mẹ và điểm số.")
-# elif correlation > 0.3:
-#     print("Có một mối quan hệ yếu giữa mức độ học tập của ba mẹ và điểm số.")
-# else:
-#     print("Không có mối quan hệ rõ ràng giữa mức độ học tập của ba mẹ và điểm số.")
+# Nhận xét về kết quả
+if correlation > 0.7:
+    print("Có một mối quan hệ mạnh mẽ giữa mức độ học tập của ba mẹ và điểm số.")
+elif correlation > 0.3:
+    print("Có một mối quan hệ yếu giữa mức độ học tập của ba mẹ và điểm số.")
+else:
+    print("Không có mối quan hệ rõ ràng giữa mức độ học tập của ba mẹ và điểm số.")
 
-# # Vẽ biểu đồ boxplot Exam_Score và Distance_from_Home
-# def boxplot_Distance_from_Home_and_Exam_Score():
-#     global df_cleaned
-#     plt.figure(figsize=(10, 6))
-#     sns.boxplot(x=df_cleaned['Distance_from_Home'], y=df_cleaned['Exam_Score'], palette='Set3')
+# Vẽ biểu đồ boxplot Exam_Score và Distance_from_Home
+def boxplot_Distance_from_Home_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(x=df_cleaned['Distance_from_Home'], y=df_cleaned['Exam_Score'], palette='Set3')
 
-#     plt.title('Boxplot: Exam Scores by Distance from Home')
-#     plt.xlabel('Distance from Home')
-#     plt.ylabel('Exam Score')
-#     # Hiển thị biểu đồ
-#     plt.show()
+    plt.title('Boxplot: Exam Scores by Distance from Home')
+    plt.xlabel('Distance from Home')
+    plt.ylabel('Exam Score')
+    # Hiển thị biểu đồ
+    plt.show()
 
-# # Mã hóa cột thành các giá trị số
-# df_cleaned['Distance_from_Home_num'] = df_cleaned['Distance_from_Home'].map({'Near': 0, 'Moderate': 1, 'Far': 2})
+# Mã hóa cột thành các giá trị số
+df_cleaned['Distance_from_Home_num'] = df_cleaned['Distance_from_Home'].map({'Near': 0, 'Moderate': 1, 'Far': 2})
 
-# # Tính toán mối tương quan
-# correlation = df_cleaned['Distance_from_Home_num'].corr(df_cleaned['Exam_Score'])
-# print("-" * 20)
-# print(f'Mối tương quan giữa khoảng cách từ nhà đến trường và điểm thi: {correlation:.2f}')
+# Tính toán mối tương quan
+correlation = df_cleaned['Distance_from_Home_num'].corr(df_cleaned['Exam_Score'])
+print("-" * 20)
+print(f'Mối tương quan giữa khoảng cách từ nhà đến trường và điểm thi: {correlation:.2f}')
 
-# # Nhận xét về kết quả
-# if correlation > 0.7:
-#     print("Có một mối quan hệ mạnh mẽ giữa khoảng cách từ nhà đến trường và điểm số.")
-# elif correlation > 0.3:
-#     print("Có một mối quan hệ yếu giữa khoảng cách từ nhà đến trường và điểm số.")
-# else:
-#     print("Không có mối quan hệ rõ ràng giữa khoảng cách từ nhà đến trường và điểm số.")
+# Nhận xét về kết quả
+if correlation > 0.7:
+    print("Có một mối quan hệ mạnh mẽ giữa khoảng cách từ nhà đến trường và điểm số.")
+elif correlation > 0.3:
+    print("Có một mối quan hệ yếu giữa khoảng cách từ nhà đến trường và điểm số.")
+else:
+    print("Không có mối quan hệ rõ ràng giữa khoảng cách từ nhà đến trường và điểm số.")
 
-# # Vẽ biểu đồ Boxplot cho Exam_Score và Gender
-# def boxplot_Gender_and_Exam_Score():
-#     global df_cleaned
-#     plt.figure(figsize=(10, 6))
-#     sns.boxplot(x=df_cleaned['Gender'], y=df_cleaned['Exam_Score'], palette='Set2')
+# Vẽ biểu đồ Boxplot cho Exam_Score và Gender
+def boxplot_Gender_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(x=df_cleaned['Gender'], y=df_cleaned['Exam_Score'], palette='Set2')
 
-#     plt.title('Boxplot: Exam Scores by Gender')
-#     plt.xlabel('Gender')
-#     plt.ylabel('Exam Score')
-#     # Hiển thị biểu đồ
-#     plt.show()
+    plt.title('Boxplot: Exam Scores by Gender')
+    plt.xlabel('Gender')
+    plt.ylabel('Exam Score')
+    # Hiển thị biểu đồ
+    plt.show()
 
-# # Mã hóa cột thành các giá trị số
-# df_cleaned['Gender_num'] = df_cleaned['Gender'].map({'Female': 0, 'Male': 1})
+# Mã hóa cột thành các giá trị số
+df_cleaned['Gender_num'] = df_cleaned['Gender'].map({'Female': 0, 'Male': 1})
 
-# # Tính toán mối tương quan
-# correlation = df_cleaned['Gender_num'].corr(df_cleaned['Exam_Score'])
-# print("-" * 20)
-# print(f'Mối tương quan giữa giới tính và điểm thi: {correlation:.2f}')
+# Tính toán mối tương quan
+correlation = df_cleaned['Gender_num'].corr(df_cleaned['Exam_Score'])
+print("-" * 20)
+print(f'Mối tương quan giữa giới tính và điểm thi: {correlation:.2f}')
 
-# if correlation > 0.7:
-#     print("Có một mối quan hệ mạnh mẽ giữa giới tính và điểm số.")
-# elif correlation > 0.3:
-#     print("Có một mối quan hệ yếu giữa giới tính và điểm số.")
-# else:
-#     print("Không có mối quan hệ rõ ràng giữa giới tính và điểm số.")
+if correlation > 0.7:
+    print("Có một mối quan hệ mạnh mẽ giữa giới tính và điểm số.")
+elif correlation > 0.3:
+    print("Có một mối quan hệ yếu giữa giới tính và điểm số.")
+else:
+    print("Không có mối quan hệ rõ ràng giữa giới tính và điểm số.")
 
-# def heatmap():
-#     global df_cleaned
-#     # Lọc chỉ các cột số
-#     numerical_df = df_cleaned.select_dtypes(include='number')
-#     # Tính ma trận tương quan cho numerical_df
-#     corr_df = numerical_df.corr()
-#     # Vẽ heatmap cho ma trận tương quan của các cột số
-#     plt.figure(figsize=(8, 6))  # Điều chỉnh kích thước của heatmap
-#     sns.heatmap(corr_df, annot=True, cmap='coolwarm', fmt=".2f")  # Vẽ heatmap, hiện giá trị tương quan, và sử dụng bảng màu "coolwarm"
-#     plt.title('Biểu đồ Heatmap của các cột số')  # Thêm tiêu đề
-#     plt.show()  # Hiển thị biểu đồ
+def heatmap():
+    global df_cleaned
+    # Lọc chỉ các cột số
+    numerical_df = df_cleaned.select_dtypes(include='number')
+    # Tính ma trận tương quan cho numerical_df
+    corr_df = numerical_df.corr()
+    # Vẽ heatmap cho ma trận tương quan của các cột số
+    plt.figure(figsize=(8, 6))  # Điều chỉnh kích thước của heatmap
+    sns.heatmap(corr_df, annot=True, cmap='coolwarm', fmt=".2f")  # Vẽ heatmap, hiện giá trị tương quan, và sử dụng bảng màu "coolwarm"
+    plt.title('Biểu đồ Heatmap của các cột số')  # Thêm tiêu đề
+    plt.show()  # Hiển thị biểu đồ
 
 
 
