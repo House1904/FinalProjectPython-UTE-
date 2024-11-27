@@ -1,4 +1,3 @@
-# Basic
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -9,35 +8,24 @@ warnings.filterwarnings('ignore') # Tắt thông báo cảnh báo (warnings)
 
 df_cleaned = pd.read_csv('data_source\cleaned_data.csv') # Lấy dữ liệu chuẩn từ file đã làm sạch
 
-# Phân tách biến số và biến phân loại
-num_col = ['Hours_Studied', 'Attendance', 'Previous_Scores']
-cat_col = ['Parental_Involvement', 'Access_to_Resources', 'Sleep_Hours', 'Extracurricular_Activities', 
-           'Motivation_Level', 'Internet_Access', 'Tutoring_Sessions', 'Family_Income', 'Teacher_Quality', 
-           'School_Type', 'Peer_Influence', 'Physical_Activity', 'Learning_Disabilities', 'Parental_Education_Level', 
-           'Distance_from_Home', 'Gender']
-target = 'Exam_Score'
-
-print("\nKiểm tra kiểu dữ liệu")
-print(df_cleaned[num_col].dtypes)
-print(df_cleaned[cat_col].dtypes)
-print(df_cleaned[target].dtype)
-
 # Visualization - Trực quan hoá dữ liệu
 
 # 1. VẼ BIỂU ĐỒ TẦN SUẤT VÀ CỘT CHO CÁC THUỘC TÍNH ĐƠN LẺ (HISTOGRAM và BAR)
 # Histogram cho biến mục tiêu Exam_Score 
-plt.figure(figsize=(10, 6))
+def plot_exam_score_distribution():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
 
-sns.histplot(df_cleaned[target], bins = 45, kde=True, color='red', edgecolor = 'black', alpha = 0.5 )
+    sns.histplot(df_cleaned["Exam_Score"], bins = 45, kde=True, color='red', edgecolor = 'black', alpha = 0.5 )
 
-plt.title('Distribution of Exam Score')
-plt.xlabel('Exam Score')
-plt.ylabel('Frequency')
+    plt.title('Distribution of Exam Score')
+    plt.xlabel('Exam Score')
+    plt.ylabel('Frequency')
 
-plt.xlim(55, 100)
+    plt.xlim(55, 100)
 
-plt.grid(axis='y', alpha = 0.75)
-plt.show()
+    plt.grid(axis='y', alpha = 0.75)
+    plt.show()
 
 print("\nNhận định về Distribution of Exam Score.")
 
@@ -53,15 +41,26 @@ print(f"Phần trăm điểm số dưới 64: {percent_below_64:.2f}%")
 print(f"Phần trăm điểm số trên 70: {percent_above_70:.2f}%")
 print(f"Phần trăm điểm số trong khoảng 65 đến 69: {percent_between_65_and_69:.2f}%")
 
+mean_score = df_cleaned['Exam_Score'].mean()
+median_score = df_cleaned['Exam_Score'].median()
+mode_score = df_cleaned['Exam_Score'].mode()[0]  # Mode có thể trả về nhiều giá trị, lấy giá trị đầu tiên
+
+print(f"Trung bình của Exam Score: {mean_score:.2f}")
+print(f"Trung vị của Exam Score: {median_score:.2f}")
+print(f"Đỉnh cao nhất của Exam Score: {mode_score}")
+print(f"Khoảng giá trị của Exam Score: [{df_cleaned['Exam_Score'].min():.2f},{df_cleaned['Exam_Score'].max():.2f}]")
+
 # Histogram cho Hours_Studied
-plt.figure(figsize=(10, 6))
-sns.histplot(df_cleaned['Hours_Studied'], bins=45, kde=True, color='blue', edgecolor='black', alpha=0.5)
-plt.title('Distribution of Hours Studied')
-plt.xlabel('Hours Studied')
-plt.ylabel('Frequency')
-plt.xlim(0, 50)
-plt.grid(axis='y', alpha=0.75)
-plt.show()
+def plot_hours_studied_distribution():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.histplot(df_cleaned['Hours_Studied'], bins = 45, kde=True, color='blue', edgecolor='black', alpha=0.5)
+    plt.title('Distribution of Hours Studied')
+    plt.xlabel('Hours Studied')
+    plt.ylabel('Frequency')
+    plt.xlim(0, 50)
+    plt.grid(axis='y', alpha=0.75)
+    plt.show()
 
 print("-" * 20)
 print("\nNhận định về Distribution of Hours Studied.")
@@ -78,15 +77,26 @@ print(f"Phần trăm số giờ học bài dưới 10 giờ: {percent_below_10:.
 print(f"Phần trăm số giờ học bài trên 20 giờ: {percent_above_20:.2f}%")
 print(f"Phần trăm số giờ học bài trong khoảng 11 giờ đến 19 giờ: {percent_between_11_and_19:.2f}%")
 
+mean_score = df_cleaned['Hours_Studied'].mean()
+median_score = df_cleaned['Hours_Studied'].median()
+mode_score = df_cleaned['Hours_Studied'].mode()[0]  # Mode có thể trả về nhiều giá trị, lấy giá trị đầu tiên
+
+print(f"Trung bình của Hours Studied: {mean_score:.2f}")
+print(f"Trung vị của Hours Studied: {median_score:.2f}")
+print(f"Đỉnh cao nhất của Hours Studied: {mode_score}")
+print(f"Khoảng giá trị của Hours Studied: [{df_cleaned['Hours_Studied'].min():.2f},{df_cleaned['Hours_Studied'].max():.2f}]")
+
 # Histogram cho Attendance
-plt.figure(figsize=(10, 6))
-sns.histplot(df_cleaned['Attendance'], bins=45, kde=True, color='violet', edgecolor='black', alpha=0.5)
-plt.title('Distribution of Attendance')
-plt.xlabel('Attendance')
-plt.ylabel('Frequency')
-plt.xlim(60, 100)
-plt.grid(axis='y', alpha=0.75)
-plt.show()
+def plot_attendance_distribution():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.histplot(df_cleaned['Attendance'], bins=45, kde=True, color='violet', edgecolor='black', alpha=0.5)
+    plt.title('Distribution of Attendance')
+    plt.xlabel('Attendance')
+    plt.ylabel('Frequency')
+    plt.xlim(60, 100)
+    plt.grid(axis='y', alpha=0.75)
+    plt.show()
 
 print("-" * 20)
 print("\nNhận định về Distribution of Attendance.")
@@ -103,14 +113,27 @@ print(f"Phần trăm tham dự dưới 69: {percent_below_69:.2f}%")
 print(f"Phần trăm tham dự trên 80: {percent_above_80:.2f}%")
 print(f"Phần trăm tham dự trong khoảng 70 đến 79: {percent_between_70_and_79:.2f}%")
 
+mean_score = df_cleaned['Attendance'].mean()
+median_score = df_cleaned['Attendance'].median()
+mode_score = df_cleaned['Attendance'].mode()[0]  # Mode có thể trả về nhiều giá trị, lấy giá trị đầu tiên
+
+print(f"Trung bình của Attendance: {mean_score:.2f}")
+print(f"Trung vị của Attendance: {median_score:.2f}")
+print(f"Đỉnh cao nhất của Attendance: {mode_score}")
+print(f"Khoảng giá trị của Attendance: [{df_cleaned['Attendance'].min():.2f},{df_cleaned['Attendance'].max():.2f}]")
+
+
 # Histogram cho Previous_Scores
-plt.hist(df_cleaned['Previous_Scores'], bins=50, color='green', edgecolor='black', alpha=0.5)
-plt.title('Distribution of Previous Scores')
-plt.xlabel('Previous Scores')
-plt.ylabel('Frequency')
-plt.xlim(50, 100)
-plt.grid(axis='y', alpha=0.75)
-plt.show()
+def plot_previous_scores_distribution():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.histplot(df_cleaned['Previous_Scores'], bins=45, kde=True, color='green', edgecolor='black', alpha=0.5)
+    plt.title('Distribution of Previous Scores')
+    plt.xlabel('Previous Scores')
+    plt.ylabel('Frequency')
+    plt.xlim(50, 100)
+    plt.grid(axis='y', alpha=0.75)
+    plt.show()
 
 print("-" * 20)
 print("\nNhận định về Distribution of Previous Scoress.")
@@ -127,15 +150,26 @@ print(f"Phần trăm điểm dưới 69: {percent_below_69:.2f}%")
 print(f"Phần trăm điểm trên 90: {percent_above_90:.2f}%")
 print(f"Phần trăm điểm trong khoảng 70 đến 89 giờ: {percent_between_70_and_89:.2f}%")
 
+mean_score = df_cleaned['Previous_Scores'].mean()
+median_score = df_cleaned['Previous_Scores'].median()
+mode_score = df_cleaned['Previous_Scores'].mode()[0]  # Mode có thể trả về nhiều giá trị, lấy giá trị đầu tiên
+
+print(f"Trung bình của Previous Scores: {mean_score:.2f}")
+print(f"Trung vị của Previous Scores: {median_score:.2f}")
+print(f"Đỉnh cao nhất của Previous Scores: {mode_score}")
+print(f"Khoảng giá trị của Previous Scores: [{df_cleaned['Previous_Scores'].min():.2f},{df_cleaned['Previous_Scores'].max():.2f}]")
+
 # Bar cho Parental_Involvement
-counts = df_cleaned['Parental_Involvement'].value_counts()
-counts.plot(kind='bar', color=['red', 'orange', 'green'], edgecolor='black', alpha=0.5)
-plt.title('Distribution of Parental Involvement')
-plt.xlabel('Parental Involvement')
-plt.ylabel('Frequency')
-plt.xticks(rotation=0)
-plt.grid(axis='y', alpha=0.75)
-plt.show()
+def plot_parental_involvement_distribution():
+    global df_cleaned
+    counts = df_cleaned['Parental_Involvement'].value_counts()
+    counts.plot(kind='bar', color=['red', 'orange', 'green'], edgecolor='black', alpha=0.5)
+    plt.title('Distribution of Parental Involvement')
+    plt.xlabel('Parental Involvement')
+    plt.ylabel('Frequency')
+    plt.xticks(rotation=0)
+    plt.grid(axis='y', alpha=0.75)
+    plt.show()
 
 print("-" * 20)
 print("\nNhận định về Distribution of Parental Involvement.")
@@ -153,14 +187,16 @@ print(f"Phần trăm tham gia của phụ huynh ở mức trung bình: {percent_
 print(f"Phần trăm tham gia của phụ huynh ở mức cao: {percent_high:.2f}%")
 
 # Bar cho Access_to_Resources
-counts = df_cleaned['Access_to_Resources'].value_counts()
-counts.plot(kind='bar', color=['cyan', 'magenta', 'green'], edgecolor='black', alpha=0.5)
-plt.title('Distribution of Access to Resources')
-plt.xlabel('Access to Resources')
-plt.ylabel('Frequency')
-plt.xticks(rotation=0)
-plt.grid(axis='y', alpha=0.75)
-plt.show()
+def plot_access_to_resources_distribution():
+    global df_cleaned
+    counts = df_cleaned['Access_to_Resources'].value_counts()
+    counts.plot(kind='bar', color=['cyan', 'magenta', 'green'], edgecolor='black', alpha=0.5)
+    plt.title('Distribution of Access to Resources')
+    plt.xlabel('Access to Resources')
+    plt.ylabel('Frequency')
+    plt.xticks(rotation=0)
+    plt.grid(axis='y', alpha=0.75)
+    plt.show()
 
 print("-" * 20)
 print("\nNhận định về Distribution of Access to Resources.")
@@ -178,14 +214,16 @@ print(f"Phần trăm truy cập vào dữ liệu ở mức trung bình: {percent
 print(f"Phần trăm truy cập vào dữ liệu ở mức cao: {percent_high:.2f}%")
 
 # Bar cho Extracurricular_Activities
-counts = df_cleaned['Extracurricular_Activities'].value_counts()
-counts.plot(kind='bar', color=['red', 'green'], edgecolor='black', alpha=0.5)
-plt.title('Distribution of Extracurricular Activities')
-plt.xlabel('Extracurricular Activities')
-plt.ylabel('Frequency')
-plt.xticks(rotation=0)
-plt.grid(axis='y', alpha=0.75)
-plt.show()
+def plot_extracurricular_activities_distribution():
+    global df_cleaned
+    counts = df_cleaned['Extracurricular_Activities'].value_counts()
+    counts.plot(kind='bar', color=['red', 'green'], edgecolor='black', alpha=0.5)
+    plt.title('Distribution of Extracurricular Activities')
+    plt.xlabel('Extracurricular Activities')
+    plt.ylabel('Frequency')
+    plt.xticks(rotation=0)
+    plt.grid(axis='y', alpha=0.75)
+    plt.show()
 
 print("-" * 20)
 print("\nNhận định về Distribution of Extracurricular Activitiess.")
@@ -200,22 +238,24 @@ print(f"Phần trăm có hoạt động ngoại khóa: {percent_yes:.2f}%")
 print(f"Phần trăm không hoạt động ngoại khóa: {percent_no:.2f}%")
 
 # Bar cho Sleep_Hours
-# Tính toán tần suất của các giá trị Sleep_Hours
-counts = df_cleaned['Sleep_Hours'].value_counts().sort_index()
-# Màu sắc khác nhau cho từng cột
-colors = ['#FF6347', '#FFD700', '#ADFF2F', '#00BFFF', '#FF69B4', '#8A2BE2', 
-          '#FF4500', '#32CD32', '#FF1493', '#C71585']
-# Vẽ bar chart cho Sleep_Hours
-counts.plot(kind='bar', color=colors[:len(counts)], edgecolor='black', alpha=0.5)
-# Thêm tiêu đề và nhãn cho biểu đồ
-plt.title('Distribution of Sleep Hours')
-plt.xlabel('Sleep Hours')
-plt.ylabel('Frequency')
-# Cập nhật các giá trị trục x và hiển thị grid cho trục y
-plt.xticks(rotation=0)
-plt.grid(axis='y', alpha=0.75)
-# Hiển thị biểu đồ
-plt.show()
+def plot_sleep_hours_distribution():
+    global df_cleaned
+    # Tính toán tần suất của các giá trị Sleep_Hours
+    counts = df_cleaned['Sleep_Hours'].value_counts().sort_index()
+    # Màu sắc khác nhau cho từng cột
+    colors = ['#FF6347', '#FFD700', '#ADFF2F', '#00BFFF', '#FF69B4', '#8A2BE2', 
+              '#FF4500', '#32CD32', '#FF1493', '#C71585']
+    # Vẽ bar chart cho Sleep_Hours
+    counts.plot(kind='bar', color=colors[:len(counts)], edgecolor='black', alpha=0.5)
+    # Thêm tiêu đề và nhãn cho biểu đồ
+    plt.title('Distribution of Sleep Hours')
+    plt.xlabel('Sleep Hours')
+    plt.ylabel('Frequency')
+    # Cập nhật các giá trị trục x và hiển thị grid cho trục y
+    plt.xticks(rotation=0)
+    plt.grid(axis='y', alpha=0.75)
+    # Hiển thị biểu đồ
+    plt.show()
 
 print("-" * 20)
 print("\nNhận định về Distribution of Sleep Hours.")
@@ -233,14 +273,16 @@ print(f"Phần trăm số giờ ngủ trên 8 giờ: {percent_above_8:.2f}%")
 print(f"Phần trăm số giờ ngủ trong khoảng 6 đến 7 giờ: {percent_between_6_and_7:.2f}%")
 
 # Bar cho Motivation_Level
-counts = df_cleaned['Motivation_Level'].value_counts()
-counts.plot(kind='bar', color=['yellow', 'green', 'red'], edgecolor='black', alpha=0.5)
-plt.title('Distribution of Motivation Level')
-plt.xlabel('Motivation Level')
-plt.ylabel('Frequency')
-plt.xticks(rotation=0)
-plt.grid(axis='y', alpha=0.75)
-plt.show()
+def plot_motivation_level_distribution():
+    global df_cleaned
+    counts = df_cleaned['Motivation_Level'].value_counts()
+    counts.plot(kind='bar', color=['yellow', 'green', 'red'], edgecolor='black', alpha=0.5)
+    plt.title('Distribution of Motivation Level')
+    plt.xlabel('Motivation Level')
+    plt.ylabel('Frequency')
+    plt.xticks(rotation=0)
+    plt.grid(axis='y', alpha=0.75)
+    plt.show()
 
 print("-" * 20)
 print("\nNhận định về Distribution of Motivation Level.")
@@ -258,14 +300,16 @@ print(f"Phần trăm động lực ở mức trung bình: {percent_medium:.2f}%"
 print(f"Phần trăm động lực ở mức cao: {percent_high:.2f}%")
 
 # Bar cho Internet_Access
-counts = df_cleaned['Internet_Access'].value_counts()
-counts.plot(kind='bar', color=['purple', 'red'], edgecolor='black', alpha=0.5)
-plt.title('Distribution of Internet Access')
-plt.xlabel('Internet Access')
-plt.ylabel('Frequency')
-plt.xticks(rotation=0)
-plt.grid(axis='y', alpha=0.75)
-plt.show()
+def plot_internet_access_distribution():
+    global df_cleaned
+    counts = df_cleaned['Internet_Access'].value_counts()
+    counts.plot(kind='bar', color=['purple', 'red'], edgecolor='black', alpha=0.5)
+    plt.title('Distribution of Internet Access')
+    plt.xlabel('Internet Access')
+    plt.ylabel('Frequency')
+    plt.xticks(rotation=0)
+    plt.grid(axis='y', alpha=0.75)
+    plt.show()
 
 print("-" * 20)
 print("\nNhận định về Distribution of Internet Access.")
@@ -280,22 +324,24 @@ print(f"Phần trăm có truy cập Internet: {percent_yes:.2f}%")
 print(f"Phần trăm không truy cập Internet: {percent_no:.2f}%")
 
 # Bar cho Tutoring_Sessions 
-# Tính số lượng các giá trị của 'Tutoring_Sessions' và sắp xếp theo thứ tự tăng dần
-counts = df_cleaned['Tutoring_Sessions'].value_counts().sort_index()
-# Tạo danh sách các màu để sử dụng cho mỗi cột
-colors = ['purple', 'blue', 'green', 'orange', 'red', 'yellow', 'brown', 'pink', 'cyan']
-# Vẽ bar chart
-counts.plot(kind='bar', color=colors[:len(counts)], edgecolor='black', alpha=0.7)
-# Thêm tiêu đề và nhãn cho biểu đồ
-plt.title('Distribution of Tutoring Sessions')
-plt.xlabel('Tutoring Sessions')
-plt.ylabel('Frequency')
-# Sắp xếp lại trục X từ 0 đến 8
-plt.xticks(range(9), rotation=0)
-# Hiển thị grid cho trục y
-plt.grid(axis='y', alpha=0.75)
-# Hiển thị biểu đồ
-plt.show()
+def plot_tutoring_sessions_distribution():
+    global df_cleaned
+    # Tính số lượng các giá trị của 'Tutoring_Sessions' và sắp xếp theo thứ tự tăng dần
+    counts = df_cleaned['Tutoring_Sessions'].value_counts().sort_index()
+    # Tạo danh sách các màu để sử dụng cho mỗi cột
+    colors = ['purple', 'blue', 'green', 'orange', 'red', 'yellow', 'brown', 'pink', 'cyan']
+    # Vẽ bar chart
+    counts.plot(kind='bar', color=colors[:len(counts)], edgecolor='black', alpha=0.7)
+    # Thêm tiêu đề và nhãn cho biểu đồ
+    plt.title('Distribution of Tutoring Sessions')
+    plt.xlabel('Tutoring Sessions')
+    plt.ylabel('Frequency')
+    # Sắp xếp lại trục X từ 0 đến 8
+    plt.xticks(range(9), rotation=0)
+    # Hiển thị grid cho trục y
+    plt.grid(axis='y', alpha=0.75)
+    # Hiển thị biểu đồ
+    plt.show()
 
 print("-" * 20)
 print("\nNhận định về Distribution of Tutoring Sessions.")
@@ -308,19 +354,21 @@ percent_below_2 = (len(below_2) / len(df_cleaned)) * 100
 percent_above_6 = (len(above_6) / len(df_cleaned)) * 100
 percent_between_3_and_5 = (len(between_3_and_5) / len(df_cleaned)) * 100
 
-print(f"Phần trăm số phiên dạy kèm dưới 2 phiên: {percent_below_5:.2f}%")
-print(f"Phần trăm số phiên dạy kèm trên 6 phiên: {percent_above_8:.2f}%")
-print(f"Phần trăm số phiên dạy kèm trong khoảng 3 đến 5 phiên: {percent_between_6_and_7:.2f}%")
+print(f"Phần trăm số phiên dạy kèm dưới 2 phiên: {percent_below_2:.2f}%")
+print(f"Phần trăm số phiên dạy kèm trên 6 phiên: {percent_above_6:.2f}%")
+print(f"Phần trăm số phiên dạy kèm trong khoảng 3 đến 5 phiên: {percent_between_3_and_5:.2f}%")
 
 # Bar cho Family_Income
-counts = df_cleaned['Family_Income'].value_counts()
-counts.plot(kind='bar', color=['purple', 'yellow', 'pink'], edgecolor='black', alpha=0.5)
-plt.title('Distribution of Family Income')
-plt.xlabel('Family Income')
-plt.ylabel('Frequency')
-plt.xticks(rotation=0)
-plt.grid(axis='y', alpha=0.75)
-plt.show()
+def plot_family_income_distribution():
+    global df_cleaned
+    counts = df_cleaned['Family_Income'].value_counts()
+    counts.plot(kind='bar', color=['purple', 'yellow', 'pink'], edgecolor='black', alpha=0.5)
+    plt.title('Distribution of Family Income')
+    plt.xlabel('Family Income')
+    plt.ylabel('Frequency')
+    plt.xticks(rotation=0)
+    plt.grid(axis='y', alpha=0.75)
+    plt.show()
 
 print("-" * 20)
 print("\nNhận định về Distribution of Family Income.")
@@ -338,14 +386,16 @@ print(f"Phần trăm thu nhập gia đình ở mức trung bình: {percent_mediu
 print(f"Phần trăm thu nhập gia đình ở mức cao: {percent_high:.2f}%")
 
 # Bar cho Teacher_Quality
-counts = df_cleaned['Teacher_Quality'].value_counts()
-counts.plot(kind='bar', color=['fuchsia', 'blue', 'orange'], edgecolor='black', alpha=0.5)
-plt.title('Distribution of Teacher Quality')
-plt.xlabel('Teacher Quality')
-plt.ylabel('Frequency')
-plt.xticks(rotation=0)
-plt.grid(axis='y', alpha=0.75)
-plt.show()
+def plot_teacher_quality_distribution():
+    global df_cleaned
+    counts = df_cleaned['Teacher_Quality'].value_counts()
+    counts.plot(kind='bar', color=['fuchsia', 'blue', 'orange'], edgecolor='black', alpha=0.5)
+    plt.title('Distribution of Teacher Quality')
+    plt.xlabel('Teacher Quality')
+    plt.ylabel('Frequency')
+    plt.xticks(rotation=0)
+    plt.grid(axis='y', alpha=0.75)
+    plt.show()
 
 print("-" * 20)
 print("\nNhận định về Distribution of Teacher Quality.")
@@ -363,14 +413,16 @@ print(f"Phần trăm chất lượng giảng viên ở mức trung bình: {perce
 print(f"Phần trăm chất lượng giảng viên ở mức cao: {percent_high:.2f}%")
 
 # Bar cho School_Type
-counts = df_cleaned['School_Type'].value_counts()
-counts.plot(kind='bar', color=['green', 'violet'], edgecolor='black', alpha=0.5)
-plt.title('Distribution of School Type')
-plt.xlabel('School Type')
-plt.ylabel('Frequency')
-plt.xticks(rotation=0)
-plt.grid(axis='y', alpha=0.75)
-plt.show()
+def plot_school_type_distribution():
+    global df_cleaned
+    counts = df_cleaned['School_Type'].value_counts()
+    counts.plot(kind='bar', color=['green', 'violet'], edgecolor='black', alpha=0.5)
+    plt.title('Distribution of School Type')
+    plt.xlabel('School Type')
+    plt.ylabel('Frequency')
+    plt.xticks(rotation=0)
+    plt.grid(axis='y', alpha=0.75)
+    plt.show()
 
 print("-" * 20)
 print("\nNhận định về Distribution of School Type.")
@@ -385,14 +437,16 @@ print(f"Phần trăm học ở trường công lập: {public_sch:.2f}%")
 print(f"Phần trăm học ở trường tư thục: {private_sch:.2f}%")
 
 # Bar cho Peer_Influence
-counts = df_cleaned['Peer_Influence'].value_counts()
-counts.plot(kind='bar', color=['violet', 'lime', 'maroon'], edgecolor='black', alpha=0.5)
-plt.title('Distribution of Peer Influence')
-plt.xlabel('Peer Influence')
-plt.ylabel('Frequency')
-plt.xticks(rotation=0)
-plt.grid(axis='y', alpha=0.75)
-plt.show()
+def plot_peer_influence_distribution():
+    global df_cleaned
+    counts = df_cleaned['Peer_Influence'].value_counts()
+    counts.plot(kind='bar', color=['violet', 'lime', 'maroon'], edgecolor='black', alpha=0.5)
+    plt.title('Distribution of Peer Influence')
+    plt.xlabel('Peer Influence')
+    plt.ylabel('Frequency')
+    plt.xticks(rotation=0)
+    plt.grid(axis='y', alpha=0.75)
+    plt.show()
 
 print("-" * 20)
 print("\nNhận định về Distribution of Peer Influence.")
@@ -410,22 +464,24 @@ print(f"Phần trăm ảnh hưởng tiêu cực: {percent_ne:.2f}%")
 print(f"Phần trăm ảnh hưởng trung lập: {percent_neu:.2f}%")
 
 # Bar cho Physical_Activity
-# Tính số lượng các giá trị của 'Physical_Activity' và sắp xếp theo thứ tự tăng dần
-counts = df_cleaned['Physical_Activity'].value_counts().sort_index()
-# Tạo danh sách các màu để sử dụng cho mỗi cột
-colors = ['teal', 'orange', 'blue', 'green', 'purple', 'red', 'pink']
-# Vẽ bar chart
-counts.plot(kind='bar', color=colors[:len(counts)], edgecolor='black', alpha=0.7)
-# Thêm tiêu đề và nhãn cho biểu đồ
-plt.title('Distribution of Physical Activity')
-plt.xlabel('Physical Activity')
-plt.ylabel('Frequency')
-# Sắp xếp lại trục X từ 0 đến 6
-plt.xticks(range(7), rotation=0)
-# Hiển thị grid cho trục y
-plt.grid(axis='y', alpha=0.75)
-# Hiển thị biểu đồ
-plt.show()
+def plot_physical_activity_distribution():
+    global df_cleaned
+    # Tính số lượng các giá trị của 'Physical_Activity' và sắp xếp theo thứ tự tăng dần
+    counts = df_cleaned['Physical_Activity'].value_counts().sort_index()
+    # Tạo danh sách các màu để sử dụng cho mỗi cột
+    colors = ['teal', 'orange', 'blue', 'green', 'purple', 'red', 'pink']
+    # Vẽ bar chart
+    counts.plot(kind='bar', color=colors[:len(counts)], edgecolor='black', alpha=0.7)
+    # Thêm tiêu đề và nhãn cho biểu đồ
+    plt.title('Distribution of Physical Activity')
+    plt.xlabel('Physical Activity')
+    plt.ylabel('Frequency')
+    # Sắp xếp lại trục X từ 0 đến 6
+    plt.xticks(range(7), rotation=0)
+    # Hiển thị grid cho trục y
+    plt.grid(axis='y', alpha=0.75)
+    # Hiển thị biểu đồ
+    plt.show()
 
 print("-" * 20)
 print("\nNhận định về Distribution of Physical Activity.")
@@ -443,14 +499,16 @@ print(f"Phần trăm hoạt động thể chất trên 5 môn: {percent_above_5:
 print(f"Phần trăm hoạt động thể chất trong khoảng 2 đến 4 môn: {percent_between_2_and_4:.2f}%")
 
 # Bar cho Learning_Disabilities
-counts = df_cleaned['Learning_Disabilities'].value_counts()
-counts.plot(kind='bar', color=['coral', 'olive'], edgecolor='black', alpha=0.5)
-plt.title('Distribution of Learning Disabilities')
-plt.xlabel('Learning Disabilities')
-plt.ylabel('Frequency')
-plt.xticks(rotation=0)
-plt.grid(axis='y', alpha=0.75)
-plt.show()
+def plot_learning_disabilities_distribution():
+    global df_cleaned
+    counts = df_cleaned['Learning_Disabilities'].value_counts()
+    counts.plot(kind='bar', color=['coral', 'olive'], edgecolor='black', alpha=0.5)
+    plt.title('Distribution of Learning Disabilities')
+    plt.xlabel('Learning Disabilities')
+    plt.ylabel('Frequency')
+    plt.xticks(rotation=0)
+    plt.grid(axis='y', alpha=0.75)
+    plt.show()
 
 print("-" * 20)
 print("\nNhận định về Distribution of Learning Disabilities.")
@@ -465,14 +523,16 @@ print(f"Phần trăm có truy cập Internet: {percent_yes:.2f}%")
 print(f"Phần trăm không truy cập Internet: {percent_no:.2f}%")
 
 # Bar cho Parental_Education_Level
-counts = df_cleaned['Parental_Education_Level'].value_counts()
-counts.plot(kind='bar', color=['green', 'blue', 'orange'], edgecolor='black', alpha=0.5)
-plt.title('Distribution of Parental Education Level')
-plt.xlabel('Parental Education Level')
-plt.ylabel('Frequency')
-plt.xticks(rotation=0)
-plt.grid(axis='y', alpha=0.75)
-plt.show()
+def plot_parental_education_level_distribution():
+    global df_cleaned
+    counts = df_cleaned['Parental_Education_Level'].value_counts()
+    counts.plot(kind='bar', color=['green', 'blue', 'orange'], edgecolor='black', alpha=0.5)
+    plt.title('Distribution of Parental Education Level')
+    plt.xlabel('Parental Education Level')
+    plt.ylabel('Frequency')
+    plt.xticks(rotation=0)
+    plt.grid(axis='y', alpha=0.75)
+    plt.show()
 
 print("-" * 20)
 print("\nNhận định về Distribution of Parental Education Level.")
@@ -490,14 +550,16 @@ print(f"Phần trăm ba mẹ học cao đẳng: {percent_co:.2f}%")
 print(f"Phần trăm ba mẹ học tiếp sau đại học: {percent_po:.2f}%")
 
 # Bar cho Distance_from_Home
-counts = df_cleaned['Distance_from_Home'].value_counts()
-counts.plot(kind='bar', color=['coral', 'olive', 'lime'], edgecolor='black', alpha=0.5)
-plt.title('Distribution of Distance from Home')
-plt.xlabel('Distance from Home')
-plt.ylabel('Frequency')
-plt.xticks(rotation=0)
-plt.grid(axis='y', alpha=0.75)
-plt.show()
+def plot_distance_from_home_distribution():
+    global df_cleaned
+    counts = df_cleaned['Distance_from_Home'].value_counts()
+    counts.plot(kind='bar', color=['coral', 'olive', 'lime'], edgecolor='black', alpha=0.5)
+    plt.title('Distribution of Distance from Home')
+    plt.xlabel('Distance from Home')
+    plt.ylabel('Frequency')
+    plt.xticks(rotation=0)
+    plt.grid(axis='y', alpha=0.75)
+    plt.show()
 
 print("-" * 20)
 print("\nNhận định về Distribution of Distance from Home.")
@@ -515,14 +577,16 @@ print(f"Phần trăm nhà ở xa trường: {percent_fa:.2f}%")
 print(f"Phần trăm nhà cách trường không xa: {percent_mo:.2f}%")
 
 # Bar cho Gender
-counts = df_cleaned['Gender'].value_counts()
-counts.plot(kind='bar', color=['azure', 'cyan'], edgecolor='black', alpha=0.5)
-plt.title('Distribution of Gender')
-plt.xlabel('Gender')
-plt.ylabel('Frequency')
-plt.xticks(rotation=0)
-plt.grid(axis='y', alpha=0.75)
-plt.show()
+def plot_gender_distribution():
+    global df_cleaned
+    counts = df_cleaned['Gender'].value_counts()
+    counts.plot(kind='bar', color=['azure', 'cyan'], edgecolor='black', alpha=0.5)
+    plt.title('Distribution of Gender')
+    plt.xlabel('Gender')
+    plt.ylabel('Frequency')
+    plt.xticks(rotation=0)
+    plt.grid(axis='y', alpha=0.75)
+    plt.show()
 
 print("-" * 20)
 print("\nNhận định về Distribution of Gender.")
@@ -539,15 +603,17 @@ print(f"Phần trăm nam: {percent_ma:.2f}%")
 # 2. VẼ BIỂU ĐỒ BIỂU DIỄN QUAN HỆ PHÂN TÁN (SỐ) VÀ BIỂU ĐỒ HỘP (PHÂN LOẠI) VỚI BIẾN MỤC TIÊU EXAM_SCORE
 # Vẽ biểu đồ phân tán Hours Studied và Exam Score
 # Liệu số giờ học có ảnh hưởng đến điểm số không?
-plt.figure(figsize=(10, 6))
-sns.scatterplot(x=df_cleaned['Hours_Studied'], y=df_cleaned['Exam_Score'], color='green', alpha=0.7)
+def scatterplot_Hours_Studied_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.scatterplot(x=df_cleaned['Hours_Studied'], y=df_cleaned['Exam_Score'], color='green', alpha=0.7)
 
-plt.title('Scatter Plot: Hours Studied vs Exam Score')
-plt.xlabel('Hours Studied')
-plt.ylabel('Exam Score')
+    plt.title('Scatter Plot: Hours Studied vs Exam Score')
+    plt.xlabel('Hours Studied')
+    plt.ylabel('Exam Score')
 
-plt.grid(True)
-plt.show()
+    plt.grid(True)
+    plt.show()
 
 print("-" * 20)
 correlation = df_cleaned['Hours_Studied'].corr(df_cleaned['Exam_Score'])
@@ -561,15 +627,17 @@ else:
     print("Không có mối quan hệ rõ ràng giữa số giờ học và điểm số.")
 
 # Vẽ biểu đồ phân tán Attendance và Exam Score
-plt.figure(figsize=(10, 6))
-sns.scatterplot(x=df_cleaned['Attendance'], y=df_cleaned['Exam_Score'], color='gray', alpha=0.7)
+def scatterplot_Attendance_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.scatterplot(x=df_cleaned['Attendance'], y=df_cleaned['Exam_Score'], color='gray', alpha=0.7)
 
-plt.title('Scatter Plot: Attendance vs Exam Score')
-plt.xlabel('Attendance')
-plt.ylabel('Exam Score')
+    plt.title('Scatter Plot: Attendance vs Exam Score')
+    plt.xlabel('Attendance')
+    plt.ylabel('Exam Score')
 
-plt.grid(True)
-plt.show()
+    plt.grid(True)
+    plt.show()
 
 print("-" * 20)
 correlation = df_cleaned['Attendance'].corr(df_cleaned['Exam_Score'])
@@ -583,15 +651,17 @@ else:
     print("Không có mối quan hệ rõ ràng giữa sự tham gia và điểm số.")
 
 # Vẽ biểu đồ phân tán Previous Scores và Exam Score
-plt.figure(figsize=(10, 6))
-sns.scatterplot(x=df_cleaned['Previous_Scores'], y=df_cleaned['Exam_Score'], color='salmon', alpha=0.7)
+def scatterplot_Previous_Scores_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.scatterplot(x=df_cleaned['Previous_Scores'], y=df_cleaned['Exam_Score'], color='salmon', alpha=0.7)
 
-plt.title('Scatter Plot: Previous Scores vs Exam Score')
-plt.xlabel('Previous Scores')
-plt.ylabel('Exam Score')
+    plt.title('Scatter Plot: Previous Scores vs Exam Score')
+    plt.xlabel('Previous Scores')
+    plt.ylabel('Exam Score')
 
-plt.grid(True)
-plt.show()
+    plt.grid(True)
+    plt.show()
 
 print("-" * 20)
 correlation = df_cleaned['Previous_Scores'].corr(df_cleaned['Exam_Score'])
@@ -606,17 +676,21 @@ else:
 
 # Vẽ biểu đồ boxplot Exam_Score và Parental Involvement
 # Sự tham gia của phụ huynh có ảnh hưởng đến kết quả học tập của học sinh?
-plt.figure(figsize=(10, 6))
-sns.boxplot(x=df_cleaned['Parental_Involvement'], y=df_cleaned['Exam_Score'], palette='Set2')
+def boxplot_Parental_Involvement_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(x=df_cleaned['Parental_Involvement'], y=df_cleaned['Exam_Score'], palette='Set2')
 
-plt.title('Boxplot: Exam Scores by Parental Involvement')
-plt.xlabel('Parental Involvement')
-plt.ylabel('Exam Score')
+    plt.title('Boxplot: Exam Scores by Parental Involvement')
+    plt.xlabel('Parental Involvement')
+    plt.ylabel('Exam Score')
+    plt.show()
 
 # Mã hóa cột thành các giá trị số
 df_cleaned['Parental_Involvement_num'] = df_cleaned['Parental_Involvement'].map({'Low': 0, 'Medium': 1, 'High': 2})
 
 correlation = df_cleaned['Parental_Involvement_num'].corr(df_cleaned['Exam_Score'])
+
 print("-" * 20)
 print(f'Mối tương quan giữa sự tham gia của phụ huynh và điểm thi: {correlation:.2f}')
 
@@ -627,16 +701,19 @@ elif correlation > 0.3:
 else:
     print("Không có mối quan hệ rõ ràng giữa sự tham gia của phụ huynh và điểm số.")
 
-plt.show()
+    
 
 # Vẽ biểu đồ boxplot Exam_Score và Access_to_Resources
 # Mức độ truy cập tài nguyên học tập có liên quan đến kết quả học tập không?
-plt.figure(figsize=(10, 6))
-sns.boxplot(x=df_cleaned['Access_to_Resources'], y=df_cleaned['Exam_Score'], palette='Set2')
+def boxplot_Access_to_Resources_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(x=df_cleaned['Access_to_Resources'], y=df_cleaned['Exam_Score'], palette='Set2')
 
-plt.title('Boxplot: Exam Scores by Access to Resources')
-plt.xlabel('Access to Resources')
-plt.ylabel('Exam Score')
+    plt.title('Boxplot: Exam Scores by Access to Resources')
+    plt.xlabel('Access to Resources')
+    plt.ylabel('Exam Score')
+    plt.show()
 
 # Mã hóa cột thành các giá trị số
 df_cleaned['Access_to_Resources_num'] = df_cleaned['Access_to_Resources'].map({'Low': 0, 'Medium': 1, 'High': 2})
@@ -652,16 +729,19 @@ elif correlation > 0.3:
 else:
     print("Không có mối quan hệ rõ ràng giữa truy cập tài nguyên học tập và điểm số.")
 
-plt.show()
+    
 
 # Vẽ biểu đồ boxplot Exam_Score và Extracurricular_Activities
 # Học sinh tham gia hoạt động ngoại khóa có điểm số khác so với học sinh không tham gia không?
-plt.figure(figsize=(10, 6))
-sns.boxplot(data=df_cleaned, x='Extracurricular_Activities', y='Exam_Score', palette=['pink', 'blue'])
+def boxplot_Extracurricular_Activities_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(data=df_cleaned, x='Extracurricular_Activities', y='Exam_Score', palette=['pink', 'blue'])
 
-plt.title('Boxplot: Exam Score by Extracurricular Activities')
-plt.xlabel('Extracurricular Activities')
-plt.ylabel('Exam Score')
+    plt.title('Boxplot: Exam Score by Extracurricular Activities')
+    plt.xlabel('Extracurricular Activities')
+    plt.ylabel('Exam Score')
+    plt.show()
 
 df_cleaned['Extracurricular_Activities_Encoded'] = df_cleaned['Extracurricular_Activities'].map({'Yes': 1, 'No': 0})
 
@@ -678,16 +758,18 @@ else:
     print("Không có mối quan hệ rõ ràng giữa học sinh tham gia hoạt động ngoại khóa và điểm số.")
 
 plt.grid(axis='y', alpha=0.75)
-plt.show()
-
+    
 # Vẽ biểu đồ boxplot Exam_Score và Sleep_Hours
-plt.figure(figsize=(10, 6))
+def boxplot_Sleep_Hours_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
 
-sns.boxplot(data=df_cleaned, x='Sleep_Hours', y='Exam_Score', palette='Set2')
+    sns.boxplot(data=df_cleaned, x='Sleep_Hours', y='Exam_Score', palette='Paired')
 
-plt.title('Boxplot: Exam Score by Sleep Hours')
-plt.xlabel('Sleep Hours')
-plt.ylabel('Exam Score')
+    plt.title('Boxplot: Exam Score by Sleep Hours')
+    plt.xlabel('Sleep Hours')
+    plt.ylabel('Exam Score')
+    plt.show()
 
 correlation = df_cleaned[['Sleep_Hours', 'Exam_Score']].corr().iloc[0, 1]
 
@@ -702,15 +784,17 @@ else:
     print("Không có mối quan hệ rõ ràng giữa giờ ngủ và điểm số.")
 
 plt.grid(axis='y', alpha=0.75)
-plt.show()
 
 # Vẽ biểu đồ boxplot Exam_Score và Motivation_Level
-plt.figure(figsize=(10, 6))
-sns.boxplot(x=df_cleaned['Motivation_Level'], y=df_cleaned['Exam_Score'], palette='Set1')
+def boxplot_Motivation_Level_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(x=df_cleaned['Motivation_Level'], y=df_cleaned['Exam_Score'], palette='Set1')
 
-plt.title('Boxplot: Exam Scores by Motivation Level')
-plt.xlabel('Motivation Level')
-plt.ylabel('Exam Score')
+    plt.title('Boxplot: Exam Scores by Motivation Level')
+    plt.xlabel('Motivation Level')
+    plt.ylabel('Exam Score')
+    plt.show()
 
 # Mã hóa cột thành các giá trị số
 df_cleaned['Motivation_Level_num'] = df_cleaned['Motivation_Level'].map({'Low': 0, 'Medium': 1, 'High': 2})
@@ -726,15 +810,16 @@ elif correlation > 0.3:
 else:
     print("Không có mối quan hệ rõ ràng giữa động lực và điểm số.")
 
-plt.show()
-
 # Vẽ biểu đồ boxplot Exam_Score và Internet_Access
-plt.figure(figsize=(10, 6))
-sns.boxplot(data=df_cleaned, x='Internet_Access', y='Exam_Score', palette=['red', 'pink'])
+def boxplot_Internet_Access_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(data=df_cleaned, x='Internet_Access', y='Exam_Score', palette=['red', 'pink'])
 
-plt.title('Boxplot: Exam Score by Internet Access')
-plt.xlabel('Internet Access')
-plt.ylabel('Exam Score')
+    plt.title('Boxplot: Exam Score by Internet Access')
+    plt.xlabel('Internet Access')
+    plt.ylabel('Exam Score')
+    plt.show()
 
 df_cleaned['Internet_Access_num'] = df_cleaned['Internet_Access'].map({'Yes': 1, 'No': 0})
 
@@ -751,16 +836,18 @@ else:
     print("Không có mối quan hệ rõ ràng giữa việc truy cập Internet và điểm số.")
 
 plt.grid(axis='y', alpha=0.75)
-plt.show()
 
 # Vẽ biểu đồ boxplot Exam_Score và Tutoring_Sessions
-plt.figure(figsize=(10, 6))
+def boxplot_Tutoring_Sessions_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
 
-sns.boxplot(data=df_cleaned, x='Tutoring_Sessions', y='Exam_Score', palette='Set1')
+    sns.boxplot(data=df_cleaned, x='Tutoring_Sessions', y='Exam_Score', palette='Set3')
 
-plt.title('Boxplot: Exam Score by Tutoring Sessions')
-plt.xlabel('Tutoring Sessions')
-plt.ylabel('Exam Score')
+    plt.title('Boxplot: Exam Score by Tutoring Sessions')
+    plt.xlabel('Tutoring Sessions')
+    plt.ylabel('Exam Score')
+    plt.show()
 
 correlation = df_cleaned[['Tutoring_Sessions', 'Exam_Score']].corr().iloc[0, 1]
 
@@ -775,16 +862,19 @@ else:
     print("Không có mối quan hệ rõ ràng giữa các phiên dạy kèm và điểm số.")
 
 plt.grid(axis='y', alpha=0.75)
-plt.show()
-
+    
 # Vẽ biểu đồ boxplot Exam_Score và Family_Income
 # Có mối liên hệ giữa thu nhập gia đình và điểm số học tập không?
-plt.figure(figsize=(10, 6))
-sns.boxplot(x=df_cleaned['Family_Income'], y=df_cleaned['Exam_Score'], palette='Set2')
+def boxplot_Family_Income_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(x=df_cleaned['Family_Income'], y=df_cleaned['Exam_Score'], palette='Set2')
 
-plt.title('Boxplot: Exam Scores by Family Income')
-plt.xlabel('Access to Resources')
-plt.ylabel('Exam Score')
+    plt.title('Boxplot: Exam Scores by Family Income')
+    plt.xlabel('Access to Resources')
+    plt.ylabel('Exam Score')
+    # Hiển thị biểu đồ
+    plt.show()
 
 # Mã hóa cột thành các giá trị số
 df_cleaned['Family_Income_num'] = df_cleaned['Family_Income'].map({'Low': 0, 'Medium': 1, 'High': 2})
@@ -802,17 +892,18 @@ elif correlation > 0.3:
 else:
     print("Không có mối quan hệ rõ ràng giữa thu nhập gia đình và điểm số.")
 
-# Hiển thị biểu đồ
-plt.show()
-
 # Vẽ biểu đồ boxplot Exam_Score và Teacher_Quality
 # Chất lượng giáo viên có ảnh hưởng như thế nào đến kết quả học tập?
-plt.figure(figsize=(10, 6))
-sns.boxplot(x=df_cleaned['Teacher_Quality'], y=df_cleaned['Exam_Score'], palette='Set1')
+def boxplot_Teacher_Quality_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(x=df_cleaned['Teacher_Quality'], y=df_cleaned['Exam_Score'], palette='Set1')
 
-plt.title('Boxplot: Exam Scores by Teacher Quality')
-plt.xlabel('Teacher Quality')
-plt.ylabel('Exam Score')
+    plt.title('Boxplot: Exam Scores by Teacher Quality')
+    plt.xlabel('Teacher Quality')
+    plt.ylabel('Exam Score')
+    # Hiển thị biểu đồ
+    plt.show()
 
 # Mã hóa cột thành các giá trị số
 df_cleaned['Teacher_Quality_num'] = df_cleaned['Teacher_Quality'].map({'Low': 0, 'Medium': 1, 'High': 2})
@@ -830,17 +921,18 @@ elif correlation > 0.3:
 else:
     print("Không có mối quan hệ rõ ràng giữa chất lượng giáo viên và điểm số.")
 
-# Hiển thị biểu đồ
-plt.show()
-
 # Vẽ biểu đồ Boxplot cho Exam_Score và School_Type
 # Loại trường học (công lập hay tư thục) có ảnh hưởng đến thành tích học tập?
-plt.figure(figsize=(10, 6))
-sns.boxplot(x=df_cleaned['School_Type'], y=df_cleaned['Exam_Score'], palette='Set2')
+def boxplot_School_Type_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(x=df_cleaned['School_Type'], y=df_cleaned['Exam_Score'], palette='Set2')
 
-plt.title('Boxplot: Exam Scores by School Type')
-plt.xlabel('School Type')
-plt.ylabel('Exam Score')
+    plt.title('Boxplot: Exam Scores by School Type')
+    plt.xlabel('School Type')
+    plt.ylabel('Exam Score')
+    # Hiển thị biểu đồ
+    plt.show()
 
 # Mã hóa cột thành các giá trị số
 df_cleaned['School_Type_num'] = df_cleaned['School_Type'].map({'Public': 0, 'Private': 1})
@@ -859,17 +951,18 @@ elif correlation > 0.3:
 else:
     print("Không có mối quan hệ rõ ràng giữa loại trường học và điểm số.")
 
-# Hiển thị biểu đồ
-plt.show()
-
 # Vẽ biểu đồ boxplot Exam_Score và Peer_Influence
 # Sự ảnh hưởng của bạn bè đến điểm số học tập?
-plt.figure(figsize=(10, 6))
-sns.boxplot(x=df_cleaned['Peer_Influence'], y=df_cleaned['Exam_Score'], palette='Set3')
+def boxplot_Peer_Influence_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(x=df_cleaned['Peer_Influence'], y=df_cleaned['Exam_Score'], palette='Set3')
 
-plt.title('Boxplot: Exam Scores by Teacher Quality')
-plt.xlabel('Teacher Quality')
-plt.ylabel('Exam Score')
+    plt.title('Boxplot: Exam Scores by Teacher Quality')
+    plt.xlabel('Teacher Quality')
+    plt.ylabel('Exam Score')
+    # Hiển thị biểu đồ
+    plt.show()
 
 # Mã hóa cột thành các giá trị số
 df_cleaned['Peer_Influence_num'] = df_cleaned['Peer_Influence'].map({'Positive': 0, 'Negative': 1, 'Neutral': 2})
@@ -887,17 +980,17 @@ elif correlation > 0.3:
 else:
     print("Không có mối quan hệ rõ ràng giữa sự ảnh hưởng của bạn bè và điểm số.")
 
-# Hiển thị biểu đồ
-plt.show()
-
 # Vẽ biểu đồ boxplot Exam_Score và Physical_Activity
-plt.figure(figsize=(10, 6))
+def boxplot_Physical_Activity_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
 
-sns.boxplot(data=df_cleaned, x='Physical_Activity', y='Exam_Score', palette='Set2')
+    sns.boxplot(data=df_cleaned, x='Physical_Activity', y='Exam_Score', palette='tab20')
 
-plt.title('Boxplot: Exam Score by Physical Activity')
-plt.xlabel('Physical Activity')
-plt.ylabel('Exam Score')
+    plt.title('Boxplot: Exam Score by Physical Activity')
+    plt.xlabel('Physical Activity')
+    plt.ylabel('Exam Score')
+    plt.show()
 
 correlation = df_cleaned[['Physical_Activity', 'Exam_Score']].corr().iloc[0, 1]
 
@@ -912,15 +1005,18 @@ else:
     print("Không có mối quan hệ rõ ràng giữa hoạt động thể chất và điểm số.")
 
 plt.grid(axis='y', alpha=0.75)
-plt.show()
 
 # Vẽ biểu đồ Boxplot cho Exam_Score và Learning_Disabilities
-plt.figure(figsize=(10, 6))
-sns.boxplot(x=df_cleaned['Learning_Disabilities'], y=df_cleaned['Exam_Score'], palette='Set2')
+def boxplot_Learning_Disabilities_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(x=df_cleaned['Learning_Disabilities'], y=df_cleaned['Exam_Score'], palette='Set2')
 
-plt.title('Boxplot: Exam Scores by School Type')
-plt.xlabel('School Type')
-plt.ylabel('Exam Score')
+    plt.title('Boxplot: Exam Scores by School Type')
+    plt.xlabel('School Type')
+    plt.ylabel('Exam Score')
+    # Hiển thị biểu đồ
+    plt.show()
 
 # Mã hóa cột thành các giá trị số
 df_cleaned['Learning_Disabilities_num'] = df_cleaned['Learning_Disabilities'].map({'No': 0, 'Yes': 1})
@@ -937,16 +1033,17 @@ elif correlation > 0.3:
 else:
     print("Không có mối quan hệ rõ ràng giữa khuyết tật học tập và điểm số.")
 
-# Hiển thị biểu đồ
-plt.show()
-
 # Vẽ biểu đồ boxplot Exam_Score và Parental_Education_Level
-plt.figure(figsize=(10, 6))
-sns.boxplot(x=df_cleaned['Parental_Education_Level'], y=df_cleaned['Exam_Score'], palette='Set3')
+def boxplot_Parental_Education_Level_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(x=df_cleaned['Parental_Education_Level'], y=df_cleaned['Exam_Score'], palette='Set3')
 
-plt.title('Boxplot: Exam Scores by Parental Education Level')
-plt.xlabel('Parental Education Level')
-plt.ylabel('Exam Score')
+    plt.title('Boxplot: Exam Scores by Parental Education Level')
+    plt.xlabel('Parental Education Level')
+    plt.ylabel('Exam Score')
+    # Hiển thị biểu đồ
+    plt.show()
 
 # Mã hóa cột thành các giá trị số
 df_cleaned['Parental_Education_Level_num'] = df_cleaned['Parental_Education_Level'].map({'High School': 0, 'College': 1, 'Postgraduate': 2})
@@ -964,16 +1061,17 @@ elif correlation > 0.3:
 else:
     print("Không có mối quan hệ rõ ràng giữa mức độ học tập của ba mẹ và điểm số.")
 
-# Hiển thị biểu đồ
-plt.show()
-
 # Vẽ biểu đồ boxplot Exam_Score và Distance_from_Home
-plt.figure(figsize=(10, 6))
-sns.boxplot(x=df_cleaned['Distance_from_Home'], y=df_cleaned['Exam_Score'], palette='Set3')
+def boxplot_Distance_from_Home_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(x=df_cleaned['Distance_from_Home'], y=df_cleaned['Exam_Score'], palette='Set3')
 
-plt.title('Boxplot: Exam Scores by Distance from Home')
-plt.xlabel('Distance from Home')
-plt.ylabel('Exam Score')
+    plt.title('Boxplot: Exam Scores by Distance from Home')
+    plt.xlabel('Distance from Home')
+    plt.ylabel('Exam Score')
+    # Hiển thị biểu đồ
+    plt.show()
 
 # Mã hóa cột thành các giá trị số
 df_cleaned['Distance_from_Home_num'] = df_cleaned['Distance_from_Home'].map({'Near': 0, 'Moderate': 1, 'Far': 2})
@@ -991,16 +1089,17 @@ elif correlation > 0.3:
 else:
     print("Không có mối quan hệ rõ ràng giữa khoảng cách từ nhà đến trường và điểm số.")
 
-# Hiển thị biểu đồ
-plt.show()
-
 # Vẽ biểu đồ Boxplot cho Exam_Score và Gender
-plt.figure(figsize=(10, 6))
-sns.boxplot(x=df_cleaned['Gender'], y=df_cleaned['Exam_Score'], palette='Set2')
+def boxplot_Gender_and_Exam_Score():
+    global df_cleaned
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(x=df_cleaned['Gender'], y=df_cleaned['Exam_Score'], palette='Set2')
 
-plt.title('Boxplot: Exam Scores by Gender')
-plt.xlabel('Gender')
-plt.ylabel('Exam Score')
+    plt.title('Boxplot: Exam Scores by Gender')
+    plt.xlabel('Gender')
+    plt.ylabel('Exam Score')
+    # Hiển thị biểu đồ
+    plt.show()
 
 # Mã hóa cột thành các giá trị số
 df_cleaned['Gender_num'] = df_cleaned['Gender'].map({'Female': 0, 'Male': 1})
@@ -1017,18 +1116,17 @@ elif correlation > 0.3:
 else:
     print("Không có mối quan hệ rõ ràng giữa giới tính và điểm số.")
 
-# Hiển thị biểu đồ
-plt.show()
-
-# Lọc chỉ các cột số
-numerical_df = df_cleaned.select_dtypes(include='number')
-# Tính ma trận tương quan cho numerical_df
-corr_df = numerical_df.corr()
-# Vẽ heatmap cho ma trận tương quan của các cột số
-plt.figure(figsize=(8, 6))  # Điều chỉnh kích thước của heatmap
-sns.heatmap(corr_df, annot=True, cmap='coolwarm', fmt=".2f")  # Vẽ heatmap, hiện giá trị tương quan, và sử dụng bảng màu "coolwarm"
-plt.title('Biểu đồ Heatmap của các cột số')  # Thêm tiêu đề
-plt.show()  # Hiển thị biểu đồ
+def heatmap():
+    global df_cleaned
+    # Lọc chỉ các cột số
+    numerical_df = df_cleaned.select_dtypes(include='number')
+    # Tính ma trận tương quan cho numerical_df
+    corr_df = numerical_df.corr()
+    # Vẽ heatmap cho ma trận tương quan của các cột số
+    plt.figure(figsize=(8, 6))  # Điều chỉnh kích thước của heatmap
+    sns.heatmap(corr_df, annot=True, cmap='coolwarm', fmt=".2f")  # Vẽ heatmap, hiện giá trị tương quan, và sử dụng bảng màu "coolwarm"
+    plt.title('Biểu đồ Heatmap của các cột số')  # Thêm tiêu đề
+    plt.show()  # Hiển thị biểu đồ
 
 
 
