@@ -218,61 +218,6 @@ def print_rows_range(start, end, page_size=100):
     # Gọi hàm phân trang chung
     paginate(data_subset, page_size=page_size)
 
-# Chức năng trích lọc dữ liệu 1 số có giá trị số
-def filter_numeric_columns():
-    """Lọc dữ liệu dựa trên các cột số học (float hoặc int)."""
-    
-    # Xác định các cột có kiểu dữ liệu số
-    numeric_columns = data.select_dtypes(include=['float64', 'int64']).columns
-
-    # Hiển thị các cột số để người dùng lựa chọn
-    print("Các cột có sẵn để lọc theo phạm vi:")
-    for idx, col in enumerate(numeric_columns, start=1):
-        print(f"{idx}. {col}")
-
-    # Người dùng nhập chỉ số cột muốn lọc
-    while True:
-        try:
-            column_index = int(input("Nhập chỉ số cột muốn lọc: ").strip()) - 1
-            if 0 <= column_index < len(numeric_columns):
-                column_name = numeric_columns[column_index]
-                break
-            else:
-                print("Chỉ số không hợp lệ. Vui lòng thử lại.")
-        except ValueError:
-            print("Vui lòng nhập một số nguyên hợp lệ.")
-
-    # Xác định phạm vi giá trị của cột được chọn
-    min_possible = data[column_name].min()
-    max_possible = data[column_name].max()
-    print(f"Phạm vi giá trị có thể nhập cho cột '{column_name}': {min_possible} đến {max_possible}")
-
-    # Nhập phạm vi giá trị để lọc
-    while True: 
-        try:
-            min_value = float(input(f"Nhập giá trị nhỏ nhất cho cột '{column_name}': "))
-            max_value = float(input(f"Nhập giá trị lớn nhất cho cột '{column_name}': "))
-            
-            # Kiểm tra nếu giá trị nhập nằm ngoài phạm vi hợp lệ
-            if min_value < min_possible or max_value > max_possible:
-                print("Giá trị nằm ngoài phạm vi. Vui lòng nhập lại.")
-                continue
-
-            if min_value > max_value:
-                print("Giá trị nhỏ nhất không được lớn hơn giá trị lớn nhất. Vui lòng nhập lại.")
-                continue
-
-        # Thực hiện lọc dữ liệu
-            filtered_data = data[(data[column_name] >= min_value) & (data[column_name] <= max_value)]
-            if filtered_data.empty:
-                print("Không có dữ liệu thỏa mãn điều kiện lọc.")
-            else:
-                print("\nKết quả lọc dữ liệu:")
-                paginate(filtered_data)
-                break
-        except ValueError:
-            print("Giá trị nhập không hợp lệ. Vui lòng nhập số.")
-
 def update_student_record(data):
     def input_float(prompt, min_value=0, max_value=100):
         while True:
@@ -411,9 +356,6 @@ def update_student_record(data):
             break
     data.to_csv('data_source\\cleaned_data.csv', index=False)
     print("Đã cập nhật thành công.")
-
-
-from tabulate import tabulate
 
 def delete_student_record():
     """Xóa một hoặc nhiều dòng từ DataFrame sau khi xác nhận."""
