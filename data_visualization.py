@@ -210,9 +210,9 @@ percent_low = (len(low_access) / len(df_cleaned)) * 100
 percent_medium = (len(medium_access) / len(df_cleaned)) * 100
 percent_high = (len(high_access) / len(df_cleaned)) * 100
 
-print(f"Phần trăm truy cập vào dữ liệu ở mức thấp: {percent_low:.2f}%")
-print(f"Phần trăm truy cập vào dữ liệu ở mức trung bình: {percent_medium:.2f}%")
-print(f"Phần trăm truy cập vào dữ liệu ở mức cao: {percent_high:.2f}%")
+print(f"Phần trăm truy cập vào tài nguyên học tập ở mức thấp: {percent_low:.2f}%")
+print(f"Phần trăm truy cập vào tài nguyên học tập ở mức trung bình: {percent_medium:.2f}%")
+print(f"Phần trăm truy cập vào tài nguyên học tập ở mức cao: {percent_high:.2f}%")
 
 # Bar cho Extracurricular_Activities
 def plot_extracurricular_activities_distribution():
@@ -873,9 +873,9 @@ def boxplot_Extracurricular_Activities_and_Exam_Score():
     plt.ylabel('Exam Score')
     plt.show()
 
-df_cleaned['Extracurricular_Activities_Encoded'] = df_cleaned['Extracurricular_Activities'].map({'Yes': 1, 'No': 0})
+df_cleaned['Extracurricular_Activities_num'] = df_cleaned['Extracurricular_Activities'].map({'Yes': 1, 'No': 0})
 
-correlation = df_cleaned[['Extracurricular_Activities_Encoded', 'Exam_Score']].corr().iloc[0, 1]
+correlation = df_cleaned[['Extracurricular_Activities_num', 'Exam_Score']].corr().iloc[0, 1]
 
 print("-" * 20)
 print(f"Hệ số tương quan giữa việc tham gia hoạt động ngoại khóa và điểm số: {correlation:.2f}")
@@ -886,8 +886,6 @@ elif correlation > 0.3:
     print("Có một mối quan hệ yếu giữa học sinh tham gia hoạt động ngoại khóa và điểm số.")
 else:
     print("Không có mối quan hệ rõ ràng giữa học sinh tham gia hoạt động ngoại khóa và điểm số.")
-
-plt.grid(axis='y', alpha=0.75)
     
 # Vẽ biểu đồ boxplot Exam_Score và Sleep_Hours
 def boxplot_Sleep_Hours_and_Exam_Score():
@@ -912,8 +910,6 @@ elif correlation > 0.3:
     print("Có một mối quan hệ yếu giữa giờ ngủ và điểm số.")
 else:
     print("Không có mối quan hệ rõ ràng giữa giờ ngủ và điểm số.")
-
-plt.grid(axis='y', alpha=0.75)
 
 # Vẽ biểu đồ boxplot Exam_Score và Motivation_Level
 def boxplot_Motivation_Level_and_Exam_Score():
@@ -965,8 +961,6 @@ elif correlation > 0.3:
 else:
     print("Không có mối quan hệ rõ ràng giữa việc truy cập Internet và điểm số.")
 
-plt.grid(axis='y', alpha=0.75)
-
 # Vẽ biểu đồ boxplot Exam_Score và Tutoring_Sessions
 def boxplot_Tutoring_Sessions_and_Exam_Score():
     global df_cleaned
@@ -990,8 +984,6 @@ elif correlation > 0.3:
     print("Có một mối quan hệ yếu giữa các phiên dạy kèm và điểm số.")
 else:
     print("Không có mối quan hệ rõ ràng giữa các phiên dạy kèm và điểm số.")
-
-plt.grid(axis='y', alpha=0.75)
     
 # Vẽ biểu đồ boxplot Exam_Score và Family_Income
 # Có mối liên hệ giữa thu nhập gia đình và điểm số học tập không?
@@ -1134,8 +1126,6 @@ elif correlation > 0.3:
 else:
     print("Không có mối quan hệ rõ ràng giữa hoạt động thể chất và điểm số.")
 
-plt.grid(axis='y', alpha=0.75)
-
 # Vẽ biểu đồ Boxplot cho Exam_Score và Learning_Disabilities
 def boxplot_Learning_Disabilities_and_Exam_Score():
     global df_cleaned
@@ -1255,8 +1245,10 @@ def heatmap():
     # Vẽ heatmap cho ma trận tương quan của các cột số
     plt.figure(figsize=(8, 6))  # Điều chỉnh kích thước của heatmap
     sns.heatmap(corr_df, annot=True, cmap='coolwarm', fmt=".2f")  # Vẽ heatmap, hiện giá trị tương quan, và sử dụng bảng màu "coolwarm"
-    plt.title('Biểu đồ Heatmap của các cột số')  # Thêm tiêu đề
+    plt.title('Biểu đồ HEATMAP')  # Thêm tiêu đề
     plt.show()  # Hiển thị biểu đồ
+
+heatmap()
 
 
 
