@@ -128,7 +128,7 @@ print(f"Khoảng giá trị của Attendance: [{df_cleaned['Attendance'].min():.
 def plot_previous_scores_distribution():
     global df_cleaned
     plt.figure(figsize=(10, 6))
-    sns.histplot(df_cleaned['Previous_Scores'], bins=45, kde=True, color='green', edgecolor='black', alpha=0.5)
+    sns.histplot(df_cleaned['Previous_Scores'], bins=80, kde=True, color='green', edgecolor='black', alpha=0.5)
     plt.title('Distribution of Previous Scores')
     plt.xlabel('Previous Scores')
     plt.ylabel('Frequency')
@@ -517,8 +517,8 @@ no_disa = df_cleaned[df_cleaned['Learning_Disabilities'] == 'No']
 percent_yes = (len(yes_disa) / len(df_cleaned)) * 100
 percent_no = (len(no_disa) / len(df_cleaned)) * 100
 
-print(f"Phần trăm có truy cập Internet: {percent_yes:.2f}%")
-print(f"Phần trăm không truy cập Internet: {percent_no:.2f}%")
+print(f"Phần trăm có gặp khó khăn trong học tập: {percent_yes:.2f}%")
+print(f"Phần trăm không gặp khó khăn trong học tập: {percent_no:.2f}%")
 
 # Bar cho Parental_Education_Level
 def plot_parental_education_level_distribution():
@@ -1001,7 +1001,7 @@ def boxplot_Family_Income_and_Exam_Score():
     sns.boxplot(x=df_cleaned['Family_Income'], y=df_cleaned['Exam_Score'], palette='Set2')
 
     plt.title('Boxplot: Exam Scores by Family Income')
-    plt.xlabel('Access to Resources')
+    plt.xlabel('Family Income')
     plt.ylabel('Exam Score')
     # Hiển thị biểu đồ
     plt.show()
@@ -1088,8 +1088,8 @@ def boxplot_Peer_Influence_and_Exam_Score():
     plt.figure(figsize=(10, 6))
     sns.boxplot(x=df_cleaned['Peer_Influence'], y=df_cleaned['Exam_Score'], palette='Set3')
 
-    plt.title('Boxplot: Exam Scores by Teacher Quality')
-    plt.xlabel('Teacher Quality')
+    plt.title('Boxplot: Exam Scores by Peer Influence')
+    plt.xlabel('Peer Influence')
     plt.ylabel('Exam Score')
     # Hiển thị biểu đồ
     plt.show()
@@ -1142,8 +1142,8 @@ def boxplot_Learning_Disabilities_and_Exam_Score():
     plt.figure(figsize=(10, 6))
     sns.boxplot(x=df_cleaned['Learning_Disabilities'], y=df_cleaned['Exam_Score'], palette='Set2')
 
-    plt.title('Boxplot: Exam Scores by School Type')
-    plt.xlabel('School Type')
+    plt.title('Boxplot: Exam Scores by Learning Disabilities')
+    plt.xlabel('Learning Disabilities')
     plt.ylabel('Exam Score')
     # Hiển thị biểu đồ
     plt.show()
@@ -1257,8 +1257,6 @@ def heatmap():
     sns.heatmap(corr_df, annot=True, cmap='coolwarm', fmt=".2f")  # Vẽ heatmap, hiện giá trị tương quan, và sử dụng bảng màu "coolwarm"
     plt.title('Biểu đồ Heatmap của các cột số')  # Thêm tiêu đề
     plt.show()  # Hiển thị biểu đồ
-
-
 
 
 
