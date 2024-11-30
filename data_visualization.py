@@ -7,7 +7,7 @@ from scipy.stats import ttest_ind
 
 warnings.filterwarnings('ignore') # Tắt thông báo cảnh báo (warnings)
 
-df_cleaned = pd.read_csv('data_source\cleaned_data.csv') # Lấy dữ liệu chuẩn từ file đã làm sạch
+df_cleaned = pd.read_csv('data_source\\cleaned_data.csv') # Lấy dữ liệu chuẩn từ file đã làm sạch
 
 # Visualization - Trực quan hoá dữ liệu
 
