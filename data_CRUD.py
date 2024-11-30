@@ -200,7 +200,7 @@ def display_valid_row_range():
     """Hiển thị khoảng chỉ số dòng hợp lệ có thể in."""
     total_rows = len(data)
     print(f"Có tổng cộng {total_rows} dòng dữ liệu.")
-    print(f"Bạn có thể nhập từ dòng 1 đến dòng {total_rows}.")
+    print(f"Bạn có thể nhập từ dòng 0 đến dòng {total_rows-1}.")
 
 def print_rows_range(start, end, page_size=100):
     """Hiển thị các dòng trong khoảng với phân trang."""
@@ -771,8 +771,8 @@ if __name__ == "__main__":
         elif choice == '7':
             display_valid_row_range()
             while True:
-                start = input_int("Nhập chỉ số dòng bắt đầu: ", 1, len(data))
-                end = input_int("Nhập chỉ số dòng kết thúc: ", 1, len(data))
+                start = input_int("Nhập chỉ số dòng bắt đầu: ", 0, len(data)-1)
+                end = input_int("Nhập chỉ số dòng kết thúc: ", 0, len(data)-1)
                 if start <= end:
                     break
                 else:
