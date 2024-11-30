@@ -833,9 +833,6 @@ def create_gui():
 
     menu4 = Menu(menu_frame4, tearoff=0)
 
-    def on_select(option):
-        print(f"Bạn đã chọn: {option}")
-
     chart_frame = tk.Frame(chart_tab)
     chart_frame.pack(side="top", fill="both", expand=True)
 
@@ -849,7 +846,10 @@ def create_gui():
 
         canvas = FigureCanvasTkAgg(fig, master=chart_frame)
         canvas.draw()
-        canvas.get_tk_widget().pack(fill="both", expand=True)
+        
+        cw = canvas.get_tk_widget()
+        cw.config(width=1300, height=700)
+        cw.pack()
 
     # Tạo một menu con trong menu bar
     file1_menu = tk.Menu(menu4, tearoff=0)  # tearoff=0 để không cho phép menu rời khỏi thanh menu
@@ -895,10 +895,10 @@ def create_gui():
     file2_menu.add_command(label="Vẽ biểu đồ Boxplot cho Exam_Score và School_Type", command=lambda: plot_on_canvas(data_visualization.boxplot_School_Type_and_Exam_Score))
     file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Peer_Influence", command=lambda: plot_on_canvas(data_visualization.boxplot_Peer_Influence_and_Exam_Score))   
     file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Physical_Activity", command=lambda: plot_on_canvas(data_visualization.boxplot_Physical_Activity_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ Boxplot cho Exam_Score và Learning_Disabilities", command=lambda: plot_on_canvas(data_visualization.boxplot_Learning_Disabilities_and_Exam_Score))
+    file2_menu.add_command(label="Vẽ biểu đồ boxplot cho Exam_Score và Learning_Disabilities", command=lambda: plot_on_canvas(data_visualization.boxplot_Learning_Disabilities_and_Exam_Score))
     file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Parental_Education_Level", command=lambda: plot_on_canvas(data_visualization.boxplot_Parental_Education_Level_and_Exam_Score))
     file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Distance_from_Home", command=lambda: plot_on_canvas(data_visualization.boxplot_Distance_from_Home_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ Boxplot cho Exam_Score và Gender", command=lambda: plot_on_canvas(data_visualization.boxplot_Gender_and_Exam_Score))
+    file2_menu.add_command(label="Vẽ biểu đồ boxplot cho Exam_Score và Gender", command=lambda: plot_on_canvas(data_visualization.boxplot_Gender_and_Exam_Score))
 
      
     menu4.add_cascade(label="BIỂU ĐỒ TẦN SUẤT VÀ CỘT CHO CÁC THUỘC TÍNH ĐƠN LẺ", menu=file1_menu)
