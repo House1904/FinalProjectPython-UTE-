@@ -47,7 +47,6 @@ def add_student_record():
             else:
                 return value
 
-
     new_record = {
         'Hours_Studied': input_float("Hours Studied (Số giờ học mỗi tuần): ",0,168),
         'Attendance': input_float("Attendance (Tỷ lệ % tham gia lớp học), 0-100): "),
@@ -363,7 +362,6 @@ def update_student_record(data):
     data.to_csv('data_source\\cleaned_data.csv', index=False)
     print("Đã cập nhật thành công.")
 
-
 def delete_student_record():
     """Xóa một hoặc nhiều dòng từ DataFrame sau khi xác nhận."""
     global data
@@ -408,8 +406,6 @@ def delete_student_record():
 
     except Exception as e:
         print(f"Đã xảy ra lỗi: {e}")
-
-
 
 #Sắp xếp giá trị tăng dần của một cột
 def sort_numeric_column():
@@ -548,7 +544,6 @@ def search_by_attribute(data):
     print("Kết quả tìm kiếm:")
     paginate(filtered_data)
 
-
 # Chức năng trích lọc dữ liệu 1 số có giá trị số
 def filter_numeric_columns():
     """Lọc dữ liệu dựa trên các cột số học (float hoặc int)."""
@@ -649,7 +644,6 @@ def filter_unique_value():
         except ValueError:
             print("Vui lòng nhập một giá trị số hợp lệ.")
 
-
 def filter_multiple_values():
     """Lọc nhiều giá trị."""
     
@@ -701,7 +695,6 @@ def filter_multiple_values():
         print("\nKết quả lọc dữ liệu:")
         paginate(filtered_data)
 
-
 def numeric_filter_menu():
     """Hiển thị menu lọc dữ liệu theo cột số."""
     while True:
@@ -722,9 +715,6 @@ def numeric_filter_menu():
             break
         else:
             print("Lựa chọn không hợp lệ. Vui lòng thử lại.")
-
-
-
 
 if __name__ == "__main__":
     while True:
