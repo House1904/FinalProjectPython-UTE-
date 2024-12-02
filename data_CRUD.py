@@ -200,7 +200,7 @@ def display_valid_row_range():
     """Hiển thị khoảng chỉ số dòng hợp lệ có thể in."""
     total_rows = len(data)
     print(f"Có tổng cộng {total_rows} dòng dữ liệu.")
-    print(f"Bạn có thể nhập từ dòng 1 đến dòng {total_rows}.")
+    print(f"Bạn có thể nhập từ dòng 0 đến dòng {total_rows - 1} .")
 
 def print_rows_range(start, end, page_size=100):
     """Hiển thị các dòng trong khoảng với phân trang."""
@@ -218,6 +218,7 @@ def print_rows_range(start, end, page_size=100):
     # Gọi hàm phân trang chung
     paginate(data_subset, page_size=page_size)
 
+ # Cập nhật lại dữ liệu mới
 def update_student_record(data):
     def input_float(prompt, min_value=0, max_value=100):
         while True:
@@ -243,27 +244,31 @@ def update_student_record(data):
 
     def input_str(prompt, valid_options=None):
         if valid_options:
-            print(f"Các giá trị hợp lệ cho yêu cầu bên dưới: {', '.join(valid_options)}")  # In ra các giá trị hợp lệ
+            print(f"Các giá trị hợp lệ: {', '.join(valid_options)}")  # In các giá trị hợp lệ
         while True:
-            value = input(prompt).strip().lower()  # Chuyển giá trị nhập vào thành chữ thường
+            value = input(prompt).strip().lower()  # Chuyển nhập thành chữ thường
             if valid_options:
                 valid_options_lower = [option.lower() for option in valid_options]  # Chuyển các giá trị hợp lệ thành chữ thường
                 if value not in valid_options_lower:
                     print(f"Giá trị không hợp lệ. Vui lòng chọn từ {valid_options}.")
                 else:
-                    # Trả về giá trị ban đầu trong valid_options (giữ nguyên kiểu viết hoa viết thường gốc)
-                    return valid_options[valid_options_lower.index(value)]
+                    return valid_options[valid_options_lower.index(value)]  # Trả về giá trị gốc
             else:
                 return value
 
-    row_index = input_int("Nhập hàng muốn cập nhật: ", 0, len(data) - 1)
+    # Nhập chỉ số hàng muốn cập nhật
+    row_index = input_int("Nhập chỉ số hàng muốn cập nhật: ", 0, len(data) - 1)
 
+    # In ra hàng được chọn trước khi cập nhật
+    print("\nHàng bạn đã chọn để cập nhật:")
+    print(tabulate([data.iloc[row_index]], headers="keys", tablefmt="pretty", showindex=True))
+    
     while True:
-        # Hỏi xem cập nhật toàn bộ hàng hay một cột cụ thể
-        update_all = input_str("Có muốn cập nhật lại toàn bộ hàng? (Yes or No): ", valid_options=["Yes", "No"])
+        # Hỏi người dùng muốn cập nhật toàn bộ hàng hay một cột cụ thể
+        update_all = input_str("Có muốn cập nhật toàn bộ hàng? (Yes or No): ", valid_options=["Yes", "No"])
 
         if update_all.lower() == "yes":
-            # Cập nhật tất cả các trường trong hàng
+            # Cập nhật toàn bộ cột trong hàng
             for column in data.columns:
                 current_value = data.loc[row_index, column]
                 if column in ['Hours_Studied', 'Physical_Activity']:
@@ -302,18 +307,17 @@ def update_student_record(data):
                         new_value = input_str(f"{column} (hiện tại: {current_value}): ", valid_options=valid_options[column])
                         data.loc[row_index, column] = new_value
         else:
-            # Hiển thị danh sách các cột được đánh số
-            print("Chọn yêu cầu mà bạn muốn cập nhật:")
+            # Hiển thị danh sách các cột để chọn
+            print("\nDanh sách các cột có thể cập nhật:")
             for i, column in enumerate(data.columns):
                 print(f"{i + 1}. {column}")
 
-            column_index = input_int("Nhập số tương ứng với yêu cầu muốn cập nhật: ", 1, len(data.columns)) - 1
+            # Nhập số cột muốn cập nhật
+            column_index = input_int("Nhập số tương ứng với cột muốn cập nhật: ", 1, len(data.columns)) - 1
             column_to_update = data.columns[column_index]
-
-            # Hiển thị giá trị hiện tại cho cột đã chọn
             current_value = data.loc[row_index, column_to_update]
 
-            # Cập nhật cột đã chọn
+            # Cập nhật cột được chọn
             if column_to_update in ['Hours_Studied', 'Physical_Activity']:
                 if not pd.api.types.is_float_dtype(data[column_to_update]):
                     data[column_to_update] = data[column_to_update].astype(float)
@@ -350,12 +354,15 @@ def update_student_record(data):
                     new_value = input_str(f"{column_to_update} (hiện tại: {current_value}): ", valid_options=valid_options[column_to_update])
                     data.loc[row_index, column_to_update] = new_value
 
-        # Hỏi người dùng muốn cập nhật cột khác hay thoát
+        # Hỏi xem có muốn tiếp tục cập nhật không
         continue_update = input_str("Có muốn tiếp tục cập nhật? (Yes or No): ", valid_options=["Yes", "No"])
         if continue_update.lower() == "no":
             break
+
+    # Lưu dữ liệu vào file CSV
     data.to_csv('data_source\\cleaned_data.csv', index=False)
     print("Đã cập nhật thành công.")
+
 
 def delete_student_record():
     """Xóa một hoặc nhiều dòng từ DataFrame sau khi xác nhận."""
@@ -464,9 +471,10 @@ def sort_numeric_column_desc():
         except ValueError:
             print("Dữ liệu không hợp lệ. Vui lòng nhập một số nguyên.")
 
+# Lọc theo thuộc tính có giá trị chữ.
 def search_by_attribute(data):
     def input_str(prompt, valid_options=None):
-        """Hàm nhập chuỗi với kiểm tra giá trị hợp lệ."""
+        #Hàm nhập chuỗi với kiểm tra giá trị hợp lệ.
         if valid_options:
             print(f"Các giá trị hợp lệ cho yêu cầu bên dưới: {', '.join(valid_options)}")
         while True:
@@ -481,7 +489,7 @@ def search_by_attribute(data):
                 return value
 
     def input_int(prompt, min_value, max_value):
-        """Hàm nhập số nguyên trong khoảng hợp lệ."""
+        #Hàm nhập số nguyên trong khoảng hợp lệ.
         while True:
             try:
                 value = int(input(prompt))
@@ -509,22 +517,22 @@ def search_by_attribute(data):
     }
 
     # Hiển thị danh sách các cột có thể tìm kiếm
-    print("Danh sách các cột bạn có thể tìm kiếm:")
+    print("Danh sách các cột bạn có thể lọc:")
     columns_list = list(valid_options.keys())
-    for i, column in enumerate(columns_list, start=1):
-        print(f"{i}. {column}")
 
     # Nhập số tiêu chí muốn tìm kiếm
-    num_criteria = input_int("Nhập số tiêu chí bạn muốn tìm kiếm (tối thiểu 1): ", 1, len(columns_list))
+    num_criteria = input_int("Nhập số tiêu chí bạn muốn lọc (tối thiểu 1): ", 1, len(columns_list))
 
     # Khởi tạo bộ lọc cho dữ liệu
     filters = {}
 
-    # Lặp qua từng tiêu chí
+    # Lặp qua từng tiêu chí, loại bỏ cột đã chọn khỏi danh sách
     for i in range(num_criteria):
         print(f"\nTiêu chí {i + 1}:")
-        column_index = input_int("Nhập số tương ứng với cột muốn tìm kiếm: ", 1, len(columns_list))
-        column = columns_list[column_index - 1]
+        for j, column in enumerate(columns_list, start=1):
+            print(f"{j}. {column}")
+        column_index = input_int("Nhập số tương ứng với cột muốn lọc: ", 1, len(columns_list))
+        column = columns_list.pop(column_index - 1)  # Loại bỏ cột đã chọn khỏi danh sách
         search_value = input_str(f"Nhập giá trị muốn tìm trong cột '{column}': ", valid_options=valid_options[column])
         filters[column] = search_value
 
@@ -537,9 +545,10 @@ def search_by_attribute(data):
     if filtered_data.empty:
         print("Không tìm thấy kết quả nào cho các tiêu chí đã chọn.")
         return
-
     print("Kết quả tìm kiếm:")
     paginate(filtered_data)
+
+
 # Chức năng trích lọc dữ liệu 1 số có giá trị số
 def filter_numeric_columns():
     """Lọc dữ liệu dựa trên các cột số học (float hoặc int)."""
@@ -731,14 +740,14 @@ if __name__ == "__main__":
         print("║ 4. Hiển thị n cột đầu tiên               ║")
         print("║ 5. Hiển thị các cột cụ thể               ║")
         print("║ 6. Hiển thị các cột với số hàng cụ thể   ║")
-        print("║ 7. Hiển thị các dòng cụ thể              ║")
-        print("║ 8. Cập nhật dữ liệu mới                  ║")
-        print("║ 9. Xóa dữ liệu theo hàng                 ║")
-        print("║ 10. Sắp xếp giá trị tăng dần của một cột ║")
-        print("║ 11. Sắp xếp giá trị giảm dần của một cột ║")
-        print("║ 12. Lọc theo thuộc tính có giá trị chữ   ║")
-        print("║ 13. Lọc theo thuộc tính có giá trị số    ║")
-        print("║ 14. THOÁT CHƯƠNG TRÌNH                   ║")
+        print("║ 7. Hiển thị các dòng trong khoảng cụ thể ║")
+        print("║ 8. Lọc theo thuộc tính có giá trị số     ║")
+        print("║ 9. Lọc theo thuộc tính có giá trị chữ    ║")
+        print("║ 10.Cập nhật dữ liệu mới                  ║")
+        print("║ 11.Xóa dữ liệu theo hàng                 ║")
+        print("║ 12.Sắp xếp giá trị tăng dần của một cột  ║")
+        print("║ 13.Sắp xếp giá trị giảm dần của một cột  ║")
+        print("║ 14.THOÁT CHƯƠNG TRÌNH                    ║")
         print("╚══════════════════════════════════════════╝")
         
         choice = input("Nhập lựa chọn của bạn (1-14): ")
@@ -771,25 +780,26 @@ if __name__ == "__main__":
         elif choice == '7':
             display_valid_row_range()
             while True:
-                start = input_int("Nhập chỉ số dòng bắt đầu: ", 1, len(data))
-                end = input_int("Nhập chỉ số dòng kết thúc: ", 1, len(data))
+                start = input_int("Nhập chỉ số dòng bắt đầu: ", 0, len(data) - 1)
+                end = input_int("Nhập chỉ số dòng kết thúc: ", 0, len(data) - 1)
                 if start <= end:
                     break
                 else:
                     print("Chỉ số dòng bắt đầu phải bé hơn hoặc bằng chỉ số dòng kết thúc")
             print_rows_range(start, end)
         elif choice == '8':
-            update_student_record(data)
+            numeric_filter_menu()    
         elif choice == '9':
-            delete_student_record()
+            search_by_attribute(data)          
         elif choice == '10':
-            sort_numeric_column()
+            update_student_record(data)          
         elif choice == '11':
+            delete_student_record()
             sort_numeric_column_desc()
         elif choice == '12':
-            search_by_attribute(data)
+            sort_numeric_column()
         elif choice == '13':
-            numeric_filter_menu()
+            sort_numeric_column_desc()
         elif choice == '14':
             print("Cảm ơn bạn đã sử dụng chương trình! Hẹn gặp lại.")
             break
