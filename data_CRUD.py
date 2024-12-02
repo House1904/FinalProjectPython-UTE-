@@ -780,8 +780,8 @@ if __name__ == "__main__":
         elif choice == '7':
             display_valid_row_range()
             while True:
-                start = input_int("Nhập chỉ số dòng bắt đầu: ", 0, len(data) - 1)
-                end = input_int("Nhập chỉ số dòng kết thúc: ", 0, len(data) - 1)
+                start = input_int("Nhập chỉ số dòng bắt đầu: ", 1, len(data))
+                end = input_int("Nhập chỉ số dòng kết thúc: ", 1, len(data))
                 if start <= end:
                     break
                 else:
