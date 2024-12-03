@@ -14,13 +14,7 @@ print(f"Dữ liệu có bị trùng lặp không? {df.duplicated().any()}")
 
 print(f"Số giá trị trùng lặp: {df.duplicated().sum()}")
 
-percent_null = ( df.isnull().sum().sum() / np.product(df.shape)) * 100
-print(f"Phần trăm giá trị bị NULL của toàn bộ DF: {percent_null}")
-
-print("Kiểm tra xem có giá trị ở thuộc tính nào bị NULL không?")
-print(df.isnull().any())
-
-print("Số giá trị bị NULL của từng thuộc tính: ")
+print("Số giá trị bị NULL: ")
 print(df.isnull().sum())
 
 # Xóa các hàng chứa các giá trị bị thiếu
@@ -34,10 +28,6 @@ print(df_na.isnull().sum())
 
 print("\nTóm tắt thống kê cơ bản dữ liệu số:")
 print(df_na.describe())
-
-# Kiểm tra từng cột thuộc tính số xem có giá trị nào ngoại lệ không?
-for col in df_na.select_dtypes(include=['number']).columns:
-    print(f"Unique values in '{col}': {df_na[col].unique()}")
 
 # Loại bỏ các giá trị ngoại lệ
 df_cleaned = df_na[df_na['Exam_Score'] <= 100]
