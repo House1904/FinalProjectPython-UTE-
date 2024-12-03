@@ -4,6 +4,8 @@ import csv
 import subprocess
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import visualization_for_GUI
+import warnings
+warnings.filterwarnings("ignore")
 
 def makecenter(root, width, height):
     x = (root.winfo_screenwidth() // 2) - (width // 2)
@@ -60,6 +62,8 @@ def load_csv_data(file_path):
         print(f"Error reading {file_path}: {e}")
     return headers, data
 
+headers, data = load_csv_data(csv_file)
+
 # Hàm ghi dữ liệu vào file CSV
 def write_csv_data(file_path, headers, data):
     try:
@@ -104,7 +108,7 @@ def create_gui():
 
     # Tab 1: Bảng câu hỏi
     questions_tab = ttk.Frame(notebook)
-    notebook.add(questions_tab, text="Survey Questions")
+    notebook.add(questions_tab, text="Data Description")
 
     # Tab 2: Câu trả lời
     answers_tab = ttk.Frame(notebook)
@@ -138,49 +142,115 @@ def create_gui():
     def filter_by_text():
         """Lọc dữ liệu theo giá trị chữ."""
         # Hiển thị danh sách cột có giá trị chữ
-        selected_columns = simpledialog.askstring(
-            "Input", f"Available columns: {', '.join(text_columns)}\nEnter column names (comma-separated):"
-        )
-        if not selected_columns:
-            messagebox.showerror("Error", "No columns selected!")
+        column_info = "\n".join([f"{idx + 1}. {header}" for idx, header in enumerate(text_columns)])
+        input_message = f"Các cột có sẵn:\n{column_info}\n\nNhập chỉ số các cột cần in ra, cách nhau bằng dấu phẩy:"
+        
+        # Hộp thoại nhập
+        column_indices_str = simpledialog.askstring("Input", input_message)
+        if not column_indices_str:
+            messagebox.showwarning("Invalid Input", "No indices entered!")
             return
 
-        columns = selected_columns.split(",")
-        for col in columns:
-            if col.strip() not in text_columns:
-                messagebox.showerror("Error", f"Invalid column name: {col}")
+        try:
+            # Chuyển đổi chỉ số cột nhập vào thành danh sách số nguyên
+            column_indices = sorted(set(int(idx.strip()) - 1 for idx in column_indices_str.split(",")))  # Chỉ số bắt đầu từ 0
+        except ValueError:
+            messagebox.showerror("Error", "Invalid column indices! Please enter valid numbers.")
+            return
+
+        # Kiểm tra tính hợp lệ của chỉ số
+        invalid_indices = [idx for idx in column_indices if idx < 0 or idx >= len(headers)]
+        if invalid_indices:
+            messagebox.showerror(
+                "Error", f"Invalid column indices: {', '.join(str(idx + 1) for idx in invalid_indices)}"
+            )
+            return
+
+        # Lấy tên cột từ chỉ số
+        selected_columns = [text_columns[idx] for idx in column_indices]
+
+        # Tạo cửa sổ để nhập giá trị lọc cho từng cột
+        filter_window = tk.Toplevel(root)
+        filter_window.title("Enter Filter Values for Columns")
+        filter_window.geometry("400x400")
+        filter_window.grab_set()  # Modal window
+
+        filter_comboboxes = {}
+        for idx, col in enumerate(selected_columns):
+            label = ttk.Label(filter_window, text=f"Value for {col}:")
+            label.grid(row=idx, column=0, padx=10, pady=5, sticky="w")
+
+            # Lấy các giá trị duy nhất trong cột từ dữ liệu
+            column_index = headers.index(col)
+            unique_values = sorted(set(row[column_index] for row in data if row[column_index]))  # Các giá trị duy nhất
+
+            # Tạo Combobox
+            combobox = ttk.Combobox(filter_window, values=unique_values, state="readonly", width=20)
+            combobox.grid(row=idx, column=1, padx=10, pady=5, sticky="w")
+            filter_comboboxes[col] = combobox
+
+        def apply_filter():
+            filter_values = {}
+            for col, entry in filter_comboboxes.items():
+                value = entry.get().strip()
+                if value:  # Chỉ lưu giá trị đã nhập
+                    filter_values[col] = value
+
+            if not filter_values:
+                raise ValueError("No filter values entered for any column!")
+
+            # Lọc dữ liệu
+            filtered_data = []
+            column_indices_map = {col: headers.index(col) for col in filter_values.keys()}
+            for row in data:
+                match = all(row[column_indices_map[col]] == value for col, value in filter_values.items())
+                if match:
+                    filtered_data.append(row)
+
+            if not filtered_data:
+                messagebox.showinfo("Fail", "No matching rows found for the specified filters.")
                 return
 
-        # Nhập giá trị muốn tìm
-        filter_value = simpledialog.askstring("Input", f"Enter value to filter in columns: {', '.join(columns)}")
-        if not filter_value:
-            messagebox.showerror("Error", "No value entered for filtering!")
-            return
+            # Cập nhật bảng với dữ liệu đã lọc
+            tree.delete(*tree.get_children())
+            for idx, row in enumerate(filtered_data, start=1):
+                tree.insert("", "end", values=[idx] + row)
 
-        # Lọc dữ liệu
-        filtered_data = []
-        column_indices = [headers.index(col.strip()) for col in columns]
-        for row in data:
-            for idx in column_indices:
-                if row[idx] == filter_value:
-                    filtered_data.append(row)
-                    break
+            filter_window.destroy()
+            messagebox.showinfo("Success", "Filtered rows by value in columns")
 
-        # Cập nhật bảng với dữ liệu đã lọc
-        tree.delete(*tree.get_children())
-        for idx, row in enumerate(filtered_data, start=1):
-            tree.insert("", "end", values=[idx] + row)
+        # Nút OK và Cancel
+        button_frame = ttk.Frame(filter_window)
+        button_frame.grid(row=len(selected_columns), columnspan=2, pady=10)
 
-        messagebox.showinfo("Success", f"Filtered rows by value '{filter_value}' in columns: {', '.join(columns)}")
+        ok_button = ttk.Button(button_frame, text="OK", command=apply_filter)
+        ok_button.pack(side="left", padx=5)
+
+        cancel_button = ttk.Button(button_frame, text="Cancel", command=filter_window.destroy)
+        cancel_button.pack(side="left", padx=5)
 
     def filter_by_single_value():
         """Lọc dữ liệu theo một giá trị duy nhất trong một cột."""
-        column_name = simpledialog.askstring(
-            "Input", f"Available columns: {', '.join(numeric_columns)}\nEnter column name to filter:"
-        )
-        if column_name not in numeric_columns:
-            messagebox.showerror("Error", f"Invalid column name: {column_name}")
+        column_info = "\n".join([f"{idx + 1}. {header}" for idx, header in enumerate(numeric_columns)])
+        input_message = f"Các cột có sẵn:\n{column_info}\n\nNhập chỉ số các cột cần in ra, cách nhau bằng dấu phẩy:"
+        
+        # Hộp thoại nhập
+        column_indices_str = simpledialog.askstring("Input", input_message)
+        if not column_indices_str:
+            messagebox.showwarning("Invalid Input", "No indices entered!")
             return
+
+        try:
+            # Lấy chỉ số cột (1-based) và chuyển sang 0-based
+            column_index = int(column_indices_str.strip()) - 1
+            if column_index < 0 or column_index >= len(numeric_columns):
+                raise ValueError
+        except ValueError:
+            messagebox.showerror("Error", "Invalid column index! Please enter a valid number.")
+            return
+
+        # Lấy tên cột tương ứng
+        column_name = numeric_columns[column_index]
 
         try:
             filter_value = float(simpledialog.askstring("Input", f"Enter value to filter in column '{column_name}':"))
@@ -194,17 +264,30 @@ def create_gui():
 
         # Cập nhật bảng với dữ liệu đã lọc
         update_treeview(filtered_data)
-        messagebox.showinfo("Success", f"Filtered rows where '{column_name}' equals {filter_value}.")
+        messagebox.showinfo("Success", f"Filtered rows where '{column_indices_str}' equals {filter_value}.")
 
     def filter_by_multiple_values():
         """Lọc dữ liệu theo nhiều giá trị trong một cột."""
-        column_name = simpledialog.askstring(
-            "Input", f"Available columns: {', '.join(numeric_columns)}\nEnter column name to filter:"
-        )
-        if column_name not in numeric_columns:
-            messagebox.showerror("Error", f"Invalid column name: {column_name}")
+        column_info = "\n".join([f"{idx + 1}. {header}" for idx, header in enumerate(numeric_columns)])
+        input_message = f"Các cột có sẵn:\n{column_info}\n\nNhập chỉ số các cột cần in ra, cách nhau bằng dấu phẩy:"
+        
+        # Hộp thoại nhập
+        column_indices_str = simpledialog.askstring("Input", input_message)
+        if not column_indices_str:
+            messagebox.showwarning("Invalid Input", "No indices entered!")
             return
 
+        try:
+            # Lấy chỉ số cột (1-based) và chuyển sang 0-based
+            column_index = int(column_indices_str.strip()) - 1
+            if column_index < 0 or column_index >= len(numeric_columns):
+                raise ValueError
+        except ValueError:
+            messagebox.showerror("Error", "Invalid column index! Please enter a valid number.")
+            return
+
+        # Lấy tên cột tương ứng
+        column_name = numeric_columns[column_index]
         try:
             filter_values = list(map(float, simpledialog.askstring(
                 "Input", f"Enter values to filter in column '{column_name}' (comma-separated):").split(',')))
@@ -218,16 +301,29 @@ def create_gui():
 
         # Cập nhật bảng với dữ liệu đã lọc
         update_treeview(filtered_data)
-        messagebox.showinfo("Success", f"Filtered rows where '{column_name}' matches any of {filter_values}.")
 
     def filter_by_range():
         """Lọc dữ liệu trong phạm vi giá trị của một cột."""
-        column_name = simpledialog.askstring(
-            "Input", f"Available columns: {', '.join(numeric_columns)}\nEnter column name to filter:"
-        )
-        if column_name not in numeric_columns:
-            messagebox.showerror("Error", f"Invalid column name: {column_name}")
+        column_info = "\n".join([f"{idx + 1}. {header}" for idx, header in enumerate(numeric_columns)])
+        input_message = f"Các cột có sẵn:\n{column_info}\n\nNhập chỉ số các cột cần in ra, cách nhau bằng dấu phẩy:"
+        
+        # Hộp thoại nhập
+        column_indices_str = simpledialog.askstring("Input", input_message)
+        if not column_indices_str:
+            messagebox.showwarning("Invalid Input", "No indices entered!")
             return
+
+        try:
+            # Lấy chỉ số cột (1-based) và chuyển sang 0-based
+            column_index = int(column_indices_str.strip()) - 1
+            if column_index < 0 or column_index >= len(numeric_columns):
+                raise ValueError
+        except ValueError:
+            messagebox.showerror("Error", "Invalid column index! Please enter a valid number.")
+            return
+
+        # Lấy tên cột tương ứng
+        column_name = numeric_columns[column_index]
 
         try:
             min_value = float(simpledialog.askstring("Input", f"Enter minimum value for column '{column_name}':"))
@@ -242,8 +338,6 @@ def create_gui():
 
         # Cập nhật bảng với dữ liệu đã lọc
         update_treeview(filtered_data)
-        messagebox.showinfo("Success", f"Filtered rows where '{column_name}' is between {min_value} and {max_value}.")
-
     def update_treeview(filtered_data):
         """Cập nhật bảng Treeview với dữ liệu đã lọc."""
         tree.delete(*tree.get_children())  # Xóa dữ liệu cũ
@@ -355,85 +449,218 @@ def create_gui():
 
     def show_n_rows(n):
         """Hiển thị n dòng đầu tiên."""
-        if not n or n < 1:
-            messagebox.showerror("Error", "Please enter a valid number of rows!")
+        if n > len(data) or n < 1:
+            messagebox.showerror("Giá trị không hợp lệ", f"Vui lòng nhập số trong khoảng 1 -> {len(data)}!")
             return
+
         tree.delete(*tree.get_children())  # Xóa dữ liệu cũ
         for idx, row in enumerate(data[:n], start=1):  # Lấy n dòng đầu tiên
             tree.insert("", "end", values=[idx] + row)
-        messagebox.showinfo("Success", f"Displayed the first {n} rows.")
+        messagebox.showinfo("Success", f"Hiển thị từ dòng 1 đến {n}")
     
     def show_n_columns(n):
         """Hiển thị n cột đầu tiên."""
-        if not n or n < 1 or n > len(headers):
+        if n < 1 or n > len(headers):
             messagebox.showerror("Error", "Please enter a valid number of columns!")
             return
+        
         tree["columns"] = ["STT"] + headers[:n]  # Cập nhật cột hiển thị
-
         tree.heading("STT", text="STT")
         tree.column("STT", width=50, anchor="center")
 
         for header in headers[:n]:
             tree.heading(header, text=header)
-            tree.column(header, width=150, anchor="center")
+            column_width_n = max(len(header) * 8, 1000)
+            tree.column(header, width=column_width_n, anchor="w")
 
         tree.delete(*tree.get_children())  # Xóa dữ liệu cũ
         for idx, row in enumerate(data, start=1):
             tree.insert("", "end", values=[idx] + row[:n])  # Lấy n cột đầu tiên
         messagebox.showinfo("Success", f"Displayed the first {n} columns.")
     
-    def show_specific_columns(columns):
+    def show_specific_columns():
         """Hiển thị các cột cụ thể."""
-        try:
-            column_indices = [headers.index(col.strip()) for col in columns]
-        except ValueError as e:
-            messagebox.showerror("Error", f"Invalid column name(s): {e}")
+        column_info = "\n".join([f"{idx + 1}. {header}" for idx, header in enumerate(headers)])
+        input_message = f"Các cột có sẵn:\n{column_info}\n\nNhập chỉ số các cột cần in ra, cách nhau bằng dấu phẩy:"
+        
+        # Hộp thoại nhập
+        column_indices_str = simpledialog.askstring("Input", input_message)
+        if not column_indices_str:
+            messagebox.showwarning("Invalid Input", "No indices entered!")
             return
-        tree["columns"] = ["STT"] + columns  # Cập nhật cột hiển thị
+
+        try:
+            # Chuyển đổi chỉ số cột nhập vào thành danh sách số nguyên
+            column_indices = sorted(set(int(idx.strip()) - 1 for idx in column_indices_str.split(",")))  # Chỉ số bắt đầu từ 0
+        except ValueError:
+            messagebox.showerror("Error", "Invalid column indices! Please enter valid numbers.")
+            return
+
+        # Kiểm tra tính hợp lệ của chỉ số
+        invalid_indices = [idx for idx in column_indices if idx < 0 or idx >= len(headers)]
+        if invalid_indices:
+            messagebox.showerror(
+                "Error", f"Invalid column indices: {', '.join(str(idx + 1) for idx in invalid_indices)}"
+            )
+            return
+
+        # Lấy tên cột từ chỉ số
+        selected_columns = [headers[idx] for idx in column_indices]
+        
+        tree["columns"] = ["STT"] + selected_columns  # Cập nhật cột hiển thị
         tree.heading("STT", text="STT")
         tree.column("STT", width=50, anchor="center")
-        for col in columns:
+        
+        for col in selected_columns:
             tree.heading(col, text=col)
             tree.column(col, width=150, anchor="center")
+        
         tree.delete(*tree.get_children())  # Xóa dữ liệu cũ
+        
         for idx, row in enumerate(data, start=1):
             selected_columns = [row[i] for i in column_indices]
             tree.insert("", "end", values=[idx] + selected_columns)
-        messagebox.showinfo("Success", f"Displayed specific columns: {', '.join(columns)}")
-
-    def show_specific_columns_with_rows(columns, n):
+        
+    def show_specific_columns_with_rows():
         """Hiển thị các cột cụ thể với số hàng."""
-        try:
-            column_indices = [headers.index(col.strip()) for col in columns]
-        except ValueError as e:
-            messagebox.showerror("Error", f"Invalid column name(s): {e}")
-            return
-        if not n or n < 1:
-            messagebox.showerror("Error", "Please enter a valid number of rows!")
-            return
-        tree["columns"] = ["STT"] + columns  # Cập nhật cột hiển thị
-        tree.heading("STT", text="STT")
-        tree.column("STT", width=50, anchor="center")
-        for col in columns:
-            tree.heading(col, text=col)
-            tree.column(col, width=150, anchor="center")
-        tree.delete(*tree.get_children())  # Xóa dữ liệu cũ
-        for idx, row in enumerate(data[:n], start=1):  # Lấy n dòng đầu tiên
-            selected_columns = [row[i] for i in column_indices]
-            tree.insert("", "end", values=[idx] + selected_columns)
-        messagebox.showinfo("Success", f"Displayed columns {', '.join(columns)} with the first {n} rows.")
+        input_window = tk.Toplevel(root)
+        input_window.title("Select Columns and Rows")
+        input_window.geometry("400x550")
+        input_window.grab_set()
+
+        # Hiển thị danh sách chỉ mục và tên cột
+        column_info = "\n".join([f"{idx + 1}. {header}" for idx, header in enumerate(headers)])
+        instructions = ttk.Label(
+            input_window, 
+            text=f"Các cột có sẵn:\n{column_info}\n"
+        )
+        instructions.pack(pady=10)
+
+        # Frame chứa các Entry
+        entry_frame = ttk.Frame(input_window)
+        entry_frame.pack(pady=10)
+
+        # Entry nhập chỉ mục cột
+        column_label = ttk.Label(entry_frame, text="Nhập chỉ số các cột cần in ra, cách nhau bằng dấu phẩy:")
+        column_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
+        column_entry = ttk.Entry(entry_frame, width=25)
+        column_entry.grid(row=1, column=0, padx=5, pady=5, sticky="w")
+
+        # Entry nhập số hàng
+        rows_label = ttk.Label(entry_frame, text="Nhập số hàng muốn hiển thị:")
+        rows_label.grid(row=2, column=0, sticky="w")
+        rows_entry = ttk.Entry(entry_frame, width=25)
+        rows_entry.grid(row=3, column=0, sticky='w')
+
+        def confirm_selection():
+            """Xử lý khi người dùng nhấn OK."""
+            try:
+                # Lấy chỉ mục cột
+                column_indices = sorted(set(int(idx.strip()) - 1 for idx in column_entry.get().split(",")))
+
+                # Lấy số hàng
+                num_rows = int(rows_entry.get())
+                if num_rows < 1:
+                    raise ValueError("Number of rows must be greater than 0!")
+
+                # Kiểm tra chỉ số hợp lệ
+                invalid_indices = [idx for idx in column_indices if idx < 0 or idx >= len(headers)]
+                if invalid_indices:
+                    raise ValueError(f"Invalid column indices: {', '.join(str(idx + 1) for idx in invalid_indices)}")
+
+                # Lấy tên cột từ chỉ số
+                selected_columns = [headers[idx] for idx in column_indices]
+
+                # Hiển thị cột và số hàng trong Treeview
+                tree["columns"] = ["STT"] + selected_columns  # Cập nhật cột hiển thị
+                tree.heading("STT", text="STT")
+                tree.column("STT", width=50, anchor="center")
+                for col in selected_columns:
+                    tree.heading(col, text=col)
+                    tree.column(col, width=150, anchor="center")
+                tree.delete(*tree.get_children())  # Xóa dữ liệu cũ
+                for idx, row in enumerate(data[:num_rows], start=1):  # Lấy num_rows đầu tiên
+                    selected_data = [row[i] for i in column_indices]
+                    tree.insert("", "end", values=[idx] + selected_data)
+
+                # Đóng cửa sổ và thông báo thành công
+                input_window.destroy()
+                messagebox.showinfo("Success", f"Displayed columns {', '.join(selected_columns)} with the first {num_rows} rows.")
+            except ValueError as e:
+                messagebox.showerror("Error", f"Invalid input: {e}")
+
+        # Nút OK và Cancel
+        button_frame = ttk.Frame(input_window)
+        button_frame.pack(pady=10)
+
+        ok_button = ttk.Button(button_frame, text="OK", command=confirm_selection)
+        ok_button.pack(side="left", padx=5)
+
+        cancel_button = ttk.Button(button_frame, text="Cancel", command=input_window.destroy)
+        cancel_button.pack(side="left", padx=5)
+
+    def ask_row_indices():
+        """Hiển thị cửa sổ để người dùng nhập chỉ số bắt đầu và kết thúc."""
+        indices_window = tk.Toplevel(root)
+        indices_window.title("Enter Row Indices")
+        indices_window.geometry("300x200")
+        indices_window.grab_set()  # Đặt cửa sổ modal
+
+        # Label hướng dẫn
+        label = ttk.Label(indices_window, text="Enter the row range (1-based):")
+        label.pack(pady=10)
+
+        # Frame chứa các Entry
+        entry_frame = ttk.Frame(indices_window)
+        entry_frame.pack(pady=10)
+
+        # Entry cho chỉ số bắt đầu
+        start_label = ttk.Label(entry_frame, text="Start Index:")
+        start_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
+        start_entry = ttk.Entry(entry_frame, width=10)
+        start_entry.grid(row=0, column=1, padx=5, pady=5, sticky="w")
+
+        # Entry cho chỉ số kết thúc
+        end_label = ttk.Label(entry_frame, text="End Index:")
+        end_label.grid(row=1, column=0, padx=5, pady=5, sticky="w")
+        end_entry = ttk.Entry(entry_frame, width=10)
+        end_entry.grid(row=1, column=1, padx=5, pady=5, sticky="w")
+
+        # Biến lưu kết quả
+        result = {"start_index": None, "end_index": None}
+
+        def confirm_selection():
+            """Xác nhận lựa chọn và đóng cửa sổ."""
+            try:
+                start_index = int(start_entry.get())
+                end_index = int(end_entry.get())
+                if start_index < 1 or end_index < start_index:  # Kiểm tra tính hợp lệ
+                    raise ValueError("Invalid range")
+                result["start_index"] = start_index
+                result["end_index"] = end_index
+                indices_window.destroy()
+            except ValueError:
+                messagebox.showerror("Error", "Please enter valid numeric indices!")
+
+        # Nút OK và Cancel
+        button_frame = ttk.Frame(indices_window)
+        button_frame.pack(pady=10)
+
+        ok_button = ttk.Button(button_frame, text="OK", command=confirm_selection)
+        ok_button.pack(side="left", padx=5)
+
+        cancel_button = ttk.Button(button_frame, text="Cancel", command=indices_window.destroy)
+        cancel_button.pack(side="left", padx=5)
+
+        indices_window.wait_window()  # Chờ cửa sổ đóng
+        return result["start_index"], result["end_index"]
 
     def show_specific_rows():
         """Hiển thị các dòng mong muốn."""
-        start_index = simpledialog.askinteger("Input", "Enter start row index (1-based):")
-        if start_index is None or start_index < 1:  # Kiểm tra chỉ số bắt đầu hợp lệ
-            messagebox.showerror("Error", "Please enter a valid start row index!")
-            return
+        start_index, end_index = ask_row_indices()
 
-        end_index = simpledialog.askinteger("Input", "Enter end row index (1-based):")
-        if end_index is None or end_index < start_index:  # Kiểm tra chỉ số kết thúc hợp lệ
-            messagebox.showerror("Error", "End index must be greater than or equal to start index!")
-            return
+        if start_index is None or end_index is None:
+            messagebox.showinfo("Cancelled", "Operation cancelled by user.")
 
         if end_index > len(data):  # Đảm bảo không vượt quá số dòng trong dữ liệu
             messagebox.showerror("Error", f"End index exceeds the number of rows ({len(data)}).")
@@ -454,17 +681,15 @@ def create_gui():
     # Menu 1: Xem
     Xem_menu = Menu(menu, tearoff=0)
     Xem_menu.add_command(label="Hiển thị n dòng đầu tiên", 
-                        command=lambda: show_n_rows(simpledialog.askinteger("Input", "Enter number of rows:")))
+                        command=lambda: show_n_rows(simpledialog.askinteger("Input", "Nhập số dòng muốn hiển thị:")))
     Xem_menu.add_command(label="Hiển thị n cột đầu tiên",
-                        command=lambda: show_n_columns(simpledialog.askinteger("Input", "Enter number of columns:")))
+                        command=lambda: show_n_columns(simpledialog.askinteger("Input", "Nhập số cột muốn hiển thị:")))
     Xem_menu.add_command(label="Hiển thị các cột cụ thể",
-                        command=lambda: show_specific_columns(simpledialog.askstring("Input", "Enter column names (comma-separated):").split(",")))
+                        command=show_specific_columns)
     Xem_menu.add_command(label="Hiển thị các dòng cụ thể",
                         command=show_specific_rows)
     Xem_menu.add_command(label="Hiển thị các cột với số hàng cụ thể",
-                        command=lambda: show_specific_columns_with_rows(
-                            simpledialog.askstring("Input", "Enter column names (comma-separated):").split(","),
-                            simpledialog.askinteger("Input", "Enter number of rows:")))
+                        command=show_specific_columns_with_rows)
 
     # Menu 2: Sắp xếp
     SXep_menu = Menu(menu, tearoff=0)
@@ -496,15 +721,6 @@ def create_gui():
     table_frame = ttk.Frame(answers_tab)
     table_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
-    # Đọc dữ liệu từ CSV
-    headers, data = load_csv_data(csv_file)
-
-    # Nếu không có dữ liệu, hiển thị thông báo
-    if not headers or not data:
-        no_data_label = ttk.Label(table_frame, text="No data available in the CSV file.")
-        no_data_label.pack(pady=20)
-        return
-
     # Bảng hiển thị dữ liệu
     tree = ttk.Treeview(table_frame,
                         columns=["STT"] + headers,
@@ -520,8 +736,6 @@ def create_gui():
         column_width = max(len(header) * 8, 10)
         tree.column(header, width=column_width, anchor="w")
 
-    tree.pack(fill="both", expand=True)
-
     # Thanh cuộn dọc
     vertical_scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=tree.yview)
     vertical_scrollbar.pack(side="right", fill="y")
@@ -533,13 +747,15 @@ def create_gui():
     # Kết nối thanh cuộn với Treeview
     tree.configure(yscrollcommand=vertical_scrollbar.set, xscrollcommand=horizontal_scrollbar.set)
 
+    tree.pack(fill="both", expand=True)
+
     # Thông tin phân trang
     rows_per_page = 500
     current_page = tk.IntVar(value=0)  # Biến lưu trạng thái trang hiện tại
     total_pages = (len(data) + rows_per_page - 1) // rows_per_page  # Tính tổng số trang
 
     # Hiển thị số trang
-    page_info_label = ttk.Label(answers_tab, text=f"Page {current_page.get() + 1} of {total_pages}")
+    page_info_label = ttk.Label(answers_tab, text=f"{current_page.get() + 1}/{total_pages}")
     page_info_label.pack()
 
     # Nút điều hướng phân trang
@@ -550,7 +766,7 @@ def create_gui():
         """Cập nhật trạng thái của nút điều hướng."""
         prev_button["state"] = "normal" if current_page.get() > 0 else "disabled"
         next_button["state"] = "normal" if current_page.get() < total_pages - 1 else "disabled"
-        page_info_label.config(text=f"Page {current_page.get() + 1} of {total_pages}")
+        page_info_label.config(text=f"{current_page.get() + 1}/{total_pages}")
 
     def go_to_previous_page():
         """Đi đến trang trước."""
@@ -568,9 +784,31 @@ def create_gui():
 
     def refresh_data():
         """làm mới dữ liệu hiển thị trong bảng"""
+        # Tính toán lại tổng số trang
+        total_pages = (len(data) + rows_per_page - 1) // rows_per_page
+        current_page.set(0)  # Reset về trang đầu tiên
+
+        # Cập nhật bảng hiển thị
         tree.delete(*tree.get_children())  # Xóa dữ liệu cũ trong bảng
-        for row in data:  # Hiển thị lại dữ liệu gốc
-            tree.insert("", "end", values=row)
+
+        # tree["columns"] = ["STT"] + headers
+        # tree.heading("STT", text="STT")
+        # tree.column("STT", width=50, anchor="center")
+
+        # for header in headers:
+        #     tree.heading(header, text=header)
+        #     column_width = max(len(header) * 100, 100)  # Tính chiều rộng cột (tối thiểu 100px)
+        #     tree.column(header, width=column_width, anchor="w")
+    
+        display_page(tree, data, current_page.get(), rows_per_page)
+
+        # Cập nhật thông tin số trang
+        page_info_label.config(text=f"{current_page.get() + 1}/{total_pages}")
+
+        # Cập nhật trạng thái nút điều hướng
+        update_navigation_buttons()
+
+        # Thông báo làm mới thành công
         messagebox.showinfo("Success", "Data has been refreshed!")
           
     prev_button = ttk.Button(navigation_frame, text="Trang trước", command=go_to_previous_page)
@@ -586,14 +824,141 @@ def create_gui():
     update_navigation_buttons()
     display_page(tree, data, current_page.get(), rows_per_page)
 
-    # ===== Tab 3: Quản lý dữ liệu =====
-    # Đọc dữ liệu từ CSV
-    headers, data = load_csv_data(csv_file)
+# ===== Tab 3: Quản lý dữ liệu =====
+    def add_data():
+        """Thêm thông tin khảo sát mới."""
+        try:
+            subprocess.run(["python", "SurveyForm.py"], check=True) # Gọi chương trình SurveyForm.py
+        except subprocess.CalledProcessError as e:
+            messagebox.showerror("Error", f"Error running the external program: {e}")
+ 
+    def update_data():
+        row_num = selected_row_num.get()
 
-    if not headers or not data:
-        no_data_label = ttk.Label(manage_tab, text="No data available in the CSV file.")
-        no_data_label.pack(pady=20)
-        return
+        if row_num == -1:  # Kiểm tra nếu chưa có dòng nào được chọn
+            messagebox.showwarning("No Selection", "No row has been selected for deletion.")
+            return
+
+        updated_datas = []
+        errors = []
+
+        for attribute, widget in input_widgets.items():
+            value = widget.get()
+
+            if isinstance(widget, ttk.Combobox):
+                updated_datas.append(widget.get())
+            elif attribute in ("Hours_Studied", "Sleep_Hours", "Attendance", "Previous_Scores", "Tutoring_Sessions", "Physical_Activity", "Exam_Score"):
+                try:
+                    number = float(value)
+                    if number < 0:
+                        errors.append(f"'{attribute}' must be a non-negative number.")
+                except ValueError:
+                    errors.append(f"'{attribute}' must be a valid number.")
+
+            updated_datas.append(widget.get())
+
+        # Nếu có lỗi, hiển thị thông báo và dừng xử lý
+        if errors:
+            messagebox.showerror("Invalid Input", "\n".join(errors))
+            return
+
+
+        # Kiểm tra chỉ số hợp lệ
+        if row_num < 0 or row_num >= len(data):
+            messagebox.showerror("Error", "Invalid row number selected.")
+            return
+        
+        # Cập nhật dữ liệu trong danh sách attributes_data
+        data[row_num - 1][0:] = updated_datas  # Chỉ cập nhật phần giá trị, không sửa "Attribute"
+
+        # Cập nhật lại bảng
+        selected_item = treeba.selection()
+        treeba.item(selected_item, values=data[row_num] + updated_datas)
+        
+        # Lưu thay đổi vào file CSV
+        write_csv_data(csv_file, headers, data)
+        # Hiển thị thông báo thành công
+        messagebox.showinfo("Success", "Row updated successfully!")
+
+        display_row()
+    
+    def delete_data():
+        """Xóa 1 hoặc nhiều hàng."""
+        # Kiểm tra nếu người dùng muốn xóa 1 hàng hoặc nhiều hàng
+        delete_choice = simpledialog.askstring(
+            "Delete Choice", "Do you want to delete 1 row or multiple rows? Enter '1' for one row, '2' for multiple rows."
+        )
+
+        if delete_choice == "1":
+            # Xóa 1 hàng
+            try:
+                row_num = int(row_num_entry.get())  # Lấy số dòng từ Entry
+            except ValueError:
+                messagebox.showwarning("Invalid Input", "Please enter a valid number in the row entry!")
+                return
+
+            del data[row_num - 1]  # Xóa dữ liệu từ danh sách
+            tree.delete(*treeba.get_children())  # Xóa dòng khỏi bảng
+            messagebox.showinfo("Success", "Row deleted successfully!")
+
+        elif delete_choice == "2":
+            # Xóa nhiều hàng
+            # Yêu cầu người dùng nhập các chỉ số dòng muốn xóa
+            row_indices_str = simpledialog.askstring("Input", "Enter row indices to delete (comma-separated, e.g. 1,3,5):")
+            if not row_indices_str:
+                messagebox.showwarning("Invalid Input", "Please enter valid row indices!")
+                return
+
+            try:
+                # Chuyển đổi các chỉ số dòng nhập vào thành danh sách các số nguyên
+                row_indices = list(map(int, row_indices_str.split(',')))
+            except ValueError:
+                messagebox.showwarning("Invalid Input", "Please enter valid numeric indices!")
+                return
+
+            # Kiểm tra nếu chỉ số dòng hợp lệ (không vượt quá số dòng trong data)
+            max_index = len(data)
+            invalid_indices = [idx for idx in row_indices if idx < 1 or idx > max_index]
+            
+            if invalid_indices:
+                messagebox.showwarning("Invalid Row Indices", f"The following indices are out of range: {', '.join(map(str, invalid_indices))}")
+                return
+            
+            # Hiển thị các dòng được chọn trong bảng Treeba
+            treeba.delete(*treeba.get_children())  # Xóa dữ liệu cũ trong bảng
+            selected_rows = [data[idx - 1] for idx in row_indices]  # Lấy dữ liệu dòng được chọn
+            for idx, row in zip(row_indices, selected_rows):
+                treeba.insert("", "end", values=[idx] + row)
+
+            # Hỏi người dùng xác nhận xóa
+            confirm = messagebox.askyesno(
+                "Confirm Deletion", 
+                f"Do you want to delete the selected rows: {', '.join(map(str, row_indices))}?"
+            )
+            if not confirm:
+                return
+
+            # Xóa các dòng trong data và Treeview
+            for idx in sorted(row_indices, reverse=True):  # Xóa từ cuối lên để tránh thay đổi chỉ số
+                tree.delete(tree.get_children()[idx - 1])  # Xóa dòng trong Treeview
+                del data[idx - 1]  # Xóa dữ liệu khỏi data
+                messagebox.showinfo("Success", "Deleted successfully!")
+
+        # Cập nhật lại dữ liệu trong file CSV
+        write_csv_data(csv_file, headers, data)
+
+    # Nút điều khiển
+    button_frame = ttk.Frame(manage_tab)
+    button_frame.pack(fill="x", pady=10)
+
+    add_button = ttk.Button(button_frame, text="Add Data", command=add_data)
+    add_button.pack(side="left", padx=5)
+
+    update_button = ttk.Button(button_frame, text="Update Data", command=update_data)
+    update_button.pack(side="left", padx=5)
+
+    delete_button = ttk.Button(button_frame, text="Delete Data", command=delete_data)
+    delete_button.pack(side="left", padx=5)
 
     # Entry nhập số dòng
     input_frame = ttk.Frame(manage_tab)
@@ -706,126 +1071,6 @@ def create_gui():
             entry.grid(row=row * 2 + 1, column=col, padx=5, pady=5, sticky="n")
             input_widgets[attribute] = entry
             
-    def add_data():
-        """Thêm thông tin khảo sát mới."""
-        try:
-            subprocess.run(["python", "SurveyForm.py"], check=True) # Gọi chương trình SurveyForm.py
-        except subprocess.CalledProcessError as e:
-            messagebox.showerror("Error", f"Error running the external program: {e}")
- 
-    def update_data():
-        row_num = selected_row_num.get()
-
-        if row_num == -1:  # Kiểm tra nếu chưa có dòng nào được chọn
-            messagebox.showwarning("No Selection", "No row has been selected for deletion.")
-            return
-
-        updated_datas = []
-        for attribute, widget in input_widgets.items():
-            if isinstance(widget, ttk.Combobox):
-                updated_datas.append(widget.get())
-            else:
-                updated_datas.append(widget.get())
-
-        # Kiểm tra chỉ số hợp lệ
-        if row_num < 0 or row_num >= len(data):
-            messagebox.showerror("Error", "Invalid row number selected.")
-            return
-        
-        # Cập nhật dữ liệu trong danh sách attributes_data
-        data[row_num - 1][0:] = updated_datas  # Chỉ cập nhật phần giá trị, không sửa "Attribute"
-
-        # Cập nhật lại bảng
-        selected_item = treeba.selection()
-        treeba.item(selected_item, values=data[row_num] + updated_datas)
-        
-        # Lưu thay đổi vào file CSV
-        write_csv_data(csv_file, headers, data)
-        # Hiển thị thông báo thành công
-        messagebox.showinfo("Success", "Row updated successfully!")
-
-        display_row()
-    
-    def delete_data():
-        """Xóa 1 hoặc nhiều hàng."""
-        # Kiểm tra nếu người dùng muốn xóa 1 hàng hoặc nhiều hàng
-        delete_choice = simpledialog.askstring(
-            "Delete Choice", "Do you want to delete 1 row or multiple rows? Enter '1' for one row, '2' for multiple rows."
-        )
-
-        if delete_choice == "1":
-            # Xóa 1 hàng
-            selected_item = tree.selection()  # Lấy mục được chọn
-            if not selected_item:
-                messagebox.showwarning("No Selection", "Please select a row to delete.")
-                return
-
-            row_num = tree.index(selected_item)
-            del data[row_num]  # Xóa dữ liệu từ danh sách
-            tree.delete(selected_item)  # Xóa dòng khỏi bảng
-            messagebox.showinfo("Success", "Row deleted successfully!")
-
-        elif delete_choice == "2":
-            # Xóa nhiều hàng
-            # Yêu cầu người dùng nhập các chỉ số dòng muốn xóa
-            row_indices_str = simpledialog.askstring("Input", "Enter row indices to delete (comma-separated, e.g. 1,3,5):")
-            if not row_indices_str:
-                messagebox.showwarning("Invalid Input", "Please enter valid row indices!")
-                return
-
-            try:
-                # Chuyển đổi các chỉ số dòng nhập vào thành danh sách các số nguyên
-                row_indices = list(map(int, row_indices_str.split(',')))
-            except ValueError:
-                messagebox.showwarning("Invalid Input", "Please enter valid numeric indices!")
-                return
-
-            # Kiểm tra nếu chỉ số dòng hợp lệ (không vượt quá số dòng trong data)
-            max_index = len(data)
-            invalid_indices = [idx for idx in row_indices if idx < 1 or idx > max_index]
-            
-            if invalid_indices:
-                messagebox.showwarning("Invalid Row Indices", f"The following indices are out of range: {', '.join(map(str, invalid_indices))}")
-                return
-            
-            # Hiển thị các dòng được chọn trong bảng Treeba
-            treeba.delete(*treeba.get_children())  # Xóa dữ liệu cũ trong bảng
-            selected_rows = [data[idx - 1] for idx in row_indices]  # Lấy dữ liệu dòng được chọn
-            for idx, row in zip(row_indices, selected_rows):
-                treeba.insert("", "end", values=[idx] + row)
-
-            # Hỏi người dùng xác nhận xóa
-            confirm = messagebox.askyesno(
-                "Confirm Deletion", 
-                f"Do you want to delete the selected rows: {', '.join(map(str, row_indices))}?"
-            )
-            if not confirm:
-                display_row()  # Hiển thị lại dữ liệu ban đầu
-                return
-
-            # Xóa các dòng trong data và Treeview
-            for idx in sorted(row_indices, reverse=True):  # Xóa từ cuối lên để tránh thay đổi chỉ số
-                tree.delete(tree.get_children()[idx - 1])  # Xóa dòng trong Treeview
-                del data[idx - 1]  # Xóa dữ liệu khỏi data
-
-        # Cập nhật lại dữ liệu trong file CSV
-        write_csv_data(csv_file, headers, data)
-        # Hiển thị thông báo thành công
-        messagebox.showinfo("Success", "Deleted successfully!")
-
-    # Nút điều khiển
-    button_frame = ttk.Frame(manage_tab)
-    button_frame.pack(fill="x", pady=10)
-
-    add_button = ttk.Button(button_frame, text="Add Data", command=add_data)
-    add_button.pack(side="left", padx=5)
-
-    update_button = ttk.Button(button_frame, text="Update Data", command=update_data)
-    update_button.pack(side="left", padx=5)
-
-    delete_button = ttk.Button(button_frame, text="Delete Data", command=delete_data)
-    delete_button.pack(side="left", padx=5)
-
     # ===== Tab 4: Bảng biểu đồ =====
     # Tạo thanh Menu
     menu_frame4 = tk.Frame(chart_tab, bg="lightgrey")
@@ -835,6 +1080,9 @@ def create_gui():
 
     chart_frame = tk.Frame(chart_tab)
     chart_frame.pack(side="top", fill="both", expand=True)
+
+    label = ttk.Label(chart_frame, text="Biểu đồ sẽ hiển thị ở đây", font=50)
+    label.pack(expand=True)
 
     def plot_on_canvas(plot_function):
         # Xóa tất cả trước khi vẽ lại
@@ -853,57 +1101,57 @@ def create_gui():
 
     # Tạo một menu con trong menu bar
     file1_menu = tk.Menu(menu4, tearoff=0)  # tearoff=0 để không cho phép menu rời khỏi thanh menu
-    file1_menu.add_command(label="Hours_Studied", command=lambda: plot_on_canvas(data_visualization.plot_hours_studied_distribution))
-    file1_menu.add_command(label="Attendance", command=lambda: plot_on_canvas(data_visualization.plot_attendance_distribution))
-    file1_menu.add_command(label="Parental_Involvement", command=lambda: plot_on_canvas(data_visualization.plot_parental_involvement_distribution))
-    file1_menu.add_command(label="Access_to_Resources", command=lambda: plot_on_canvas(data_visualization.plot_access_to_resources_distribution))
-    file1_menu.add_command(label="Extracurricular_Activities", command=lambda: plot_on_canvas(data_visualization.plot_extracurricular_activities_distribution))
-    file1_menu.add_command(label="Sleep_Hours", command=lambda: plot_on_canvas(data_visualization.plot_sleep_hours_distribution))
-    file1_menu.add_command(label="Previous_Scores", command=lambda: plot_on_canvas(data_visualization.plot_previous_scores_distribution))
-    file1_menu.add_command(label="Motivation_Level", command=lambda: plot_on_canvas(data_visualization.plot_motivation_level_distribution))
-    file1_menu.add_command(label="Internet_Access", command=lambda: plot_on_canvas(data_visualization.plot_internet_access_distribution))
-    file1_menu.add_command(label="Tutoring_Sessions", command=lambda: plot_on_canvas(data_visualization.plot_tutoring_sessions_distribution))
-    file1_menu.add_command(label="Family_Income	", command=lambda: plot_on_canvas(data_visualization.plot_family_income_distribution))
-    file1_menu.add_command(label="Teacher_Quality", command=lambda: plot_on_canvas(data_visualization.plot_teacher_quality_distribution))
-    file1_menu.add_command(label="School_Type", command=lambda: plot_on_canvas(data_visualization.plot_school_type_distribution))
-    file1_menu.add_command(label="Peer_Influence", command=lambda: plot_on_canvas(data_visualization.plot_peer_influence_distribution))
-    file1_menu.add_command(label="Physical_Activity	", command=lambda: plot_on_canvas(data_visualization.plot_physical_activity_distribution))
-    file1_menu.add_command(label="Learning_Disabilities", command=lambda: plot_on_canvas(data_visualization.plot_learning_disabilities_distribution))
-    file1_menu.add_command(label="Parental_Education_Level", command=lambda: plot_on_canvas(data_visualization.plot_parental_education_level_distribution))
-    file1_menu.add_command(label="Distance_from_Home", command=lambda: plot_on_canvas(data_visualization.plot_distance_from_home_distribution))
-    file1_menu.add_command(label="Gender", command=lambda: plot_on_canvas(data_visualization.plot_gender_distribution))
-    file1_menu.add_command(label="Exam_Score", command=lambda: plot_on_canvas(data_visualization.plot_exam_score_distribution))
+    file1_menu.add_command(label="Hours_Studied", command=lambda: plot_on_canvas(visualization_for_GUI.plot_hours_studied_distribution))
+    file1_menu.add_command(label="Attendance", command=lambda: plot_on_canvas(visualization_for_GUI.plot_attendance_distribution))
+    file1_menu.add_command(label="Parental_Involvement", command=lambda: plot_on_canvas(visualization_for_GUI.plot_parental_involvement_distribution))
+    file1_menu.add_command(label="Access_to_Resources", command=lambda: plot_on_canvas(visualization_for_GUI.plot_access_to_resources_distribution))
+    file1_menu.add_command(label="Extracurricular_Activities", command=lambda: plot_on_canvas(visualization_for_GUI.plot_extracurricular_activities_distribution))
+    file1_menu.add_command(label="Sleep_Hours", command=lambda: plot_on_canvas(visualization_for_GUI.plot_sleep_hours_distribution))
+    file1_menu.add_command(label="Previous_Scores", command=lambda: plot_on_canvas(visualization_for_GUI.plot_previous_scores_distribution))
+    file1_menu.add_command(label="Motivation_Level", command=lambda: plot_on_canvas(visualization_for_GUI.plot_motivation_level_distribution))
+    file1_menu.add_command(label="Internet_Access", command=lambda: plot_on_canvas(visualization_for_GUI.plot_internet_access_distribution))
+    file1_menu.add_command(label="Tutoring_Sessions", command=lambda: plot_on_canvas(visualization_for_GUI.plot_tutoring_sessions_distribution))
+    file1_menu.add_command(label="Family_Income	", command=lambda: plot_on_canvas(visualization_for_GUI.plot_family_income_distribution))
+    file1_menu.add_command(label="Teacher_Quality", command=lambda: plot_on_canvas(visualization_for_GUI.plot_teacher_quality_distribution))
+    file1_menu.add_command(label="School_Type", command=lambda: plot_on_canvas(visualization_for_GUI.plot_school_type_distribution))
+    file1_menu.add_command(label="Peer_Influence", command=lambda: plot_on_canvas(visualization_for_GUI.plot_peer_influence_distribution))
+    file1_menu.add_command(label="Physical_Activity	", command=lambda: plot_on_canvas(visualization_for_GUI.plot_physical_activity_distribution))
+    file1_menu.add_command(label="Learning_Disabilities", command=lambda: plot_on_canvas(visualization_for_GUI.plot_learning_disabilities_distribution))
+    file1_menu.add_command(label="Parental_Education_Level", command=lambda: plot_on_canvas(visualization_for_GUI.plot_parental_education_level_distribution))
+    file1_menu.add_command(label="Distance_from_Home", command=lambda: plot_on_canvas(visualization_for_GUI.plot_distance_from_home_distribution))
+    file1_menu.add_command(label="Gender", command=lambda: plot_on_canvas(visualization_for_GUI.plot_gender_distribution))
+    file1_menu.add_command(label="Exam_Score", command=lambda: plot_on_canvas(visualization_for_GUI.plot_exam_score_distribution))
     
 
     file2_menu = tk.Menu(menu4, tearoff=0)  # tearoff=0 để không cho phép menu rời khỏi thanh menu
-    file2_menu.add_command(label="Vẽ biểu đồ phân tán Hours Studied và Exam Score", command=lambda: plot_on_canvas(data_visualization.scatterplot_Hours_Studied_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ phân tán Attendance và Exam Score", command=lambda: plot_on_canvas(data_visualization.scatterplot_Attendance_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ phân tán Previous Scores và Exam Score", command=lambda: plot_on_canvas(data_visualization.scatterplot_Previous_Scores_and_Exam_Score))
-    file2_menu.add_command(label="Xây dựng sơ đồ phân tán dựa trên các đặc điểm số (tính đến các hoạt động ngoại khóa)", command=lambda: plot_on_canvas(data_visualization.scatterplot_Numcol_and_Exam_Score_with_Extracurricular_Activities))
-    file2_menu.add_command(label="Xây dựng sơ đồ phân tán dựa trên các đặc điểm số (tính đến giới tính)", command=lambda: plot_on_canvas(data_visualization.scatterplot_Numcol_and_Exam_Score_with_Gender))
-    file2_menu.add_command(label="Xây dựng sơ đồ phân tán dựa trên các đặc điểm số (tính đến việc truy cập Internet)", command=lambda: plot_on_canvas(data_visualization.scatterplot_Numcol_and_Exam_Score_with_Internet_Access))
-    file2_menu.add_command(label="Xây dựng sơ đồ phân tán dựa trên các đặc điểm số (tính đến Khuyết tật học tập)", command=lambda: plot_on_canvas(data_visualization.scatterplot_Numcol_and_Exam_Score_with_Learning_Disabilities))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Parental Involvement", command=lambda: plot_on_canvas(data_visualization.boxplot_Parental_Involvement_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Access_to_Resources", command=lambda: plot_on_canvas(data_visualization.boxplot_Access_to_Resources_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Extracurricular_Activities", command=lambda: plot_on_canvas(data_visualization.boxplot_Extracurricular_Activities_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Sleep_Hours", command=lambda: plot_on_canvas(data_visualization.boxplot_Sleep_Hours_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Motivation_Level", command=lambda: plot_on_canvas(data_visualization.boxplot_Motivation_Level_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Internet_Access", command=lambda: plot_on_canvas(data_visualization.boxplot_Internet_Access_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Tutoring_Sessions", command=lambda: plot_on_canvas(data_visualization.boxplot_Tutoring_Sessions_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Family_Income", command=lambda: plot_on_canvas(data_visualization.boxplot_Family_Income_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Teacher_Quality", command=lambda: plot_on_canvas(data_visualization.boxplot_Teacher_Quality_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ Boxplot cho Exam_Score và School_Type", command=lambda: plot_on_canvas(data_visualization.boxplot_School_Type_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Peer_Influence", command=lambda: plot_on_canvas(data_visualization.boxplot_Peer_Influence_and_Exam_Score))   
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Physical_Activity", command=lambda: plot_on_canvas(data_visualization.boxplot_Physical_Activity_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot cho Exam_Score và Learning_Disabilities", command=lambda: plot_on_canvas(data_visualization.boxplot_Learning_Disabilities_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Parental_Education_Level", command=lambda: plot_on_canvas(data_visualization.boxplot_Parental_Education_Level_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Distance_from_Home", command=lambda: plot_on_canvas(data_visualization.boxplot_Distance_from_Home_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot cho Exam_Score và Gender", command=lambda: plot_on_canvas(data_visualization.boxplot_Gender_and_Exam_Score))
+    file2_menu.add_command(label="Vẽ biểu đồ phân tán Hours Studied và Exam Score", command=lambda: plot_on_canvas(visualization_for_GUI.scatterplot_Hours_Studied_and_Exam_Score))
+    file2_menu.add_command(label="Vẽ biểu đồ phân tán Attendance và Exam Score", command=lambda: plot_on_canvas(visualization_for_GUI.scatterplot_Attendance_and_Exam_Score))
+    file2_menu.add_command(label="Vẽ biểu đồ phân tán Previous Scores và Exam Score", command=lambda: plot_on_canvas(visualization_for_GUI.scatterplot_Previous_Scores_and_Exam_Score))
+    file2_menu.add_command(label="Xây dựng sơ đồ phân tán dựa trên các đặc điểm số (tính đến các hoạt động ngoại khóa)", command=lambda: plot_on_canvas(visualization_for_GUI.scatterplot_Numcol_and_Exam_Score_with_Extracurricular_Activities))
+    file2_menu.add_command(label="Xây dựng sơ đồ phân tán dựa trên các đặc điểm số (tính đến giới tính)", command=lambda: plot_on_canvas(visualization_for_GUI.scatterplot_Numcol_and_Exam_Score_with_Gender))
+    file2_menu.add_command(label="Xây dựng sơ đồ phân tán dựa trên các đặc điểm số (tính đến việc truy cập Internet)", command=lambda: plot_on_canvas(visualization_for_GUI.scatterplot_Numcol_and_Exam_Score_with_Internet_Access))
+    file2_menu.add_command(label="Xây dựng sơ đồ phân tán dựa trên các đặc điểm số (tính đến Khuyết tật học tập)", command=lambda: plot_on_canvas(visualization_for_GUI.scatterplot_Numcol_and_Exam_Score_with_Learning_Disabilities))
+    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Parental Involvement", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Parental_Involvement_and_Exam_Score))
+    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Access_to_Resources", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Access_to_Resources_and_Exam_Score))
+    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Extracurricular_Activities", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Extracurricular_Activities_and_Exam_Score))
+    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Sleep_Hours", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Sleep_Hours_and_Exam_Score))
+    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Motivation_Level", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Motivation_Level_and_Exam_Score))
+    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Internet_Access", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Internet_Access_and_Exam_Score))
+    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Tutoring_Sessions", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Tutoring_Sessions_and_Exam_Score))
+    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Family_Income", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Family_Income_and_Exam_Score))
+    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Teacher_Quality", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Teacher_Quality_and_Exam_Score))
+    file2_menu.add_command(label="Vẽ biểu đồ boxplot cho Exam_Score và School_Type", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_School_Type_and_Exam_Score))
+    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Peer_Influence", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Peer_Influence_and_Exam_Score))   
+    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Physical_Activity", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Physical_Activity_and_Exam_Score))
+    file2_menu.add_command(label="Vẽ biểu đồ boxplot cho Exam_Score và Learning_Disabilities", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Learning_Disabilities_and_Exam_Score))
+    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Parental_Education_Level", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Parental_Education_Level_and_Exam_Score))
+    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Distance_from_Home", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Distance_from_Home_and_Exam_Score))
+    file2_menu.add_command(label="Vẽ biểu đồ boxplot cho Exam_Score và Gender", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Gender_and_Exam_Score))
 
      
     menu4.add_cascade(label="BIỂU ĐỒ TẦN SUẤT VÀ CỘT CHO CÁC THUỘC TÍNH ĐƠN LẺ", menu=file1_menu)
     menu4.add_cascade(label="BIỂU ĐỒ BIỂU DIỄN QUAN HỆ PHÂN TÁN (SỐ) VÀ BIỂU ĐỒ HỘP (PHÂN LOẠI) VỚI BIẾN MỤC TIÊU EXAM_SCORE", menu=file2_menu)
-    menu4.add_command(label="HEATMAP", command=lambda: plot_on_canvas(data_visualization.heatmap))
+    menu4.add_command(label="HEATMAP", command=lambda: plot_on_canvas(visualization_for_GUI.heatmap))
 
     # Menu Button hiển thị menu
     menubutton4 = ttk.Menubutton(menu_frame4, text="Menu", menu=menu4)

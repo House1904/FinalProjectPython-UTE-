@@ -503,16 +503,16 @@ df_cleaned['Access_to_Resources_num'] = df_cleaned['Access_to_Resources'].map({'
 # Vẽ biểu đồ boxplot Exam_Score và Extracurricular_Activities
 def boxplot_Extracurricular_Activities_and_Exam_Score():
     global df_cleaned
+
     fig, ax = plt.subplots(figsize=(10, 6))
     sns.boxplot(data=df_cleaned, x='Extracurricular_Activities', y='Exam_Score', palette=['pink', 'blue'], ax=ax)
-
     ax.set_title('Boxplot: Exam Score by Extracurricular Activities')
     ax.set_xlabel('Extracurricular Activities')
     ax.set_ylabel('Exam Score')
     return fig
 
 # Mã hóa cột thành các giá trị số
-df_cleaned['Extracurricular_Activities_Encoded'] = df_cleaned['Extracurricular_Activities'].map({'Yes': 1, 'No': 0})
+df_cleaned['Extracurricular_Activities_num'] = df_cleaned['Extracurricular_Activities'].map({'Yes': 1, 'No': 0})
 
 # Vẽ biểu đồ boxplot Exam_Score và Sleep_Hours
 def boxplot_Sleep_Hours_and_Exam_Score():
@@ -692,7 +692,9 @@ def heatmap():
 
     numerical_df = df_cleaned.select_dtypes(include='number')
     corr_df = numerical_df.corr()
-    fig, ax = plt.subplots(figsize=(8, 6)) 
-    sns.heatmap(corr_df, annot=True, cmap='coolwarm', fmt=".2f", ax=ax)  
-    ax.set_title('Biểu đồ Heatmap của các cột số')  
-    return fig  
+    fig, ax = plt.subplots(figsize=(10, 8)) 
+    sns.heatmap(corr_df, annot=True, cmap='coolwarm', fmt=".2f",ax = ax)  
+    plt.xticks(rotation=45, ha='right')  
+    plt.title('Biểu đồ HEATMAP') 
+    plt.tight_layout()
+    return fig
