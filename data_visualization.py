@@ -2,12 +2,9 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-import warnings
 from scipy.stats import ttest_ind
 
 df_cleaned = pd.read_csv('data_source\cleaned_data.csv') # Lấy dữ liệu chuẩn từ file đã làm sạch
-
-# Visualization - Trực quan hoá dữ liệu
 
 # 1. VẼ BIỂU ĐỒ TẦN SUẤT VÀ CỘT CHO CÁC THUỘC TÍNH ĐƠN LẺ (HISTOGRAM và BAR)
 # Histogram cho biến mục tiêu Exam_Score 
@@ -61,7 +58,7 @@ def plot_hours_studied_distribution():
     plt.grid(axis='y', alpha=0.75)
     plt.show()
 
-print("-" * 20)
+print("-" * 50)
 print("\nNhận định về Distribution of Hours Studied.")
 
 below_10 = df_cleaned[df_cleaned['Hours_Studied'] <= 10]
@@ -98,7 +95,7 @@ def plot_attendance_distribution():
     plt.grid(axis='y', alpha=0.75)
     plt.show()
 
-print("-" * 20)
+print("-" * 50)
 print("\nNhận định về Distribution of Attendance.")
 
 below_69 = df_cleaned[df_cleaned['Attendance'] <= 69]
@@ -135,7 +132,7 @@ def plot_previous_scores_distribution():
     plt.grid(axis='y', alpha=0.75)
     plt.show()
 
-print("-" * 20)
+print("-" * 50)
 print("\nNhận định về Distribution of Previous Scoress.")
 
 below_69 = df_cleaned[df_cleaned['Previous_Scores'] <= 69]
@@ -172,7 +169,7 @@ def plot_parental_involvement_distribution():
     plt.grid(axis='y', alpha=0.75)
     plt.show()
 
-print("-" * 20)
+print("-" * 50)
 print("\nNhận định về Distribution of Parental Involvement.")
 
 low_involvement = df_cleaned[df_cleaned['Parental_Involvement'] == 'Low']
@@ -200,7 +197,7 @@ def plot_access_to_resources_distribution():
     plt.grid(axis='y', alpha=0.75)
     plt.show()
 
-print("-" * 20)
+print("-" * 50)
 print("\nNhận định về Distribution of Access to Resources.")
 
 low_access = df_cleaned[df_cleaned['Access_to_Resources'] == 'Low']
@@ -228,7 +225,7 @@ def plot_extracurricular_activities_distribution():
     plt.grid(axis='y', alpha=0.75)
     plt.show()
 
-print("-" * 20)
+print("-" * 50)
 print("\nNhận định về Distribution of Extracurricular Activitiess.")
 
 yes_activitiess = df_cleaned[df_cleaned['Extracurricular_Activities'] == 'Yes']
@@ -245,22 +242,17 @@ def plot_sleep_hours_distribution():
     global df_cleaned
     
     counts = df_cleaned['Sleep_Hours'].value_counts().sort_index()
-    
     colors = ['#FF6347', '#FFD700', '#ADFF2F', '#00BFFF', '#FF69B4', '#8A2BE2', 
               '#FF4500', '#32CD32', '#FF1493', '#C71585']
-    
     counts.plot(kind='bar', color=colors[:len(counts)], edgecolor='black', alpha=0.5)
-    
     plt.title('Distribution of Sleep Hours')
     plt.xlabel('Sleep Hours')
     plt.ylabel('Frequency')
-    
     plt.xticks(rotation=0)
     plt.grid(axis='y', alpha=0.75)
-  
     plt.show()
 
-print("-" * 20)
+print("-" * 50)
 print("\nNhận định về Distribution of Sleep Hours.")
 
 sleep_hour_counts = df_cleaned['Sleep_Hours'].value_counts()
@@ -284,7 +276,7 @@ def plot_motivation_level_distribution():
     plt.grid(axis='y', alpha=0.75)
     plt.show()
 
-print("-" * 20)
+print("-" * 50)
 print("\nNhận định về Distribution of Motivation Level.")
 
 low_level= df_cleaned[df_cleaned['Motivation_Level'] == 'Low']
@@ -312,7 +304,7 @@ def plot_internet_access_distribution():
     plt.grid(axis='y', alpha=0.75)
     plt.show()
 
-print("-" * 20)
+print("-" * 50)
 print("\nNhận định về Distribution of Internet Access.")
 
 yes_access = df_cleaned[df_cleaned['Internet_Access'] == 'Yes']
@@ -338,7 +330,7 @@ def plot_tutoring_sessions_distribution():
     plt.grid(axis='y', alpha=0.75)
     plt.show()
 
-print("-" * 20)
+print("-" * 50)
 print("\nNhận định về Distribution of Tutoring Sessions.")
     
 tutoring_sessions_counts = df_cleaned['Tutoring_Sessions'].value_counts()
@@ -362,7 +354,7 @@ def plot_family_income_distribution():
     plt.grid(axis='y', alpha=0.75)
     plt.show()
 
-print("-" * 20)
+print("-" * 50)
 print("\nNhận định về Distribution of Family Income.")
 
 low_income= df_cleaned[df_cleaned['Family_Income'] == 'Low']
@@ -390,7 +382,7 @@ def plot_teacher_quality_distribution():
     plt.grid(axis='y', alpha=0.75)
     plt.show()
 
-print("-" * 20)
+print("-" * 50)
 print("\nNhận định về Distribution of Teacher Quality.")
 
 low_quality= df_cleaned[df_cleaned['Teacher_Quality'] == 'Low']
@@ -418,7 +410,7 @@ def plot_school_type_distribution():
     plt.grid(axis='y', alpha=0.75)
     plt.show()
 
-print("-" * 20)
+print("-" * 50)
 print("\nNhận định về Distribution of School Type.")
 
 public_type = df_cleaned[df_cleaned['School_Type'] == 'Public']
@@ -443,7 +435,7 @@ def plot_peer_influence_distribution():
     plt.grid(axis='y', alpha=0.75)
     plt.show()
 
-print("-" * 20)
+print("-" * 50)
 print("\nNhận định về Distribution of Peer Influence.")
 
 po_influ= df_cleaned[df_cleaned['Peer_Influence'] == 'Positive']
@@ -472,7 +464,7 @@ def plot_physical_activity_distribution():
     plt.grid(axis='y', alpha=0.75)
     plt.show()
 
-print("-" * 20)
+print("-" * 50)
 print("\nNhận định về Distribution of Physical Activity.")
   
 physical_activity_counts = df_cleaned['Physical_Activity'].value_counts()
@@ -496,7 +488,7 @@ def plot_learning_disabilities_distribution():
     plt.grid(axis='y', alpha=0.75)
     plt.show()
 
-print("-" * 20)
+print("-" * 50)
 print("\nNhận định về Distribution of Learning Disabilities.")
 
 yes_disa = df_cleaned[df_cleaned['Learning_Disabilities'] == 'Yes']
@@ -521,7 +513,7 @@ def plot_parental_education_level_distribution():
     plt.grid(axis='y', alpha=0.75)
     plt.show()
 
-print("-" * 20)
+print("-" * 50)
 print("\nNhận định về Distribution of Parental Education Level.")
 
 hs = df_cleaned[df_cleaned['Parental_Education_Level'] == 'High School']
@@ -549,7 +541,7 @@ def plot_distance_from_home_distribution():
     plt.grid(axis='y', alpha=0.75)
     plt.show()
 
-print("-" * 20)
+print("-" * 50)
 print("\nNhận định về Distribution of Distance from Home.")
 
 ne = df_cleaned[df_cleaned['Distance_from_Home'] == 'Near']
@@ -577,7 +569,7 @@ def plot_gender_distribution():
     plt.grid(axis='y', alpha=0.75)
     plt.show()
 
-print("-" * 20)
+print("-" * 50)
 print("\nNhận định về Distribution of Gender.")
 
 ma = df_cleaned[df_cleaned['Gender'] == 'Male']
@@ -596,15 +588,13 @@ def scatterplot_Hours_Studied_and_Exam_Score():
 
     plt.figure(figsize=(10, 6))
     sns.scatterplot(x=df_cleaned['Hours_Studied'], y=df_cleaned['Exam_Score'], color='green', alpha=0.7)
-
     plt.title('Scatter Plot: Hours Studied vs Exam Score')
     plt.xlabel('Hours Studied')
     plt.ylabel('Exam Score')
-
     plt.grid(True)
     plt.show()
 
-print("-" * 20)
+print("-" * 50)
 correlation = df_cleaned['Hours_Studied'].corr(df_cleaned['Exam_Score'])
 print(f"Hệ số tương quan giữa số giờ học và điểm số: {correlation:.2f}")
 
@@ -627,7 +617,7 @@ def scatterplot_Attendance_and_Exam_Score():
     plt.grid(True)
     plt.show()
 
-print("-" * 20)
+print("-" * 50)
 correlation = df_cleaned['Attendance'].corr(df_cleaned['Exam_Score'])
 print(f"Hệ số tương quan giữa sự tham gia và điểm số: {correlation:.2f}")
 
@@ -650,7 +640,7 @@ def scatterplot_Previous_Scores_and_Exam_Score():
     plt.grid(True)
     plt.show()
 
-print("-" * 20)
+print("-" * 50)
 correlation = df_cleaned['Previous_Scores'].corr(df_cleaned['Exam_Score'])
 print(f"Hệ số tương quan giữa điểm trước đó và điểm số: {correlation:.2f}")
 
@@ -697,6 +687,8 @@ def scatterplot_Numcol_and_Exam_Score_with_Extracurricular_Activities():
     
 # Xây dựng sơ đồ phân tán dựa trên các đặc điểm số (tính đến giới tính):
 def scatterplot_Numcol_and_Exam_Score_with_Gender():
+    global df_cleaned
+
     fig, axes = plt.subplots(1, 3, figsize=(12, 5))  
     for idx, col in enumerate(['Hours_Studied', 'Attendance', 'Previous_Scores']):
         sns.scatterplot(x=df_cleaned[col], y=df_cleaned['Exam_Score'], 
@@ -731,6 +723,8 @@ def scatterplot_Numcol_and_Exam_Score_with_Gender():
 
 # Xây dựng sơ đồ phân tán dựa trên các đặc điểm số (tính đến việc truy cập Internet):
 def scatterplot_Numcol_and_Exam_Score_with_Internet_Access():
+    global df_cleaned
+
     fig, axes = plt.subplots(1, 3, figsize=(12, 5))  
     for idx, col in enumerate(['Hours_Studied', 'Attendance', 'Previous_Scores']):
         sns.scatterplot(x=df_cleaned[col], y=df_cleaned['Exam_Score'], 
@@ -765,6 +759,8 @@ def scatterplot_Numcol_and_Exam_Score_with_Internet_Access():
 
 # Xây dựng sơ đồ phân tán dựa trên các đặc điểm số (tính đến Khuyết tật học tập):
 def scatterplot_Numcol_and_Exam_Score_with_Learning_Disabilities():
+    global df_cleaned
+
     fig, axes = plt.subplots(1, 3, figsize=(12, 5))  
     for idx, col in enumerate(['Hours_Studied', 'Attendance', 'Previous_Scores']):
         sns.scatterplot(x=df_cleaned[col], y=df_cleaned['Exam_Score'], 
@@ -813,7 +809,7 @@ df_cleaned['Parental_Involvement_num'] = df_cleaned['Parental_Involvement'].map(
 
 correlation = df_cleaned['Parental_Involvement_num'].corr(df_cleaned['Exam_Score'])
 
-print("-" * 20)
+print("-" * 50)
 print(f'Mối tương quan giữa sự tham gia của phụ huynh và điểm thi: {correlation:.2f}')
 
 if correlation > 0.7:
@@ -838,7 +834,7 @@ def boxplot_Access_to_Resources_and_Exam_Score():
 df_cleaned['Access_to_Resources_num'] = df_cleaned['Access_to_Resources'].map({'Low': 0, 'Medium': 1, 'High': 2})
 
 correlation = df_cleaned['Access_to_Resources_num'].corr(df_cleaned['Exam_Score'])
-print("-" * 20)
+print("-" * 50)
 print(f'Mối tương quan giữa truy cập tài nguyên và điểm thi: {correlation:.2f}')
 
 if correlation > 0.7:
@@ -863,7 +859,7 @@ df_cleaned['Extracurricular_Activities_num'] = df_cleaned['Extracurricular_Activ
 
 correlation = df_cleaned[['Extracurricular_Activities_num', 'Exam_Score']].corr().iloc[0, 1]
 
-print("-" * 20)
+print("-" * 50)
 print(f"Hệ số tương quan giữa việc tham gia hoạt động ngoại khóa và điểm số: {correlation:.2f}")
 
 if correlation > 0.7:
@@ -886,7 +882,7 @@ def boxplot_Sleep_Hours_and_Exam_Score():
 
 correlation = df_cleaned[['Sleep_Hours', 'Exam_Score']].corr().iloc[0, 1]
 
-print("-" * 20)
+print("-" * 50)
 print(f"Hệ số tương quan giữa giờ ngủ và điểm số: {correlation:.2f}")
 
 if correlation > 0.7:
@@ -911,7 +907,7 @@ def boxplot_Motivation_Level_and_Exam_Score():
 df_cleaned['Motivation_Level_num'] = df_cleaned['Motivation_Level'].map({'Low': 0, 'Medium': 1, 'High': 2})
 
 correlation = df_cleaned['Motivation_Level_num'].corr(df_cleaned['Exam_Score'])
-print("-" * 20)
+print("-" * 50)
 print(f'Mối tương quan giữa động lực và điểm thi: {correlation:.2f}')
 
 if correlation > 0.7:
@@ -936,7 +932,7 @@ df_cleaned['Internet_Access_num'] = df_cleaned['Internet_Access'].map({'Yes': 1,
 
 correlation = df_cleaned[['Internet_Access_num', 'Exam_Score']].corr().iloc[0, 1]
 
-print("-" * 20)
+print("-" * 50)
 print(f"Hệ số tương quan giữa việc truy cập Internet và điểm số: {correlation:.2f}")
 
 if correlation > 0.7:
@@ -959,7 +955,7 @@ def boxplot_Tutoring_Sessions_and_Exam_Score():
 
 correlation = df_cleaned[['Tutoring_Sessions', 'Exam_Score']].corr().iloc[0, 1]
 
-print("-" * 20)
+print("-" * 50)
 print(f"Hệ số tương quan giữa các phiên dạy kèm và điểm số: {correlation:.2f}")
 
 if correlation > 0.7:
@@ -984,7 +980,7 @@ def boxplot_Family_Income_and_Exam_Score():
 df_cleaned['Family_Income_num'] = df_cleaned['Family_Income'].map({'Low': 0, 'Medium': 1, 'High': 2})
 
 correlation = df_cleaned['Family_Income_num'].corr(df_cleaned['Exam_Score'])
-print("-" * 20)
+print("-" * 50)
 print(f'Mối tương quan giữa thu nhập gia đình và điểm thi: {correlation:.2f}')
 
 if correlation > 0.7:
@@ -1009,7 +1005,7 @@ def boxplot_Teacher_Quality_and_Exam_Score():
 df_cleaned['Teacher_Quality_num'] = df_cleaned['Teacher_Quality'].map({'Low': 0, 'Medium': 1, 'High': 2})
 
 correlation = df_cleaned['Teacher_Quality_num'].corr(df_cleaned['Exam_Score'])
-print("-" * 20)
+print("-" * 50)
 print(f'Mối tương quan giữa chất lượng giáo viên và điểm thi: {correlation:.2f}')
 
 if correlation > 0.7:
@@ -1035,7 +1031,7 @@ def boxplot_School_Type_and_Exam_Score():
 df_cleaned['School_Type_num'] = df_cleaned['School_Type'].map({'Public': 0, 'Private': 1})
 
 correlation = df_cleaned['School_Type_num'].corr(df_cleaned['Exam_Score'])
-print("-" * 20)
+print("-" * 50)
 print(f'Mối tương quan giữa loại trường học và điểm thi: {correlation:.2f}')
 
 if correlation > 0.7:
@@ -1059,7 +1055,7 @@ def boxplot_Peer_Influence_and_Exam_Score():
 df_cleaned['Peer_Influence_num'] = df_cleaned['Peer_Influence'].map({'Positive': 0, 'Negative': 1, 'Neutral': 2})
 
 correlation = df_cleaned['Peer_Influence_num'].corr(df_cleaned['Exam_Score'])
-print("-" * 20)
+print("-" * 50)
 print(f'Mối tương quan giữa sự ảnh hưởng của bạn bè và điểm thi: {correlation:.2f}')
 
 if correlation > 0.7:
@@ -1082,7 +1078,7 @@ def boxplot_Physical_Activity_and_Exam_Score():
 
 correlation = df_cleaned[['Physical_Activity', 'Exam_Score']].corr().iloc[0, 1]
 
-print("-" * 20)
+print("-" * 50)
 print(f"Hệ số tương quan giữa hoạt động thể chất và điểm số: {correlation:.2f}")
 
 if correlation > 0.7:
@@ -1107,7 +1103,7 @@ def boxplot_Learning_Disabilities_and_Exam_Score():
 df_cleaned['Learning_Disabilities_num'] = df_cleaned['Learning_Disabilities'].map({'No': 0, 'Yes': 1})
 
 correlation = df_cleaned['Learning_Disabilities_num'].corr(df_cleaned['Exam_Score'])
-print("-" * 20)
+print("-" * 50)
 print(f'Mối tương quan giữa khuyết tập học tập và điểm thi: {correlation:.2f}')
 
 if correlation > 0.7:
@@ -1132,7 +1128,7 @@ def boxplot_Parental_Education_Level_and_Exam_Score():
 df_cleaned['Parental_Education_Level_num'] = df_cleaned['Parental_Education_Level'].map({'High School': 0, 'College': 1, 'Postgraduate': 2})
 
 correlation = df_cleaned['Parental_Education_Level_num'].corr(df_cleaned['Exam_Score'])
-print("-" * 20)
+print("-" * 50)
 print(f'Mối tương quan giữa mức độ học tập của ba mẹ và điểm thi: {correlation:.2f}')
 
 if correlation > 0.7:
@@ -1158,7 +1154,7 @@ def boxplot_Distance_from_Home_and_Exam_Score():
 df_cleaned['Distance_from_Home_num'] = df_cleaned['Distance_from_Home'].map({'Near': 0, 'Moderate': 1, 'Far': 2})
 
 correlation = df_cleaned['Distance_from_Home_num'].corr(df_cleaned['Exam_Score'])
-print("-" * 20)
+print("-" * 50)
 print(f'Mối tương quan giữa khoảng cách từ nhà đến trường và điểm thi: {correlation:.2f}')
 
 if correlation > 0.7:
@@ -1183,7 +1179,7 @@ def boxplot_Gender_and_Exam_Score():
 df_cleaned['Gender_num'] = df_cleaned['Gender'].map({'Female': 0, 'Male': 1})
 
 correlation = df_cleaned['Gender_num'].corr(df_cleaned['Exam_Score'])
-print("-" * 20)
+print("-" * 50)
 print(f'Mối tương quan giữa giới tính và điểm thi: {correlation:.2f}')
 
 if correlation > 0.7:
@@ -1198,13 +1194,14 @@ def heatmap():
 
     numerical_df = df_cleaned.select_dtypes(include='number')
     corr_df = numerical_df.corr()
-    plt.figure(figsize=(8, 6))  
-    sns.heatmap(corr_df, annot=True, cmap='coolwarm', fmt=".2f")  
+    plt.figure(figsize=(10, 8))  
+    sns.heatmap(corr_df, annot=True, cmap='coolwarm', fmt=".2f",)  
+    plt.xticks(rotation=45, ha='right')  
     plt.title('Biểu đồ HEATMAP') 
+    plt.tight_layout() 
     plt.show()  
 
-
-
+heatmap()
 
 
 
