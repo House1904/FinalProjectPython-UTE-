@@ -21,8 +21,6 @@ def plot_exam_score_distribution():
     plt.grid(axis='y', alpha = 0.75)
     return fig
 
-print("\nNhận định về Distribution of Exam Score.")
-
 # Histogram cho Hours_Studied
 def plot_hours_studied_distribution():
     global df_cleaned
@@ -35,9 +33,6 @@ def plot_hours_studied_distribution():
     ax.set_xlim(0, 50)
     plt.grid(axis='y', alpha=0.75)
     return fig
-
-print("-" * 20)
-print("\nNhận định về Distribution of Hours Studied.")
 
 # Histogram cho Attendance
 def plot_attendance_distribution():
