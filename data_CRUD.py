@@ -785,7 +785,6 @@ if __name__ == "__main__":
             update_student_record(data)          
         elif choice == '11':
             delete_student_record()
-            sort_numeric_column_desc()
         elif choice == '12':
             sort_numeric_column()
         elif choice == '13':
