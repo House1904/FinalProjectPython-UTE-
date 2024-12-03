@@ -3,7 +3,7 @@ from tkinter import ttk, messagebox, simpledialog, Menu
 import csv
 import subprocess
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import data_visualization
+import visualization_for_GUI
 
 def makecenter(root, width, height):
     x = (root.winfo_screenwidth() // 2) - (width // 2)
