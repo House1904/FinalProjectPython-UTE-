@@ -788,19 +788,26 @@ def create_gui():
         total_pages = (len(data) + rows_per_page - 1) // rows_per_page
         current_page.set(0)  # Reset về trang đầu tiên
 
-        # Cập nhật bảng hiển thị
-        tree.delete(*tree.get_children())  # Xóa dữ liệu cũ trong bảng
+        for column in tree["columns"]:
+            tree.heading(column, text="")  # Xóa tiêu đề
+            tree.column(column, width=0)   # Ẩn cột
+        tree["columns"] = ()  # Reset cấu trúc cột
+        tree.delete(*tree.get_children())  # Xóa toàn bộ dữ liệu
 
-        # tree["columns"] = ["STT"] + headers
-        # tree.heading("STT", text="STT")
-        # tree.column("STT", width=50, anchor="center")
+        tree["columns"] = ["STT"] + headers
+        tree.heading("STT", text="STT")
+        tree.column("STT", width=50, anchor="center")
 
-        # for header in headers:
-        #     tree.heading(header, text=header)
-        #     column_width = max(len(header) * 100, 100)  # Tính chiều rộng cột (tối thiểu 100px)
-        #     tree.column(header, width=column_width, anchor="w")
+        for header in headers:
+            tree.heading(header, text=header)
+            column_width = column_widths.get(header, 10)  # Sử dụng độ rộng cột ban đầu
+            tree.column(header, width=column_width, anchor="w")
     
+        # Cập nhật bảng hiển thị
+        # tree.delete(*tree.get_children())  # Xóa dữ liệu cũ trong bảng
         display_page(tree, data, current_page.get(), rows_per_page)
+
+        tree.configure(yscrollcommand=vertical_scrollbar.set, xscrollcommand=horizontal_scrollbar.set)
 
         # Cập nhật thông tin số trang
         page_info_label.config(text=f"{current_page.get() + 1}/{total_pages}")
@@ -832,7 +839,7 @@ def create_gui():
         except subprocess.CalledProcessError as e:
             messagebox.showerror("Error", f"Error running the external program: {e}")
  
-    def update_data():
+        def update_data():
         row_num = selected_row_num.get()
 
         if row_num == -1:  # Kiểm tra nếu chưa có dòng nào được chọn
@@ -852,16 +859,15 @@ def create_gui():
                     number = float(value)
                     if number < 0:
                         errors.append(f"'{attribute}' must be a non-negative number.")
+                    else:
+                        updated_datas.append(widget.get())
                 except ValueError:
                     errors.append(f"'{attribute}' must be a valid number.")
-
-            updated_datas.append(widget.get())
 
         # Nếu có lỗi, hiển thị thông báo và dừng xử lý
         if errors:
             messagebox.showerror("Invalid Input", "\n".join(errors))
             return
-
 
         # Kiểm tra chỉ số hợp lệ
         if row_num < 0 or row_num >= len(data):
@@ -887,14 +893,14 @@ def create_gui():
         # Yêu cầu người dùng nhập các chỉ số dòng muốn xóa
         row_indices_str = simpledialog.askstring("Input", "Nhập chỉ số dòng cần xóa (phân cách bằng dấu phẩy:")
         if not row_indices_str:
-            messagebox.showwarning("Invalid Input", "Please enter valid row indices!")
+            messagebox.showwarning("Invalid Input", "Vui lòng nhập các chỉ số dòng hợp lệ!")
             return
 
         try:
             # Chuyển đổi các chỉ số dòng nhập vào thành danh sách các số nguyên
             row_indices = list(map(int, row_indices_str.split(',')))
         except ValueError:
-            messagebox.showwarning("Invalid Input", "Please enter valid numeric indices!")
+            messagebox.showwarning("Invalid Input", "Chỉ được nhập số!")
             return
 
         # Kiểm tra nếu chỉ số dòng hợp lệ (không vượt quá số dòng trong data)
@@ -921,13 +927,14 @@ def create_gui():
 
         # Xóa các dòng trong data và Treeview
         for idx in sorted(row_indices, reverse=True):  # Xóa từ cuối lên để tránh thay đổi chỉ số
-            tree.delete(tree.get_children()[idx - 1])  # Xóa dòng trong Treeview
             del data[idx - 1]  # Xóa dữ liệu khỏi data
+
+        # Xóa tất cả dữ liệu khỏi Treeview và hiển thị lại sau khi xóa
+        treeba.delete(*treeba.get_children())
 
         messagebox.showinfo("Success", "Deleted successfully!")
         # Cập nhật lại dữ liệu trong file CSV
         write_csv_data(csv_file, headers, data)
-        display_row()
 
     # Nút điều khiển
     button_frame = ttk.Frame(manage_tab)
