@@ -470,7 +470,7 @@ def create_gui():
 
         for header in headers[:n]:
             tree.heading(header, text=header)
-            column_width_n = max(len(header) * 8, 1000)
+            column_width_n = max(len(header) * 8, 10)
             tree.column(header, width=column_width_n, anchor="w")
 
         tree.delete(*tree.get_children())  # Xóa dữ liệu cũ
@@ -788,19 +788,24 @@ def create_gui():
         total_pages = (len(data) + rows_per_page - 1) // rows_per_page
         current_page.set(0)  # Reset về trang đầu tiên
 
-        # Cập nhật bảng hiển thị
-        tree.delete(*tree.get_children())  # Xóa dữ liệu cũ trong bảng
+        for column in tree["columns"]:
+            tree.heading(column, text="")  # Xóa tiêu đề
+            tree.column(column, width=0)   # Ẩn cột
+        tree["columns"] = ()  # Reset cấu trúc cột
+        tree.delete(*tree.get_children())  # Xóa toàn bộ dữ liệu
 
-        # tree["columns"] = ["STT"] + headers
-        # tree.heading("STT", text="STT")
-        # tree.column("STT", width=50, anchor="center")
+        tree["columns"] = ["STT"] + headers
+        tree.heading("STT", text="STT")
+        tree.column("STT", width=50, anchor="center")
 
-        # for header in headers:
-        #     tree.heading(header, text=header)
-        #     column_width = max(len(header) * 100, 100)  # Tính chiều rộng cột (tối thiểu 100px)
-        #     tree.column(header, width=column_width, anchor="w")
+        for header in headers:
+            tree.heading(header, text=header)
+            column_width = max(len(header)*8, 10)  # Sử dụng độ rộng cột ban đầu
+            tree.column(header, width=column_width, anchor="w")
     
         display_page(tree, data, current_page.get(), rows_per_page)
+
+        tree.configure(yscrollcommand=vertical_scrollbar.set, xscrollcommand=horizontal_scrollbar.set)
 
         # Cập nhật thông tin số trang
         page_info_label.config(text=f"{current_page.get() + 1}/{total_pages}")
@@ -852,16 +857,15 @@ def create_gui():
                     number = float(value)
                     if number < 0:
                         errors.append(f"'{attribute}' must be a non-negative number.")
+                    else:
+                        updated_datas.append(widget.get())
                 except ValueError:
                     errors.append(f"'{attribute}' must be a valid number.")
-
-            updated_datas.append(widget.get())
 
         # Nếu có lỗi, hiển thị thông báo và dừng xử lý
         if errors:
             messagebox.showerror("Invalid Input", "\n".join(errors))
             return
-
 
         # Kiểm tra chỉ số hợp lệ
         if row_num < 0 or row_num >= len(data):
@@ -884,66 +888,49 @@ def create_gui():
     
     def delete_data():
         """Xóa 1 hoặc nhiều hàng."""
-        # Kiểm tra nếu người dùng muốn xóa 1 hàng hoặc nhiều hàng
-        delete_choice = simpledialog.askstring(
-            "Delete Choice", "Do you want to delete 1 row or multiple rows? Enter '1' for one row, '2' for multiple rows."
+        # Yêu cầu người dùng nhập các chỉ số dòng muốn xóa
+        row_indices_str = simpledialog.askstring("Input", "Nhập chỉ số dòng cần xóa (phân cách bằng dấu phẩy:")
+        if not row_indices_str:
+            messagebox.showwarning("Invalid Input", "Vui lòng nhập các chỉ số dòng hợp lệ!")
+            return
+
+        try:
+            # Chuyển đổi các chỉ số dòng nhập vào thành danh sách các số nguyên
+            row_indices = list(map(int, row_indices_str.split(',')))
+        except ValueError:
+            messagebox.showwarning("Invalid Input", "Chỉ được nhập số!")
+            return
+
+        # Kiểm tra nếu chỉ số dòng hợp lệ (không vượt quá số dòng trong data)
+        max_index = len(data)
+        invalid_indices = [idx for idx in row_indices if idx < 1 or idx > max_index]
+            
+        if invalid_indices:
+            messagebox.showwarning("Invalid Row Indices", f"The following indices are out of range: {', '.join(map(str, invalid_indices))}")
+            return
+            
+        # Hiển thị các dòng được chọn trong bảng Treeba
+        treeba.delete(*treeba.get_children())  # Xóa dữ liệu cũ trong bảng
+        selected_rows = [data[idx - 1] for idx in row_indices]  # Lấy dữ liệu dòng được chọn
+        for row in selected_rows:
+            treeba.insert("", "end", values= row)
+
+        # Hỏi người dùng xác nhận xóa
+        confirm = messagebox.askyesno(
+            "Confirm Deletion", 
+            f"Do you want to delete the selected rows: {', '.join(map(str, row_indices))}?"
         )
+        if not confirm:
+            return
 
-        if delete_choice == "1":
-            # Xóa 1 hàng
-            try:
-                row_num = int(row_num_entry.get())  # Lấy số dòng từ Entry
-            except ValueError:
-                messagebox.showwarning("Invalid Input", "Please enter a valid number in the row entry!")
-                return
+        # Xóa các dòng trong data và Treeview
+        for idx in sorted(row_indices, reverse=True):  # Xóa từ cuối lên để tránh thay đổi chỉ số
+            del data[idx - 1]  # Xóa dữ liệu khỏi data
 
-            del data[row_num - 1]  # Xóa dữ liệu từ danh sách
-            tree.delete(*treeba.get_children())  # Xóa dòng khỏi bảng
-            messagebox.showinfo("Success", "Row deleted successfully!")
+        # Xóa tất cả dữ liệu khỏi Treeview và hiển thị lại sau khi xóa
+        treeba.delete(*treeba.get_children())
 
-        elif delete_choice == "2":
-            # Xóa nhiều hàng
-            # Yêu cầu người dùng nhập các chỉ số dòng muốn xóa
-            row_indices_str = simpledialog.askstring("Input", "Enter row indices to delete (comma-separated, e.g. 1,3,5):")
-            if not row_indices_str:
-                messagebox.showwarning("Invalid Input", "Please enter valid row indices!")
-                return
-
-            try:
-                # Chuyển đổi các chỉ số dòng nhập vào thành danh sách các số nguyên
-                row_indices = list(map(int, row_indices_str.split(',')))
-            except ValueError:
-                messagebox.showwarning("Invalid Input", "Please enter valid numeric indices!")
-                return
-
-            # Kiểm tra nếu chỉ số dòng hợp lệ (không vượt quá số dòng trong data)
-            max_index = len(data)
-            invalid_indices = [idx for idx in row_indices if idx < 1 or idx > max_index]
-            
-            if invalid_indices:
-                messagebox.showwarning("Invalid Row Indices", f"The following indices are out of range: {', '.join(map(str, invalid_indices))}")
-                return
-            
-            # Hiển thị các dòng được chọn trong bảng Treeba
-            treeba.delete(*treeba.get_children())  # Xóa dữ liệu cũ trong bảng
-            selected_rows = [data[idx - 1] for idx in row_indices]  # Lấy dữ liệu dòng được chọn
-            for idx, row in zip(row_indices, selected_rows):
-                treeba.insert("", "end", values=[idx] + row)
-
-            # Hỏi người dùng xác nhận xóa
-            confirm = messagebox.askyesno(
-                "Confirm Deletion", 
-                f"Do you want to delete the selected rows: {', '.join(map(str, row_indices))}?"
-            )
-            if not confirm:
-                return
-
-            # Xóa các dòng trong data và Treeview
-            for idx in sorted(row_indices, reverse=True):  # Xóa từ cuối lên để tránh thay đổi chỉ số
-                tree.delete(tree.get_children()[idx - 1])  # Xóa dòng trong Treeview
-                del data[idx - 1]  # Xóa dữ liệu khỏi data
-                messagebox.showinfo("Success", "Deleted successfully!")
-
+        messagebox.showinfo("Success", "Deleted successfully!")
         # Cập nhật lại dữ liệu trong file CSV
         write_csv_data(csv_file, headers, data)
 
@@ -977,7 +964,7 @@ def create_gui():
     treeba = ttk.Treeview(table_frameba,
                         columns=headers,
                         show="headings",
-                        height=1)  
+                        height=7)  
     for header in headers:
          treeba.heading(header, text=header)
          treeba.column(header, width=150, anchor="w")
