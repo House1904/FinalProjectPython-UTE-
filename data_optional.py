@@ -1,1151 +1,1148 @@
 import tkinter as tk
-from tkinter import ttk, messagebox, simpledialog, Menu
-import csv
+from tkinter import ttk, messagebox, simpledialog
 import subprocess
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import visualization_for_GUI
-import warnings
-warnings.filterwarnings("ignore")
+import pandas as pd
+import data_visualization
+
+file_path = "data_source\\cleaned_data.csv"
+recent_files_data = pd.read_csv(file_path)
+
+edited_data = recent_files_data.copy()
+
+# Tạo danh sách các hàm vẽ
+plot_one = [  
+    data_visualization.plot_hours_studied_distribution, 
+    data_visualization.plot_attendance_distribution,
+    data_visualization.plot_parental_involvement_distribution,
+    data_visualization.plot_access_to_resources_distribution,
+    data_visualization.plot_extracurricular_activities_distribution,
+    data_visualization.plot_sleep_hours_distribution,
+    data_visualization.plot_previous_scores_distribution,
+    data_visualization.plot_motivation_level_distribution,
+    data_visualization.plot_internet_access_distribution,
+    data_visualization.plot_tutoring_sessions_distribution,
+    data_visualization.plot_family_income_distribution,
+    data_visualization.plot_teacher_quality_distribution,
+    data_visualization.plot_school_type_distribution,
+    data_visualization.plot_peer_influence_distribution,
+    data_visualization.plot_physical_activity_distribution,
+    data_visualization.plot_learning_disabilities_distribution,
+    data_visualization.plot_parental_education_level_distribution,
+    data_visualization.plot_distance_from_home_distribution,
+    data_visualization.plot_gender_distribution,
+    data_visualization.plot_exam_score_distribution,
+]
+
+insight_one = [
+    data_visualization.hours_studied_insight,
+    data_visualization.attendance_insight,
+    data_visualization.parental_involvement_insight,
+    data_visualization.access_to_resources_insight,
+    data_visualization.extracurricular_activities_insight,
+    data_visualization.sleep_hours_insight,
+    data_visualization.previous_scores_insight,
+    data_visualization.motivation_level_insight,
+    data_visualization.internet_access_insight,
+    data_visualization.tutoring_sessions_insight,
+    data_visualization.family_income_insight,
+    data_visualization.teacher_quality_insight,
+    data_visualization.school_type_insight,
+    data_visualization.peer_influence_insight,
+    data_visualization.physical_activity_insight,
+    data_visualization.learning_disabilities_insight,
+    data_visualization.parental_education_insight,
+    data_visualization.distance_from_home_insight,
+    data_visualization.gender_insight,
+    data_visualization.exam_score_insight,
+]
+
+plots_and_insights_two = [  
+    (data_visualization.scatterplot_Hours_Studied_and_Exam_Score, None),
+    (data_visualization.scatterplot_Attendance_and_Exam_Score, None),
+    (data_visualization.scatterplot_Previous_Scores_and_Exam_Score, None),
+    (data_visualization.scatterplot_Numcol_and_Exam_Score_with_Extracurricular_Activities, 
+     data_visualization.compare_exam_scores_by_activity),
+    (data_visualization.scatterplot_Numcol_and_Exam_Score_with_Gender, 
+     data_visualization.compare_exam_scores_by_gender),
+    (data_visualization.scatterplot_Numcol_and_Exam_Score_with_Internet_Access, 
+     data_visualization.compare_exam_scores_by_internet_access),
+    (data_visualization.scatterplot_Numcol_and_Exam_Score_with_Learning_Disabilities, 
+     data_visualization.compare_exam_scores_by_learning_disabilities),
+    (data_visualization.boxplot_Parental_Involvement_and_Exam_Score, None),
+    (data_visualization.boxplot_Access_to_Resources_and_Exam_Score, None),
+    (data_visualization.boxplot_Extracurricular_Activities_and_Exam_Score, None),
+    (data_visualization.boxplot_Sleep_Hours_and_Exam_Score, None),
+    (data_visualization.boxplot_Motivation_Level_and_Exam_Score, None),
+    (data_visualization.boxplot_Internet_Access_and_Exam_Score, None),
+    (data_visualization.boxplot_Tutoring_Sessions_and_Exam_Score, None),
+    (data_visualization.boxplot_Family_Income_and_Exam_Score, None),
+    (data_visualization.boxplot_Teacher_Quality_and_Exam_Score, None),
+    (data_visualization.boxplot_School_Type_and_Exam_Score, None),
+    (data_visualization.boxplot_Peer_Influence_and_Exam_Score, None),
+    (data_visualization.boxplot_Physical_Activity_and_Exam_Score, None),
+    (data_visualization.boxplot_Learning_Disabilities_and_Exam_Score, None),
+    (data_visualization.boxplot_Parental_Education_Level_and_Exam_Score, None),
+    (data_visualization.boxplot_Distance_from_Home_and_Exam_Score, None),
+    (data_visualization.boxplot_Gender_and_Exam_Score, None)
+]
+
+categories = [
+    ("QUẢN LÍ", "#F52F57"),
+    ("PHÂN TÍCH", "#3DDE86"),
+]
+
+# Biến lưu trạng thái danh mục hiện tại
+current_category = None
+buttons = {}
+
+def update_category_colors(selected_category):
+    """Cập nhật màu sắc các nút danh mục."""
+    for category, button in buttons.items():
+        if category == selected_category:
+            button.config(bg="#ffffff", fg="#000000")  # Đổi màu
+        else:
+            button.config(bg=category_colors[category])  # Trả lại màu gốc
+
+def show_category(category_name):
+    global current_category
+    current_category = category_name
+    update_category_colors(category_name)
+
+    # Xóa bảng Recent Files
+    for widget in content_frame.winfo_children():
+        widget.destroy()
+
+    if category_name == "QUẢN LÍ":
+        show_recent_files()
+    elif category_name == "PHÂN TÍCH":
+        show_chart1()
 
 def makecenter(root, width, height):
     x = (root.winfo_screenwidth() // 2) - (width // 2)
     y = (root.winfo_screenheight() // 2) - (height // 2)
     root.geometry('{}x{}+{}+{}'.format(width, height, x, y))
 
-# Dữ liệu bảng: Attribute và Description
-attributes_data = [
-    ("Hours_Studied", "Number of hours spent studying per week."),
-    ("Attendance", "Percentage of classes attended."),
-    ("Parental_Involvement", "Level of parental involvement in education (Low, Medium, High)."),
-    ("Access_to_Resources", "Availability of educational resources (Low, Medium, High)."),  
-    ("Extracurricular_Activities", "Participation in extracurricular activities (Yes, No)."),
-    ("Sleep_Hours", "Average number of hours of sleep per night."),    
-    ("Previous_Scores", "Scores from previous exams."),
-    ("Motivation_Level", "Student's level of motivation (Low, Medium, High)."),    
-    ("Internet_Access", "Availability of internet access (Yes, No)."),
-    ("Tutoring_Sessions", "Number of tutoring sessions attended per month."),
-    ("Family_Income", "Family income level (Low, Medium, High)."),
-    ("Teacher_Quality", "Quality of the teachers (Low, Medium, High)"),
-    ("School_Type", "Type of school attended (Public, Private)."),
-    ("Peer_Influence", "Influence of peers on academic performance (Positive, Neutral, Negative)."),
-    ("Physical_Activity", "Average number of hours of physical activity per week"),
-    ("Learning_Disabilities", "Presence of learning disabilities (Yes, No)"),
-    ("Parental_Education_Level", "Highest education level of parents (High School, College, Postgraduate)"),
-    ("Distance_from_Home", "Distance from home to school (Near, Moderate, Far)."),
-    ("Gender", "Gender of the student (Male, Female)."),
-    ("Exam_Score", "Final exam score.")
-]
+def edit_cell(event):
+    """Cho phép chỉnh sửa ô dữ liệu khi nhấp đúp."""
+    selected_item = tree.focus()  # Lấy item đang được chọn
+    if not selected_item:
+        return
 
-text_columns = ["Parental_Involvement", "Access_to_Resources",
-                        "Extracurricular_Activities", "Motivation_Level",
-                        "Internet_Access", "Family_Income", "Teacher_Quality",
-                        "School_Type", "Peer_Influence","Learning_Disabilities", 
-                        "Parental_Education_Level", "Distance_from_Home", "Gender"]
+    col = tree.identify_column(event.x)  # Lấy cột đang nhấp
+    col_index = int(col.replace("#", "")) - 1  # Chuyển cột thành chỉ số
+    # Không cho phép chỉnh sửa cột STT
+    if col_index == 0:  # Cột đầu tiên (STT)
+        return
+    column_name = recent_files_data.columns[col_index-1]  # Lấy tên cột
+    row_id = tree.index(selected_item)  # Lấy chỉ số hàng
 
-numeric_columns = ["Hours_Studied", "Attendance", "Sleep_Hours",
-                    "Previous_Scores", "Tutoring_Sessions", "Physical_Activity", "Exam_Score"]
+    numeric_columns = {
+        "Hours_Studied": (0,168),
+        "Attendance": (0,100),
+        "Sleep_Hours":(4,12),
+        "Previous_Scores": (0,100),
+        "Tutoring_Sessions": (0,8),
+        "Phycical_Activity": (0,6),
+        "Exam_Score": (0,100),
+        }
 
-# File CSV chứa dữ liệu câu trả lời
-csv_file = "data_source\\cleaned_data.csv"
+    # Hiện giá trị hiện tại
+    current_value = tree.item(selected_item, "values")[col_index]
 
-# Hàm đọc dữ liệu từ file CSV
-def load_csv_data(file_path):
-    data = []
-    headers = []
-    try:
-        with open(file_path, mode="r", encoding="utf-8") as file:
-            reader = csv.reader(file)
-            headers = next(reader)  # Lấy tiêu đề cột
-            for row in reader:
-                data.append(row)
-    except Exception as e:
-        print(f"Error reading {file_path}: {e}")
-    return headers, data
+    # Tạo Entry hoặc Combobox tùy theo kiểu dữ liệu
+    if column_name in numeric_columns:  # Nếu cột thuộc loại số, dùng Entry
+        entry = tk.Entry(content_frame, font=("Arial", 10))
+        entry.insert(0, current_value)
+        entry.place(
+            x=event.x_root - content_frame.winfo_rootx(),
+            y=event.y_root - content_frame.winfo_rooty(),
+        )
+        entry.focus_set()
 
-headers, data = load_csv_data(csv_file)
-
-# Hàm ghi dữ liệu vào file CSV
-def write_csv_data(file_path, headers, data):
-    try:
-        with open(file_path, mode="w", newline="", encoding="utf-8") as file:
-            writer = csv.writer(file)
-            writer.writerow(headers)
-            writer.writerows(data)
-    except Exception as e:
-        print(f"Error writing to {file_path}: {e}")
-
-# Hàm hiển thị dữ liệu trong bảng với phân trang
-def display_page(tree, data, page, rows_per_page):
-    # Xóa dữ liệu cũ trong Treeview
-    for row in tree.get_children():
-        tree.delete(row)
-
-    # Tính chỉ số bắt đầu và kết thúc
-    start_idx = page * rows_per_page
-    end_idx = min(start_idx + rows_per_page, len(data))
-    page_data = data[start_idx:end_idx]
-
-    # Thêm dữ liệu vào bảng
-    for i, row in enumerate(page_data, start=start_idx + 1):
-        tree.insert("", "end", values=[i] + row)
-
-def convert_to_number(value):
-            """Chuyển đổi giá trị sang số (float). Nếu không thể chuyển đổi, trả về giá trị lớn để đưa xuống cuối."""
+        def save_edit(event):
+            """Lưu giá trị mới và cập nhật Treeview."""
+            new_value = entry.get()
             try:
-                return float(value)
+                new_value = int(new_value)
+                min_value, max_value = numeric_columns[column_name]  # Lấy giới hạn cho cột
+                if not (min_value <= new_value <= max_value):
+                    messagebox.showerror("Lỗi", f"Giá trị phải nằm trong khoảng từ {min_value} đến {max_value}.")
+                    return
             except ValueError:
-                return float('inf')  # Giá trị lớn để đưa các giá trị không hợp lệ xuống cuối
-
-# Tạo giao diện ứng dụng
-def create_gui():
-    # Tạo cửa sổ chính
-    root = tk.Tk()
-    root.title("Survey Application")
-   
-    # Tạo Notebook với các tab
-    notebook = ttk.Notebook(root)
-    notebook.pack(fill="both", expand=True)
-
-    # Tab 1: Bảng câu hỏi
-    questions_tab = ttk.Frame(notebook)
-    notebook.add(questions_tab, text="Data Description")
-
-    # Tab 2: Câu trả lời
-    answers_tab = ttk.Frame(notebook)
-    notebook.add(answers_tab, text="View Answers")
-
-    # Tab 3: Bảng quản lý
-    manage_tab = ttk.Frame(notebook)
-    notebook.add(manage_tab, text="Manage Data")
-
-    # Tab 4: Bảng biểu đồ
-    chart_tab = ttk.Frame(notebook)
-    notebook.add(chart_tab, text="Chart")
-
-    # ===== Tab 1: Bảng câu hỏi =====
-    table_frame = ttk.LabelFrame(questions_tab, text="Description")
-    table_frame.pack(fill="both", expand=True, padx=10, pady=10)
-
-    # Sử dụng Treeview để hiển thị bảng
-    attributes_table = ttk.Treeview(table_frame, columns=("Attribute", "Description"), show="headings", height=15)
-    attributes_table.heading("Attribute", text="Attribute")
-    attributes_table.heading("Description", text="Description")
-    attributes_table.column("Attribute", width=200, anchor="w")
-    attributes_table.column("Description", width=500, anchor="w")
-    attributes_table.pack(fill="both", expand=True, padx=10, pady=10)
-
-    # Thêm dữ liệu vào bảng
-    for attr, desc in attributes_data:
-        attributes_table.insert("", "end", values=(attr, desc))
-
-    # ===== Tab 2: Hiển thị câu trả lời =====
-    def filter_by_text():
-        """Lọc dữ liệu theo giá trị chữ."""
-        # Hiển thị danh sách cột có giá trị chữ
-        column_info = "\n".join([f"{idx + 1}. {header}" for idx, header in enumerate(text_columns)])
-        input_message = f"Các cột có sẵn:\n{column_info}\n\nNhập chỉ số các cột cần in ra, cách nhau bằng dấu phẩy:"
-        
-        # Hộp thoại nhập
-        column_indices_str = simpledialog.askstring("Input", input_message)
-        if not column_indices_str:
-            messagebox.showwarning("Invalid Input", "No indices entered!")
-            return
-
-        try:
-            # Chuyển đổi chỉ số cột nhập vào thành danh sách số nguyên
-            column_indices = sorted(set(int(idx.strip()) - 1 for idx in column_indices_str.split(",")))  # Chỉ số bắt đầu từ 0
-        except ValueError:
-            messagebox.showerror("Error", "Invalid column indices! Please enter valid numbers.")
-            return
-
-        # Kiểm tra tính hợp lệ của chỉ số
-        invalid_indices = [idx for idx in column_indices if idx < 0 or idx >= len(headers)]
-        if invalid_indices:
-            messagebox.showerror(
-                "Error", f"Invalid column indices: {', '.join(str(idx + 1) for idx in invalid_indices)}"
-            )
-            return
-
-        # Lấy tên cột từ chỉ số
-        selected_columns = [text_columns[idx] for idx in column_indices]
-
-        # Tạo cửa sổ để nhập giá trị lọc cho từng cột
-        filter_window = tk.Toplevel(root)
-        filter_window.title("Enter Filter Values for Columns")
-        filter_window.geometry("400x400")
-        filter_window.grab_set()  # Modal window
-
-        filter_comboboxes = {}
-        for idx, col in enumerate(selected_columns):
-            label = ttk.Label(filter_window, text=f"Value for {col}:")
-            label.grid(row=idx, column=0, padx=10, pady=5, sticky="w")
-
-            # Lấy các giá trị duy nhất trong cột từ dữ liệu
-            column_index = headers.index(col)
-            unique_values = sorted(set(row[column_index] for row in data if row[column_index]))  # Các giá trị duy nhất
-
-            # Tạo Combobox
-            combobox = ttk.Combobox(filter_window, values=unique_values, state="readonly", width=20)
-            combobox.grid(row=idx, column=1, padx=10, pady=5, sticky="w")
-            filter_comboboxes[col] = combobox
-
-        def apply_filter():
-            filter_values = {}
-            for col, entry in filter_comboboxes.items():
-                value = entry.get().strip()
-                if value:  # Chỉ lưu giá trị đã nhập
-                    filter_values[col] = value
-
-            if not filter_values:
-                raise ValueError("No filter values entered for any column!")
-
-            # Lọc dữ liệu
-            filtered_data = []
-            column_indices_map = {col: headers.index(col) for col in filter_values.keys()}
-            for row in data:
-                match = all(row[column_indices_map[col]] == value for col, value in filter_values.items())
-                if match:
-                    filtered_data.append(row)
-
-            if not filtered_data:
-                messagebox.showinfo("Fail", "No matching rows found for the specified filters.")
+                messagebox.showerror("Lỗi", "Giá trị nhập vào không hợp lệ.")
                 return
+            tree.set(selected_item, column=column_name, value=new_value)  # Cập nhật giá trị Treeview
+            edited_data.at[row_id, column_name] = new_value  # Cập nhật vào DataFrame
+            entry.destroy()
 
-            # Cập nhật bảng với dữ liệu đã lọc
-            tree.delete(*tree.get_children())
-            for idx, row in enumerate(filtered_data, start=1):
-                tree.insert("", "end", values=[idx] + row)
+        entry.bind("<Return>", save_edit)  # Lưu thay đổi khi nhấn Enter
+        entry.bind("<FocusOut>", lambda _: entry.destroy())  # Hủy khi mất tiêu điểm
 
-            filter_window.destroy()
-            messagebox.showinfo("Success", "Filtered rows by value in columns")
+    else:  # Nếu cột không thuộc loại số, dùng Combobox
+        unique_values = recent_files_data[column_name].dropna().unique().tolist()  # Lấy giá trị duy nhất
+        combobox = ttk.Combobox(content_frame, values=unique_values, font=("Arial", 10))
+        combobox.set(current_value)
+        combobox.place(
+            x=event.x_root - content_frame.winfo_rootx(),
+            y=event.y_root - content_frame.winfo_rooty(),
+        )
+        combobox.focus_set()
+        combobox.event_generate("<Button-1>")
 
-        # Nút OK và Cancel
-        button_frame = ttk.Frame(filter_window)
-        button_frame.grid(row=len(selected_columns), columnspan=2, pady=10)
-
-        ok_button = ttk.Button(button_frame, text="OK", command=apply_filter)
-        ok_button.pack(side="left", padx=5)
-
-        cancel_button = ttk.Button(button_frame, text="Cancel", command=filter_window.destroy)
-        cancel_button.pack(side="left", padx=5)
-
-    def filter_by_single_value():
-        """Lọc dữ liệu theo một giá trị duy nhất trong một cột."""
-        column_info = "\n".join([f"{idx + 1}. {header}" for idx, header in enumerate(numeric_columns)])
-        input_message = f"Các cột có sẵn:\n{column_info}\n\nNhập chỉ số các cột cần in ra, cách nhau bằng dấu phẩy:"
+        def save_edit(event):
+            """Lưu giá trị mới và cập nhật Treeview."""
+            new_value = combobox.get()
+            tree.set(selected_item, column=column_name, value=new_value)  # Cập nhật giá trị Treeview
+            edited_data.at[row_id, column_name] = new_value  # Cập nhật vào DataFrame
+            combobox.destroy()
         
-        # Hộp thoại nhập
-        column_indices_str = simpledialog.askstring("Input", input_message)
-        if not column_indices_str:
-            messagebox.showwarning("Invalid Input", "No indices entered!")
-            return
+        combobox.bind("<Return>", save_edit)  # Lưu thay đổi khi nhấn Enter
+        combobox.bind("<FocusOut>", lambda _: combobox.destroy())  # Hủy khi mất tiêu
 
-        try:
-            # Lấy chỉ số cột (1-based) và chuyển sang 0-based
-            column_index = int(column_indices_str.strip()) - 1
-            if column_index < 0 or column_index >= len(numeric_columns):
-                raise ValueError
-        except ValueError:
-            messagebox.showerror("Error", "Invalid column index! Please enter a valid number.")
-            return
+def update_csv():
+    """Lưu thay đổi vào file CSV với xác nhận từ người dùng."""
+    confirm = messagebox.askyesno("Xác nhận", "Bạn có chắc chắn muốn lưu thay đổi vào file CSV?")
+    if confirm:
+        edited_data.to_csv(file_path, index=False)  # Ghi dữ liệu vào file
+        messagebox.showinfo("Thành công", "Dữ liệu đã được lưu thành công!")
+    else:
+        messagebox.showinfo("Hủy bỏ", "Dữ liệu chưa được lưu.")
 
-        # Lấy tên cột tương ứng
-        column_name = numeric_columns[column_index]
+def delete_selected_rows():
+    """Xóa các dòng được chọn sau khi xác nhận."""
+    selected_items = tree.selection()  # Lấy các dòng được chọn
 
-        try:
-            filter_value = float(simpledialog.askstring("Input", f"Enter value to filter in column '{column_name}':"))
-        except ValueError:
-            messagebox.showerror("Error", "Invalid numeric value entered!")
-            return
+    if not selected_items:
+        messagebox.showwarning("Cảnh báo", "Vui lòng chọn ít nhất một dòng để xóa.")
+        return
 
-        # Lọc dữ liệu
-        column_index = headers.index(column_name)
-        filtered_data = [row for row in data if convert_to_number(row[column_index]) == filter_value]
+    confirm = messagebox.askyesno("Xác nhận", "Bạn có chắc chắn muốn xóa dòng đã chọn?")
+    if confirm:
+        for item in selected_items:
+            # Lấy giá trị STT từ Treeview
+            stt = int(tree.item(item, "values")[0])  # Cột STT là cột đầu tiên, giá trị tại index 0
 
-        # Cập nhật bảng với dữ liệu đã lọc
-        update_treeview(filtered_data)
-        messagebox.showinfo("Success", f"Filtered rows where '{column_indices_str}' equals {filter_value}.")
+            # Xóa dòng trong DataFrame dựa trên STT
+            index_to_drop = stt - 1  # STT bắt đầu từ 1, trong khi DataFrame index bắt đầu từ 0
+            if 0 <= index_to_drop < len(edited_data):
+                edited_data.drop(index=edited_data.index[index_to_drop], inplace=True)
 
-    def filter_by_multiple_values():
-        """Lọc dữ liệu theo nhiều giá trị trong một cột."""
-        column_info = "\n".join([f"{idx + 1}. {header}" for idx, header in enumerate(numeric_columns)])
-        input_message = f"Các cột có sẵn:\n{column_info}\n\nNhập chỉ số các cột cần in ra, cách nhau bằng dấu phẩy:"
-        
-        # Hộp thoại nhập
-        column_indices_str = simpledialog.askstring("Input", input_message)
-        if not column_indices_str:
-            messagebox.showwarning("Invalid Input", "No indices entered!")
-            return
+            # Xóa dòng khỏi Treeview
+            tree.delete(item)
 
-        try:
-            # Lấy chỉ số cột (1-based) và chuyển sang 0-based
-            column_index = int(column_indices_str.strip()) - 1
-            if column_index < 0 or column_index >= len(numeric_columns):
-                raise ValueError
-        except ValueError:
-            messagebox.showerror("Error", "Invalid column index! Please enter a valid number.")
-            return
+        # Cập nhật lại DataFrame để làm mới chỉ số
+        edited_data.reset_index(drop=True, inplace=True)
+        messagebox.showinfo("Thành công", "Dòng đã được xóa thành công!")
 
-        # Lấy tên cột tương ứng
-        column_name = numeric_columns[column_index]
-        try:
-            filter_values = list(map(float, simpledialog.askstring(
-                "Input", f"Enter values to filter in column '{column_name}' (comma-separated):").split(',')))
-        except ValueError:
-            messagebox.showerror("Error", "Invalid numeric values entered!")
-            return
+def add_data():
+    """Thêm thông tin khảo sát mới."""
+    try:
+        subprocess.run(["python", "New_survey.py"], check=True) # Gọi chương trình New_survey.py
+    except subprocess.CalledProcessError as e:
+        messagebox.showerror("Error", f"Error running the external program: {e}")
 
-        # Lọc dữ liệu
-        column_index = headers.index(column_name)
-        filtered_data = [row for row in data if convert_to_number(row[column_index]) in filter_values]
+def display_data_in_treeview(data):
+    """Hiển thị DataFrame trong Treeview."""
+    # Xóa dữ liệu cũ
+    tree.delete(*tree.get_children())
 
-        # Cập nhật bảng với dữ liệu đã lọc
-        update_treeview(filtered_data)
+    # Cập nhật cột
+    tree["columns"] = ['STT'] + list(data.columns)
+    tree.heading("STT", text="STT")
+    tree.column("STT", width=50, anchor="center")
+    for col in data.columns:
+        tree.heading(col, text=col)
+        tree.column(col, anchor="w", width=100)
 
-    def filter_by_range():
-        """Lọc dữ liệu trong phạm vi giá trị của một cột."""
-        column_info = "\n".join([f"{idx + 1}. {header}" for idx, header in enumerate(numeric_columns)])
-        input_message = f"Các cột có sẵn:\n{column_info}\n\nNhập chỉ số các cột cần in ra, cách nhau bằng dấu phẩy:"
-        
-        # Hộp thoại nhập
-        column_indices_str = simpledialog.askstring("Input", input_message)
-        if not column_indices_str:
-            messagebox.showwarning("Invalid Input", "No indices entered!")
-            return
+    # Thêm dữ liệu mới
+    for _, row in data.iterrows():
+        tree.insert("", "end", values= [_+1] + list(row))
 
-        try:
-            # Lấy chỉ số cột (1-based) và chuyển sang 0-based
-            column_index = int(column_indices_str.strip()) - 1
-            if column_index < 0 or column_index >= len(numeric_columns):
-                raise ValueError
-        except ValueError:
-            messagebox.showerror("Error", "Invalid column index! Please enter a valid number.")
-            return
+def filter_by_text():
+    """Lọc dữ liệu theo giá trị chữ trong các cột đã chọn."""
+    # Tạo cửa sổ chọn cột
+    filter_window = tk.Toplevel(root)
+    filter_window.title("Lọc theo giá trị chữ")
+    filter_window.geometry("400x600")
 
-        # Lấy tên cột tương ứng
-        column_name = numeric_columns[column_index]
+    # Lọc các cột có kiểu dữ liệu là string
+    text_columns = [col for col in recent_files_data.columns if recent_files_data[col].dtype == 'object']
 
-        try:
-            min_value = float(simpledialog.askstring("Input", f"Enter minimum value for column '{column_name}':"))
-            max_value = float(simpledialog.askstring("Input", f"Enter maximum value for column '{column_name}':"))
-        except ValueError:
-            messagebox.showerror("Error", "Invalid numeric values entered!")
-            return
+    if not text_columns:
+        tk.Label(filter_window, text="Không có cột nào chứa giá trị chữ.", font=("Arial", 12)).pack(pady=10)
+        return
 
-        # Lọc dữ liệu
-        column_index = headers.index(column_name)
-        filtered_data = [row for row in data if min_value <= convert_to_number(row[column_index]) <= max_value]
+    # Biến lưu trạng thái của các cột được chọn
+    column_selected = {col: tk.BooleanVar(value=False) for col in text_columns}
+    column_to_value = {col: tk.StringVar(value="") for col in text_columns}
 
-        # Cập nhật bảng với dữ liệu đã lọc
-        update_treeview(filtered_data)
-    def update_treeview(filtered_data):
-        """Cập nhật bảng Treeview với dữ liệu đã lọc."""
-        tree.delete(*tree.get_children())  # Xóa dữ liệu cũ
-        for idx, row in enumerate(filtered_data, start=1):
-            tree.insert("", "end", values=[idx] + row)
+    # Hiển thị danh sách các cột với Checkbutton và Combobox để chọn giá trị
+    tk.Label(filter_window, text="Chọn các cột và giá trị muốn lọc:", font=("Arial", 12)).pack(pady=10)
 
-    def ask_numeric_column():
-        """Hiển thị cửa sổ với Combobox để người dùng chọn cột muốn sắp xếp."""
-        sort_window = tk.Toplevel(root)
-        sort_window.title("Select Column")
-        sort_window.geometry("300x150")
-        sort_window.grab_set()  # Đặt cửa sổ ở chế độ modal (ngăn người dùng tương tác với cửa sổ khác)
+    columns_frame = tk.Frame(filter_window)
+    columns_frame.pack(pady=10, fill=tk.BOTH, expand=True)
 
-        # Label hướng dẫn
-        label = ttk.Label(sort_window, text="Select a column:")
-        label.pack(pady=10)
+    # Thanh cuộn cho danh sách cột
+    columns_canvas = tk.Canvas(columns_frame)
+    scrollbar = ttk.Scrollbar(columns_frame, orient="vertical", command=columns_canvas.yview)
+    columns_container = tk.Frame(columns_canvas)
 
-        # Combobox để chọn cột
-        selected_column = tk.StringVar()
-        combobox2 = ttk.Combobox(sort_window, textvariable=selected_column, state="readonly", values=numeric_columns)
-        combobox2.pack(pady=5)
-        combobox2.set(numeric_columns[0])  # Giá trị mặc định
+    columns_container.bind("<Configure>", lambda e: columns_canvas.configure(scrollregion=columns_canvas.bbox("all")))
+    columns_canvas.create_window((0, 0), window=columns_container, anchor="nw")
+    columns_canvas.configure(yscrollcommand=scrollbar.set)
 
-        # Xử lý khi nhấn nút OK
-        def confirm_selection():
-            sort_window.destroy()  # Đóng cửa sổ
+    columns_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-        # Nút OK và Cancel
-        button_frame = ttk.Frame(sort_window)
-        button_frame.pack(pady=10)
+    for col in text_columns:
+        frame = tk.Frame(columns_container)
+        frame.pack(fill=tk.X, pady=2)
 
-        ok_button = ttk.Button(button_frame, text="OK", command=confirm_selection)
-        ok_button.pack(side="left", padx=5)
+        # Checkbutton để chọn cột
+        tk.Checkbutton(frame, text=col, variable=column_selected[col], font=("Arial", 10)).pack(side=tk.LEFT, padx=5)
 
-        cancel_button = ttk.Button(button_frame, text="Cancel", command=sort_window.destroy)
-        cancel_button.pack(side="left", padx=5)
+        # Combobox để chọn giá trị
+        unique_values = recent_files_data[col].dropna().unique().tolist()
+        combobox = ttk.Combobox(frame, textvariable=column_to_value[col], font=("Arial", 10), width=20)
+        combobox['values'] = unique_values  # Gán danh sách giá trị duy nhất
+        combobox.pack(side=tk.RIGHT, padx=5)
 
-        sort_window.wait_window()  # Chờ người dùng đóng cửa sổ
-        return selected_column.get()
+    def apply_filter():
+        """Áp dụng bộ lọc dựa trên các giá trị đã chọn."""
+        global edited_data, current_page, total_pages
+
+        recent_files_data = pd.read_csv(file_path)
+        filtered_data = recent_files_data
+
+        # Lọc dữ liệu theo các cột được chọn
+        for col, selected in column_selected.items():
+            if selected.get():  # Nếu cột được chọn
+                value = column_to_value[col].get().strip()
+                if value:  # Nếu giá trị được chọn
+                    filtered_data = filtered_data[filtered_data[col] == value]
+
+        # Cập nhật dữ liệu đã chỉnh sửa
+        edited_data = filtered_data.copy()
+
+        # Giữ nguyên STT ban đầu
+        if "Original_STT" not in edited_data.columns:
+            edited_data["Original_STT"] = range(1, len(edited_data) + 1)
+
+        # Cập nhật phân trang
+        current_page = 0
+        total_pages = (len(edited_data) + rows_per_page - 1) // rows_per_page
+
+        # Hiển thị lại dữ liệu
+        update_treeview(current_page)
+
+        filter_window.destroy()
     
-    def ask_text_column():
-        """Hiển thị cửa sổ với Combobox để người dùng chọn cột muốn sắp xếp."""
-        sort_window = tk.Toplevel(root)
-        sort_window.title("Select Column")
-        sort_window.geometry("300x150")
-        sort_window.grab_set()  # Đặt cửa sổ ở chế độ modal (ngăn người dùng tương tác với cửa sổ khác)
+    tk.Button(filter_window, text="Lọc", command=apply_filter, bg="#56CBF9", fg="#FFFFFF").pack(pady=10)
 
-        # Label hướng dẫn
-        label = ttk.Label(sort_window, text="Select a column:")
-        label.pack(pady=10)
+def filter_by_single_value():
+    """Lọc dữ liệu theo một giá trị duy nhất trong một cột."""
+    recent_files_data = pd.read_csv(file_path)
+    filter_window = tk.Toplevel(root)
+    filter_window.title("Lọc theo giá trị duy nhất")
+    filter_window.geometry("300x200")
+    # Label chọn cột
+    tk.Label(filter_window, text="Chọn cột để lọc:", font=("Arial", 12)).pack(pady=5)
 
-        # Combobox để chọn cột
-        selected_column = tk.StringVar()
-        combobox2 = ttk.Combobox(sort_window, textvariable=selected_column, state="readonly", values=text_columns)
-        combobox2.pack(pady=5)
-        combobox2.set(text_columns[0])  # Giá trị mặc định
+    # Lọc các cột có kiểu dữ liệu số
+    numeric_columns = [col for col in recent_files_data.columns if recent_files_data[col].dtype in ['int64', 'float64']]
 
-        # Xử lý khi nhấn nút OK
-        def confirm_selection():
-            sort_window.destroy()  # Đóng cửa sổ
+    if not numeric_columns:
+        tk.Label(filter_window, text="Không có cột nào chứa giá trị số.", font=("Arial", 12)).pack(pady=10)
+        return
 
-        # Nút OK và Cancel
-        button_frame = ttk.Frame(sort_window)
-        button_frame.pack(pady=10)
+    # Biến để lưu cột được chọn và danh sách các giá trị để lọc
+    selected_column = tk.StringVar(value="")
+    input_value = tk.StringVar(value="")
 
-        ok_button = ttk.Button(button_frame, text="OK", command=confirm_selection)
-        ok_button.pack(side="left", padx=5)
+    # Dropdown menu để chọn cột
+    column_dropdown = ttk.Combobox(filter_window, textvariable=selected_column, state="readonly", font=("Arial", 11))
+    column_dropdown['values'] = numeric_columns
+    column_dropdown.pack(pady=5)
 
-        cancel_button = ttk.Button(button_frame, text="Cancel", command=sort_window.destroy)
-        cancel_button.pack(side="left", padx=5)
+    # Label nhập giá trị
+    tk.Label(filter_window, text="Nhập giá trị muốn lọc:", font=("Arial", 12)).pack(pady=5)
 
-        sort_window.wait_window()  # Chờ người dùng đóng cửa sổ
-        return selected_column.get()
+    # Entry để nhập các giá trị cần lọc
+    values_entry = tk.Entry(filter_window, textvariable=input_value, font=("Arial", 11), width=25)
+    values_entry.pack(pady=5)
 
-    def sort_data(order="asc"):
-        """Hàm sắp xếp dữ liệu tăng dần hoặc giảm dần.""" 
-        # Hiển thị cửa sổ hỏi người dùng muốn sắp xếp cột nào
-        column_to_sort = ask_numeric_column()  # Hiển thị cửa sổ chọn cột
-        if not column_to_sort:  # Nếu người dùng hủy, không làm gì
+    def apply_filter():
+        """Áp dụng bộ lọc với cột và danh sách giá trị đã nhập."""
+        global edited_data, current_page, total_pages
+
+        column_name = selected_column.get()
+        value = input_value.get()
+
+        if column_name and value:
+            try:
+                value = float(value)  # Chuyển giá trị sang dạng số
+                edited_data = recent_files_data[recent_files_data[column_name] == value]
+
+                current_page = 0
+                total_pages = (len(edited_data) + rows_per_page - 1) // rows_per_page
+
+                update_treeview(current_page)
+                filter_window.destroy()
+            except ValueError:
+                tk.messagebox.showerror("Lỗi", "Vui lòng nhập các giá trị hợp lệ (số).")
+        else:
+            tk.messagebox.showerror("Lỗi", "Vui lòng chọn một cột và nhập giá trị để lọc.")
+    
+    tk.Button(filter_window, text="Lọc", command=apply_filter, bg="#56CBF9", fg="#FFFFFF").pack(pady=10)
+
+def filter_by_multiple_values():
+    filter_window = tk.Toplevel(root)
+    filter_window.title("Lọc theo nhiều giá trị")
+    filter_window.geometry("400x200")
+
+    # Nhập tên cột cần lọc
+    tk.Label(filter_window, text="Chọn cột để lọc:", font=("Arial", 12)).pack(pady=10)
+    
+    # Lọc các cột có kiểu dữ liệu số
+    numeric_columns = [col for col in recent_files_data.columns if recent_files_data[col].dtype in ['int64', 'float64']]
+
+    if not numeric_columns:
+        tk.Label(filter_window, text="Không có cột nào chứa giá trị số.", font=("Arial", 12)).pack(pady=10)
+        return
+
+    # Biến để lưu cột được chọn và danh sách các giá trị để lọc
+    selected_column = tk.StringVar(value="")
+    entered_values = tk.StringVar(value="")  # Lưu các giá trị được nhập (ngăn cách bằng dấu phẩy)
+
+    # Dropdown menu để chọn cột
+    column_dropdown = ttk.Combobox(filter_window, textvariable=selected_column, state="readonly", font=("Arial", 11))
+    column_dropdown['values'] = numeric_columns
+    column_dropdown.pack(pady=5)
+
+    # Label nhập giá trị
+    tk.Label(filter_window, text="Nhập các giá trị muốn lọc (ngăn cách bằng dấu phẩy):", font=("Arial", 12)).pack(pady=5)
+
+    # Entry để nhập các giá trị cần lọc
+    values_entry = tk.Entry(filter_window, textvariable=entered_values, font=("Arial", 11), width=40)
+    values_entry.pack(pady=5)
+
+    def apply_filter():
+        """Áp dụng bộ lọc với cột và danh sách giá trị đã nhập."""
+        recent_files_data = pd.read_csv(file_path)
+        global edited_data, current_page, total_pages
+
+        column_name = selected_column.get()
+        values_text = entered_values.get()
+
+        if column_name and values_text:
+            try:
+                # Chuyển danh sách giá trị từ chuỗi sang list số
+                filter_values = [float(v.strip()) for v in values_text.split(",")]
+
+                # Lọc dữ liệu
+                edited_data = recent_files_data[recent_files_data[column_name].isin(filter_values)]
+
+                current_page = 0
+                total_pages = (len(edited_data) + rows_per_page - 1) // rows_per_page
+
+                update_treeview(current_page)
+                filter_window.destroy()
+            except ValueError:
+                tk.messagebox.showerror("Lỗi", "Vui lòng nhập các giá trị hợp lệ (số).")
+        else:
+            tk.messagebox.showerror("Lỗi", "Vui lòng chọn một cột và nhập giá trị để lọc.")
+    
+    tk.Button(filter_window, text="Lọc", command=apply_filter, bg="#56CBF9", fg="#FFFFFF").pack(pady=10)
+
+def filter_by_range():
+    recent_files_data = pd.read_csv(file_path)
+    filter_window = tk.Toplevel(root)
+    filter_window.title("Lọc theo phạm vi giá trị")
+    filter_window.geometry("500x350")
+
+    # Lọc các cột có kiểu dữ liệu số
+    numeric_columns = [col for col in recent_files_data.columns if recent_files_data[col].dtype in ['int64', 'float64']]
+
+    if not numeric_columns:
+        tk.Label(filter_window, text="Không có cột nào chứa giá trị số.", font=("Arial", 12)).pack(pady=10)
+        return
+
+    # Biến lưu cột được chọn
+    selected_column = tk.StringVar(value=numeric_columns[0])
+    min_value = tk.DoubleVar()
+    max_value = tk.DoubleVar()
+
+    def update_scales(*args):
+        """Cập nhật phạm vi của thanh kéo theo cột được chọn."""
+        column_name = selected_column.get()
+        if column_name:
+            col_min = recent_files_data[column_name].min()
+            col_max = recent_files_data[column_name].max()
+            scale_min.config(from_=col_min, to=col_max)
+            scale_max.config(from_=col_min, to=col_max)
+            min_value.set(col_min)
+            max_value.set(col_max)
+
+    # Label chọn cột
+    tk.Label(filter_window, text="Chọn cột để lọc:", font=("Arial", 12)).pack(pady=5)
+
+    # Dropdown menu để chọn cột
+    column_dropdown = ttk.Combobox(filter_window, textvariable=selected_column, state="readonly", font=("Arial", 11))
+    column_dropdown['values'] = numeric_columns
+    column_dropdown.pack(pady=5)
+    column_dropdown.bind("<<ComboboxSelected>>", update_scales)
+
+    # Thanh kéo chọn giá trị nhỏ nhất
+    tk.Label(filter_window, text="Giá trị nhỏ nhất:", font=("Arial", 12)).pack(pady=5)
+    scale_min = tk.Scale(filter_window, variable=min_value, orient="horizontal", length=400, resolution=1)
+    scale_min.pack(pady=5)
+
+    # Thanh kéo chọn giá trị lớn nhất
+    tk.Label(filter_window, text="Giá trị lớn nhất:", font=("Arial", 12)).pack(pady=5)
+    scale_max = tk.Scale(filter_window, variable=max_value, orient="horizontal", length=400, resolution=1)
+    scale_max.pack(pady=5)
+
+    def apply_filter():
+        global edited_data, current_page, total_pages
+
+        column_name = selected_column.get()
+        if column_name:
+            lower_bound = min_value.get()
+            upper_bound = max_value.get()
+            edited_data = recent_files_data[
+                (recent_files_data[column_name] >= lower_bound) & (recent_files_data[column_name] <= upper_bound)
+            ]
+
+            current_page = 0
+            total_pages = (len(edited_data) + rows_per_page - 1) // rows_per_page
+
+            update_treeview(current_page)
+            filter_window.destroy()
+
+    tk.Button(filter_window, text="Lọc", command=apply_filter, bg="#56CBF9", fg="#FFFFFF").pack(pady=10)
+    update_scales()
+
+def sort_data(order="asc"):
+    """Hàm sắp xếp dữ liệu tăng dần hoặc giảm dần.""" 
+    recent_files_data = pd.read_csv(file_path)
+    sort_window = tk.Toplevel(root)
+    sort_window.title("Chọn cột để sắp xếp")
+    sort_window.geometry("300x350")
+
+    # Lọc ra các cột có giá trị số
+    numeric_columns = [col for col in recent_files_data.columns if recent_files_data[col].dtype in ['int64', 'float64']]
+
+    selected_column = tk.StringVar()
+    selected_column.set(0)
+
+    for col in numeric_columns:
+        tk.Radiobutton(
+            sort_window,
+            text=col,
+            variable=selected_column,
+            value=col,
+            font=("Arial", 12),
+            anchor="w"
+        ).pack(fill=tk.X, pady=2)
+
+    # Nút xác nhận
+    def apply_sort():
+        column_to_sort = selected_column.get()
+        if not column_to_sort:
+            tk.messagebox.showwarning("Thông báo", "Vui lòng chọn một cột để sắp xếp!")
             return
-        
-        # Xác định chỉ số cột
-        if column_to_sort not in headers:
-            messagebox.showerror("Error", f"Invalid column name: {column_to_sort}")
-            return
-        column_index = headers.index(column_to_sort)
+        sort_window.destroy()
 
-        # Sắp xếp dữ liệu
-        try:
-            if order == "asc":
-                data_with_index = [(idx + 1, row) for idx, row in enumerate(data)]  # Lưu chỉ số gốc
-                sorted_data = sorted(data_with_index, key=lambda x: convert_to_number(x[1][column_index]))  # Sắp xếp
-            else:
-                data_with_index = [(idx + 1, row) for idx, row in enumerate(data)]  # Lưu chỉ số gốc
-                sorted_data = sorted(data_with_index, key=lambda x: convert_to_number(x[1][column_index]), reverse=True)  # Sắp xếp
+        global edited_data, current_page, total_pages
 
-        except ValueError:
-            messagebox.showerror("Error", f"Cannot sort column '{column_to_sort}' due to invalid data!")
-            return
+        # Sắp xếp theo thứ tự tăng dần hoặc giảm dần
+        edited_data = recent_files_data.sort_values(by=column_to_sort, ascending=(order == "asc"))
 
-        # Cập nhật lại bảng
-        tree.delete(*tree.get_children())  # Xóa dữ liệu cũ
+        current_page = 0
+        total_pages = (len(edited_data) + rows_per_page - 1) // rows_per_page
 
-        for idx, (original_index, row) in enumerate(sorted_data, start=1):
-            tree.insert("", "end", values=[original_index] + row)
+        # Hiển thị dữ liệu của trang đầu tiên
+        update_treeview(current_page)
 
-        # Thông báo thành công
-        messagebox.showinfo("Success", f"Data sorted by '{column_to_sort}' in {'ascending' if order == 'asc' else 'descending'} order!")
+    tk.Button(
+        sort_window,
+        text="Áp dụng sắp xếp",
+        font=("Arial", 12, "bold"),
+        bg="#56CBF9",
+        fg="#FFFFFF",
+        command=apply_sort
+    ).pack(pady=10)
 
-    def show_n_rows(n):
+def show_n_rows(n):
+        global edited_data, current_page, total_pages
         """Hiển thị n dòng đầu tiên."""
-        if n > len(data) or n < 1:
-            messagebox.showerror("Giá trị không hợp lệ", f"Vui lòng nhập số trong khoảng 1 -> {len(data)}!")
+        recent_files_data = pd.read_csv(file_path)
+        if n is None:  # Người dùng nhấn Cancel hoặc không nhập gì
             return
 
-        tree.delete(*tree.get_children())  # Xóa dữ liệu cũ
-        for idx, row in enumerate(data[:n], start=1):  # Lấy n dòng đầu tiên
-            tree.insert("", "end", values=[idx] + row)
+        if n <= 0 or n > len(recent_files_data):
+            messagebox.showwarning("Thông báo", f"Số dòng từ 1 đến {len(recent_files_data)}!")
+            return
+
+        # Lọc dữ liệu chỉ lấy n dòng đầu tiên
+        edited_data = recent_files_data.head(n).copy()
+
+        # Reset phân trang
+        current_page = 0
+        total_pages = (len(edited_data) + rows_per_page - 1) // rows_per_page
+
+        # Hiển thị dữ liệu của trang đầu tiên
+        update_treeview(current_page)
         messagebox.showinfo("Success", f"Hiển thị từ dòng 1 đến {n}")
     
-    def show_n_columns(n):
+def show_n_columns(n):
         """Hiển thị n cột đầu tiên."""
-        if n < 1 or n > len(headers):
-            messagebox.showerror("Error", "Please enter a valid number of columns!")
+        recent_files_data = pd.read_csv(file_path)
+        if n is None:  # Người dùng nhấn Cancel hoặc không nhập gì
+            return
+
+        if n <= 0:
+            tk.messagebox.showwarning("Thông báo", "Số cột phải lớn hơn 0!")
+            return
+
+        if n > len(recent_files_data.columns):
+            tk.messagebox.showwarning("Thông báo", f"Dữ liệu chỉ có {len(recent_files_data.columns)} cột!")
+            n = len(recent_files_data.columns)
+
+        # Lấy n cột đầu tiên
+        tree.delete(*tree.get_children())  # Xóa các hàng cũ
+        tree["columns"] = ["STT"] + list(recent_files_data.columns[:n])  # Lấy n cột đầu tiên
+
+        # Cấu hình lại cột trong Treeview
+        for col in tree["columns"]:
+            tree.heading(col, text=col)
+            tree.column(col, anchor="w", width=100)
+
+        # Thêm dữ liệu vào bảng
+        for _, row in recent_files_data.iterrows():
+            tree.insert("", "end", values=[_+1] + list(row[:n]))
+
+        tk.messagebox.showinfo("Success", f"Đã hiển thị {n} cột đầu tiên.")    
+
+def show_specific_columns():
+    """Hiển thị các cột cụ thể."""
+    recent_files_data = pd.read_csv(file_path)
+    column_window = tk.Toplevel(root)
+    column_window.title("Chọn các cột muốn hiển thị")
+    column_window.geometry("400x400")
+
+    # Frame cuộn cho giao diện
+    canvas = tk.Canvas(column_window)
+    scrollbar = ttk.Scrollbar(column_window, 
+                              orient="vertical", 
+                              command=canvas.yview)
+    scrollable_frame = ttk.Frame(canvas)
+
+    scrollable_frame.bind(
+        "<Configure>",
+        lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+    )
+
+    canvas.create_window((0, 0), 
+                         window=scrollable_frame, 
+                         anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    canvas.pack(side="left", 
+                fill="both", 
+                expand=True)
+    scrollbar.pack(side="right", 
+                   fill="y")
+
+    # Danh sách checkbox
+    column_vars = {}
+    for col in recent_files_data.columns:
+        var = tk.BooleanVar(value=False)  # Mặc định tích chọn
+        column_vars[col] = var
+        tk.Checkbutton(
+            scrollable_frame,
+            text=col,
+            variable=var,
+            font=("Arial", 12),
+            anchor="w"
+        ).pack(fill=tk.X, pady=2)
+        
+
+    # Nút xác nhận
+    def apply_selection():
+        selected_columns = [col for col, var in column_vars.items() if var.get()]
+        if not selected_columns:
+            tk.messagebox.showwarning("Thông báo", "Vui lòng chọn ít nhất một cột!")
+            return
+        column_window.destroy()
+        # Hiển thị dữ liệu các cột được chọn
+        data = recent_files_data[selected_columns]
+        display_data_in_treeview(data)
+
+    tk.Button(
+        scrollable_frame,
+        text="Xem",
+        font=("Arial", 12, "bold"),
+        bg="#56CBF9",
+        fg="#FFFFFF",
+        command=apply_selection
+    ).pack(pady=10, fill=tk.X, anchor='center')
+        
+def show_specific_columns_with_rows():
+    recent_files_data = pd.read_csv(file_path)
+    column_window = tk.Toplevel(root)
+    column_window.title("Chọn các cột muốn hiển thị")
+    column_window.geometry("400x400")
+
+    # Frame cuộn cho giao diện
+    canvas = tk.Canvas(column_window)
+    scrollbar = ttk.Scrollbar(column_window, 
+                              orient="vertical", 
+                              command=canvas.yview)
+    scrollable_frame = ttk.Frame(canvas)
+
+    scrollable_frame.bind(
+        "<Configure>",
+        lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+    )
+
+    canvas.create_window((0, 0), 
+                         window=scrollable_frame, 
+                         anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    canvas.pack(side="left", 
+                fill="both", 
+                expand=True)
+    scrollbar.pack(side="right", 
+                   fill="y")
+
+    # Danh sách checkbox
+    column_vars = {}
+    for col in recent_files_data.columns:
+        var = tk.BooleanVar(value=False)
+        column_vars[col] = var
+        tk.Checkbutton(
+            scrollable_frame,
+            text=col,
+            variable=var,
+            font=("Arial", 12),
+            anchor="w"
+        ).pack(fill=tk.X, pady=2)
+
+    # Entry nhập số hàng
+    rows_label = ttk.Label(scrollable_frame, text="Nhập số hàng muốn hiển thị:")
+    rows_label.pack()
+    rows_entry = ttk.Entry(scrollable_frame, width=25)
+    rows_entry.pack()
+
+    # Nút xác nhận
+    def apply_selection():   
+        global edited_data, current_page, total_pages     
+        selected_columns = [col for col, var in column_vars.items() if var.get()]
+        if not selected_columns:
+            tk.messagebox.showwarning("Thông báo", "Vui lòng chọn ít nhất một cột!")
             return
         
-        tree["columns"] = ["STT"] + headers[:n]  # Cập nhật cột hiển thị
-        tree.heading("STT", text="STT")
-        tree.column("STT", width=50, anchor="center")
+        num_rows = int(rows_entry.get())
+        if num_rows < 1:
+            raise ValueError("Number of rows must be greater than 0!")
 
-        for header in headers[:n]:
-            tree.heading(header, text=header)
-            column_width_n = max(len(header) * 8, 10)
-            tree.column(header, width=column_width_n, anchor="w")
+        column_window.destroy()
+        # Hiển thị dữ liệu các cột được chọn
 
-        tree.delete(*tree.get_children())  # Xóa dữ liệu cũ
-        for idx, row in enumerate(data, start=1):
-            tree.insert("", "end", values=[idx] + row[:n])  # Lấy n cột đầu tiên
-        messagebox.showinfo("Success", f"Displayed the first {n} columns.")
-    
-    def show_specific_columns():
-        """Hiển thị các cột cụ thể."""
-        column_info = "\n".join([f"{idx + 1}. {header}" for idx, header in enumerate(headers)])
-        input_message = f"Các cột có sẵn:\n{column_info}\n\nNhập chỉ số các cột cần in ra, cách nhau bằng dấu phẩy:"
-        
-        # Hộp thoại nhập
-        column_indices_str = simpledialog.askstring("Input", input_message)
-        if not column_indices_str:
-            messagebox.showwarning("Invalid Input", "No indices entered!")
+        edited_data = recent_files_data[selected_columns].head(num_rows)
+        current_page = 0
+        total_pages = (len(edited_data) + rows_per_page - 1) // rows_per_page
+        display_data_in_treeview(edited_data)
+
+        update_treeview(current_page)
+
+    tk.Button(
+        scrollable_frame,
+        text="Áp dụng",
+        font=("Arial", 12, "bold"),
+        bg="#56CBF9",
+        fg="#FFFFFF",
+        command=apply_selection
+    ).pack(pady=10, fill=tk.X)
+
+def show_specific_rows():
+        global edited_data, current_page, total_pages
+        recent_files_data = pd.read_csv(file_path)
+        """Hiển thị các dòng mong muốn."""
+        input_range = simpledialog.askstring("Hiển thị các dòng mong muốn", "Nhập khoảng dòng (ví dụ: 5-15):")
+        if not input_range:
             return
 
         try:
-            # Chuyển đổi chỉ số cột nhập vào thành danh sách số nguyên
-            column_indices = sorted(set(int(idx.strip()) - 1 for idx in column_indices_str.split(",")))  # Chỉ số bắt đầu từ 0
+            # Tách chỉ số bắt đầu và kết thúc
+            start, end = map(int, input_range.split("-"))
+            start -= 1  # Chuyển sang chỉ số bắt đầu từ 0
+            end -= 1
         except ValueError:
-            messagebox.showerror("Error", "Invalid column indices! Please enter valid numbers.")
+            messagebox.showerror("Lỗi", "Vui lòng nhập khoảng dòng hợp lệ (dạng số, ví dụ: 5-15)!")
             return
-
-        # Kiểm tra tính hợp lệ của chỉ số
-        invalid_indices = [idx for idx in column_indices if idx < 0 or idx >= len(headers)]
-        if invalid_indices:
+                    
+        max_index = len(recent_files_data) - 1
+        if start < 0 or end > max_index or start > end:
             messagebox.showerror(
-                "Error", f"Invalid column indices: {', '.join(str(idx + 1) for idx in invalid_indices)}"
+                "Lỗi",
+                f"Khoảng dòng không hợp lệ. Vui lòng nhập giá trị từ 1 đến {max_index + 1} và đảm bảo chỉ số bắt đầu <= chỉ số kết thúc."
             )
             return
 
-        # Lấy tên cột từ chỉ số
-        selected_columns = [headers[idx] for idx in column_indices]
+        # Lấy dữ liệu của các dòng cụ thể
+        edited_data = recent_files_data.iloc[start:end + 1]
+        current_page = 0
+        total_pages = (len(edited_data) + rows_per_page - 1) // rows_per_page
+
+        update_treeview(current_page)
+
+def update_treeview(page):
+    """Cập nhật Treeview để hiển thị dữ liệu của trang hiện tại."""
+    global current_page, total_pages
+
+    if edited_data.empty:
+        messagebox.showinfo("Thông báo", "Không có dữ liệu để hiển thị.")
+        return
+
+    # Tính toán số trang
+    total_pages = (len(edited_data) + rows_per_page - 1) // rows_per_page
+
+    if total_pages == 0:
+        total_pages = 1  # Đảm bảo luôn có ít nhất 1 trang
+
+    # Kiểm tra nếu trang nằm trong giới hạn
+    if page < 0 or page >= total_pages:
+        return
+
+    # Xóa dữ liệu cũ trong Treeview
+    tree.delete(*tree.get_children())
+
+    # Lấy dữ liệu cho trang hiện tại
+    start_index = page * rows_per_page
+    end_index = min(start_index + rows_per_page, len(edited_data))
+    page_data = edited_data.iloc[start_index:end_index]
+
+    # Chèn dữ liệu vào Treeview
+    for _, row in page_data.iterrows():
+        tree.insert("", "end", values=[_+1] + list(row))
         
-        tree["columns"] = ["STT"] + selected_columns  # Cập nhật cột hiển thị
-        tree.heading("STT", text="STT")
-        tree.column("STT", width=50, anchor="center")
-        
-        for col in selected_columns:
-            tree.heading(col, text=col)
-            tree.column(col, width=150, anchor="center")
-        
-        tree.delete(*tree.get_children())  # Xóa dữ liệu cũ
-        
-        for idx, row in enumerate(data, start=1):
-            selected_columns = [row[i] for i in column_indices]
-            tree.insert("", "end", values=[idx] + selected_columns)
-        
-    def show_specific_columns_with_rows():
-        """Hiển thị các cột cụ thể với số hàng."""
-        input_window = tk.Toplevel(root)
-        input_window.title("Select Columns and Rows")
-        input_window.geometry("400x550")
-        input_window.grab_set()
+    # Cập nhật chỉ số trang hiện tại
+    current_page = page
 
-        # Hiển thị danh sách chỉ mục và tên cột
-        column_info = "\n".join([f"{idx + 1}. {header}" for idx, header in enumerate(headers)])
-        instructions = ttk.Label(
-            input_window, 
-            text=f"Các cột có sẵn:\n{column_info}\n"
-        )
-        instructions.pack(pady=10)
+    # Cập nhật nhãn số trang
+    page_label.config(text=f"{current_page + 1} / {total_pages}")
 
-        # Frame chứa các Entry
-        entry_frame = ttk.Frame(input_window)
-        entry_frame.pack(pady=10)
+def show_dropdown_menu(event, button_name):
+        """Hiển thị menu bật xuống phía dưới nút."""
+        # Xóa các mục cũ trong menu
+        popup_menu.delete(0, "end")
 
-        # Entry nhập chỉ mục cột
-        column_label = ttk.Label(entry_frame, text="Nhập chỉ số các cột cần in ra, cách nhau bằng dấu phẩy:")
-        column_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
-        column_entry = ttk.Entry(entry_frame, width=25)
-        column_entry.grid(row=1, column=0, padx=5, pady=5, sticky="w")
+        # Thêm mục menu tùy theo button_name
+        if button_name == "Xem":
+            popup_menu.add_command(label="Hiển thị n dòng đầu tiên", 
+                                   command=lambda: show_n_rows(simpledialog.askinteger("Input", "Nhập số dòng muốn hiển thị:")))
+            popup_menu.add_command(label="Hiển thị n cột đầu tiên", command=lambda: show_n_columns(simpledialog.askinteger("Input", "Nhập số cột muốn hiển thị:")))
+            popup_menu.add_command(label="Hiển thị các cột cụ thể",
+                                    command=show_specific_columns)
+            popup_menu.add_command(label="Hiển thị các dòng cụ thể",
+                                   command=show_specific_rows)
+            popup_menu.add_command(label="Hiển thị các cột với số hàng cụ thể",
+                                   command=show_specific_columns_with_rows)
 
-        # Entry nhập số hàng
-        rows_label = ttk.Label(entry_frame, text="Nhập số hàng muốn hiển thị:")
-        rows_label.grid(row=2, column=0, sticky="w")
-        rows_entry = ttk.Entry(entry_frame, width=25)
-        rows_entry.grid(row=3, column=0, sticky='w')
-
-        def confirm_selection():
-            """Xử lý khi người dùng nhấn OK."""
-            try:
-                # Lấy chỉ mục cột
-                column_indices = sorted(set(int(idx.strip()) - 1 for idx in column_entry.get().split(",")))
-
-                # Lấy số hàng
-                num_rows = int(rows_entry.get())
-                if num_rows < 1:
-                    raise ValueError("Number of rows must be greater than 0!")
-
-                # Kiểm tra chỉ số hợp lệ
-                invalid_indices = [idx for idx in column_indices if idx < 0 or idx >= len(headers)]
-                if invalid_indices:
-                    raise ValueError(f"Invalid column indices: {', '.join(str(idx + 1) for idx in invalid_indices)}")
-
-                # Lấy tên cột từ chỉ số
-                selected_columns = [headers[idx] for idx in column_indices]
-
-                # Hiển thị cột và số hàng trong Treeview
-                tree["columns"] = ["STT"] + selected_columns  # Cập nhật cột hiển thị
-                tree.heading("STT", text="STT")
-                tree.column("STT", width=50, anchor="center")
-                for col in selected_columns:
-                    tree.heading(col, text=col)
-                    tree.column(col, width=150, anchor="center")
-                tree.delete(*tree.get_children())  # Xóa dữ liệu cũ
-                for idx, row in enumerate(data[:num_rows], start=1):  # Lấy num_rows đầu tiên
-                    selected_data = [row[i] for i in column_indices]
-                    tree.insert("", "end", values=[idx] + selected_data)
-
-                # Đóng cửa sổ và thông báo thành công
-                input_window.destroy()
-                messagebox.showinfo("Success", f"Displayed columns {', '.join(selected_columns)} with the first {num_rows} rows.")
-            except ValueError as e:
-                messagebox.showerror("Error", f"Invalid input: {e}")
-
-        # Nút OK và Cancel
-        button_frame = ttk.Frame(input_window)
-        button_frame.pack(pady=10)
-
-        ok_button = ttk.Button(button_frame, text="OK", command=confirm_selection)
-        ok_button.pack(side="left", padx=5)
-
-        cancel_button = ttk.Button(button_frame, text="Cancel", command=input_window.destroy)
-        cancel_button.pack(side="left", padx=5)
-
-    def ask_row_indices():
-        """Hiển thị cửa sổ để người dùng nhập chỉ số bắt đầu và kết thúc."""
-        indices_window = tk.Toplevel(root)
-        indices_window.title("Enter Row Indices")
-        indices_window.geometry("300x200")
-        indices_window.grab_set()  # Đặt cửa sổ modal
-
-        # Label hướng dẫn
-        label = ttk.Label(indices_window, text="Enter the row range (1-based):")
-        label.pack(pady=10)
-
-        # Frame chứa các Entry
-        entry_frame = ttk.Frame(indices_window)
-        entry_frame.pack(pady=10)
-
-        # Entry cho chỉ số bắt đầu
-        start_label = ttk.Label(entry_frame, text="Start Index:")
-        start_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
-        start_entry = ttk.Entry(entry_frame, width=10)
-        start_entry.grid(row=0, column=1, padx=5, pady=5, sticky="w")
-
-        # Entry cho chỉ số kết thúc
-        end_label = ttk.Label(entry_frame, text="End Index:")
-        end_label.grid(row=1, column=0, padx=5, pady=5, sticky="w")
-        end_entry = ttk.Entry(entry_frame, width=10)
-        end_entry.grid(row=1, column=1, padx=5, pady=5, sticky="w")
-
-        # Biến lưu kết quả
-        result = {"start_index": None, "end_index": None}
-
-        def confirm_selection():
-            """Xác nhận lựa chọn và đóng cửa sổ."""
-            try:
-                start_index = int(start_entry.get())
-                end_index = int(end_entry.get())
-                if start_index < 1 or end_index < start_index:  # Kiểm tra tính hợp lệ
-                    raise ValueError("Invalid range")
-                result["start_index"] = start_index
-                result["end_index"] = end_index
-                indices_window.destroy()
-            except ValueError:
-                messagebox.showerror("Error", "Please enter valid numeric indices!")
-
-        # Nút OK và Cancel
-        button_frame = ttk.Frame(indices_window)
-        button_frame.pack(pady=10)
-
-        ok_button = ttk.Button(button_frame, text="OK", command=confirm_selection)
-        ok_button.pack(side="left", padx=5)
-
-        cancel_button = ttk.Button(button_frame, text="Cancel", command=indices_window.destroy)
-        cancel_button.pack(side="left", padx=5)
-
-        indices_window.wait_window()  # Chờ cửa sổ đóng
-        return result["start_index"], result["end_index"]
-
-    def show_specific_rows():
-        """Hiển thị các dòng mong muốn."""
-        start_index, end_index = ask_row_indices()
-
-        if start_index is None or end_index is None:
-            messagebox.showinfo("Cancelled", "Operation cancelled by user.")
-
-        if end_index > len(data):  # Đảm bảo không vượt quá số dòng trong dữ liệu
-            messagebox.showerror("Error", f"End index exceeds the number of rows ({len(data)}).")
-            return
-
-        # Hiển thị các dòng từ start_index đến end_index
-        tree.delete(*tree.get_children())  # Xóa dữ liệu cũ
-        for idx, row in enumerate(data[start_index - 1:end_index], start=start_index):  # 1-based index
-            tree.insert("", "end", values=[idx] + row)
-
-        messagebox.showinfo("Success", f"Displayed rows {start_index} to {end_index}.")
-
-    # Tạo thanh Menu
-    menu_frame = tk.Frame(answers_tab, bg="lightgrey")
-    menu_frame.pack(fill="x", pady=5) 
-    menu = Menu(menu_frame, tearoff=0)
-
-    # Menu 1: Xem
-    Xem_menu = Menu(menu, tearoff=0)
-    Xem_menu.add_command(label="Hiển thị n dòng đầu tiên", 
-                        command=lambda: show_n_rows(simpledialog.askinteger("Input", "Nhập số dòng muốn hiển thị:")))
-    Xem_menu.add_command(label="Hiển thị n cột đầu tiên",
-                        command=lambda: show_n_columns(simpledialog.askinteger("Input", "Nhập số cột muốn hiển thị:")))
-    Xem_menu.add_command(label="Hiển thị các cột cụ thể",
-                        command=show_specific_columns)
-    Xem_menu.add_command(label="Hiển thị các dòng cụ thể",
-                        command=show_specific_rows)
-    Xem_menu.add_command(label="Hiển thị các cột với số hàng cụ thể",
-                        command=show_specific_columns_with_rows)
-
-    # Menu 2: Sắp xếp
-    SXep_menu = Menu(menu, tearoff=0)
-    SXep_menu.add_command(label="Sắp xếp giá trị tăng dần của một cột",
+        elif button_name == "Sắp Xếp":
+            popup_menu.add_command(label="Sắp xếp giá trị tăng dần của một cột",
                         command=lambda: sort_data(order="asc"))
-    SXep_menu.add_command(label="Sắp xếp giá trị giảm dần của một cột",
+            popup_menu.add_command(label="Sắp xếp giá trị giảm dần của một cột",
                         command=lambda: sort_data(order="desc"))
+        elif button_name == "Lọc":
+            Loccon_menu = tk.Menu(popup_menu, tearoff=0)
+            Loccon_menu.add_command(label="Lọc một giá trị duy nhất", command=filter_by_single_value)
+            Loccon_menu.add_command(label="Lọc nhiều giá trị", command=filter_by_multiple_values)
+            Loccon_menu.add_command(label="Lọc giá trị trong phạm vi", command=filter_by_range)
+            popup_menu.add_cascade(label="Lọc theo thuộc tính có giá trị số", menu=Loccon_menu)
+            
+            popup_menu.add_command(label="Lọc theo thuộc tính có giá trị chữ", command=filter_by_text)
 
-    # Menu 3: Lọc
-    Loc_menu = Menu(menu, tearoff=0)
-    Loc_menu.add_command(label="Lọc theo thuộc tính có giá trị chữ", command=filter_by_text)
+        # Hiển thị menu ngay dưới nút nhấn
+        popup_menu.post(event.x_root, event.y_root)
 
-    # menu con của Lọc
-    Loccon_menu = Menu(Loc_menu, tearoff=0)
-    Loccon_menu.add_command(label="Lọc một giá trị duy nhất", command=filter_by_single_value)
-    Loccon_menu.add_command(label="Lọc nhiều giá trị", command=filter_by_multiple_values)
-    Loccon_menu.add_command(label="Lọc giá trị trong phạm vi", command=filter_by_range)
-    Loc_menu.add_cascade(label="Lọc theo thuộc tính có giá trị số", menu=Loccon_menu)
+def show_recent_files():
+    # Xóa nội dung hiện tại trong phần content_frame
+    for widget in content_frame.winfo_children():
+        widget.destroy()
 
-    # Thêm các menu con vào Menu chính
-    menu.add_cascade(label="Xem", menu=Xem_menu)
-    menu.add_cascade(label="Sắp Xếp", menu=SXep_menu)
-    menu.add_cascade(label="Lọc", menu=Loc_menu)
+    # Title for recent files
+    title_frame = tk.Frame(content_frame, bg="#f5e7df")
+    title_frame.pack(fill=tk.X, padx=10, pady=5)
 
-    # Menu Button hiển thị menu
-    menubutton = ttk.Menubutton(menu_frame, text="Menu", menu=menu)
-    menubutton.pack(side="left", padx=10, pady=5)
-    
-    table_frame = ttk.Frame(answers_tab)
-    table_frame.pack(fill="both", expand=True, padx=10, pady=10)
+    ViewS = tk.Button(title_frame, text="Xem", bg="#F18F01", font=("Arial", 14, "bold"), fg="#333333", width=10)
+    ViewS.pack(side=tk.LEFT)
+    SortS = tk.Button(title_frame, text="Sắp Xếp", bg="#35CE8D", font=("Arial", 14, "bold"), fg="#333333", width=10)
+    SortS.pack(side=tk.LEFT, padx=5)
+    FilterS = tk.Button(title_frame, text="Lọc", bg="#E16F7C", font=("Arial", 14, "bold"), fg="#333333", width=10)
+    FilterS.pack(side=tk.LEFT, padx=5)
+    tk.Button(title_frame, text="Cập Nhật", bg="#6A69FF", font=("Arial", 14, "bold"), fg="#FFFFFF", width=10, command=update_csv).pack(side=tk.RIGHT)
+    tk.Button(title_frame, text="Xóa", bg="#89043D", font=("Arial", 14, "bold"), fg="#FFFFFF", width=10, command=delete_selected_rows).pack(side=tk.RIGHT, padx=5)
+    tk.Button(title_frame, text="Thêm", bg="#1C448E", font=("Arial", 14, "bold"), fg="#FFFFFF", width=10, command=add_data).pack(side=tk.RIGHT, padx=5)
+    tk.Button(title_frame, text="Tải lại", bg="#56CBF9", font=("Arial", 14, "bold"), fg="#FFFFFF", width=10, command=show_recent_files).pack(side=tk.RIGHT, padx=5)
 
-    # Bảng hiển thị dữ liệu
-    tree = ttk.Treeview(table_frame,
-                        columns=["STT"] + headers,
-                        show="headings",
-                        height=17)
+    global popup_menu
+    popup_menu = tk.Menu(content_frame, tearoff=0)
+
+    ViewS.bind("<Button-1>", lambda event: show_dropdown_menu(event, "Xem"))
+    SortS.bind("<Button-1>", lambda event: show_dropdown_menu(event, "Sắp Xếp"))
+    FilterS.bind("<Button-1>", lambda event: show_dropdown_menu(event, "Lọc"))   
+
+    page_frame = tk.Frame(content_frame, bg="#FFFFFF")
+    page_frame.pack(fill=tk.X, padx=10, pady=5)
+
+    # Nút điều hướng phân trang
+    navigation_frame = tk.Frame(page_frame, bg="#f5e7df")
+    navigation_frame.pack(fill="x", pady=10)
+
+    # Nút điều hướng
+    prev = tk.Button(navigation_frame, text="Trước", bg="#121211", font=("Arial", 14, "bold"), fg="#FFFFFF",
+              command=lambda: update_treeview(current_page - 1))
+    prev.pack(side=tk.LEFT, padx=5)
+    next = tk.Button(navigation_frame, text="Tiếp", bg="#121211", font=("Arial", 14, "bold"), fg="#FFFFFF",
+              command=lambda: update_treeview(current_page + 1))
+    next.pack(side=tk.RIGHT, padx=5)
+
+    # Nhãn hiển thị số trang
+    global page_label, edited_data
+    page_label = tk.Label(navigation_frame, text="", bg="#f5e7df", font=("Arial", 14), fg="#333333")
+    page_label.pack(padx=10, anchor='center')
+
+    edited_data = pd.read_csv(file_path)
+
+    # Treeview
+    global tree
+    tree = ttk.Treeview(
+        content_frame,
+        columns=["STT"] + list(edited_data.columns),
+        show="headings",
+        height=7,
+    )
     tree.heading("STT", text="STT")
     tree.column("STT", width=50, anchor="center")
 
-    # Thêm tiêu đề cột từ CSV
-    for header in headers:
-        tree.heading(header, text=header)
-        # Tính độ rộng cột dựa trên độ dài tiêu đề
-        column_width = max(len(header) * 8, 10)
-        tree.column(header, width=column_width, anchor="w")
+    # Configure Treeview columns
+    for col in edited_data.columns:
+        tree.heading(col, text=col)
+        column_width = max(len(col) * 10, 100)
+        tree.column(col, anchor="w", width=column_width)
 
-    # Thanh cuộn dọc
-    vertical_scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=tree.yview)
+    # Style configuration for Treeview
+    style = ttk.Style()
+    style.configure("Treeview", font=("Arial", 10), rowheight=30)
+    style.configure("Treeview.Heading", font=("Arial", 11, "bold"))
+    style.map("Treeview", background=[("selected", "#EAF6FF")], foreground=[("selected", "#000")])
+
+    tree.bind("<Double-1>", edit_cell)
+
+    vertical_scrollbar = ttk.Scrollbar(content_frame, orient="vertical", command=tree.yview)
     vertical_scrollbar.pack(side="right", fill="y")
 
-    # Thanh cuộn ngang
-    horizontal_scrollbar = ttk.Scrollbar(table_frame, orient="horizontal", command=tree.xview)
+    horizontal_scrollbar = ttk.Scrollbar(content_frame, orient="horizontal", command=tree.xview)
     horizontal_scrollbar.pack(side="bottom", fill="x")
 
     # Kết nối thanh cuộn với Treeview
     tree.configure(yscrollcommand=vertical_scrollbar.set, xscrollcommand=horizontal_scrollbar.set)
+    tree.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
 
-    tree.pack(fill="both", expand=True)
+    global total_pages, current_page
+    current_page = 0
+    rows_per_page = 200
+    total_pages = (len(edited_data) + rows_per_page - 1) // rows_per_page
 
-    # Thông tin phân trang
-    rows_per_page = 500
-    current_page = tk.IntVar(value=0)  # Biến lưu trạng thái trang hiện tại
-    total_pages = (len(data) + rows_per_page - 1) // rows_per_page  # Tính tổng số trang
+    update_treeview(0)
 
-    # Hiển thị số trang
-    page_info_label = ttk.Label(answers_tab, text=f"{current_page.get() + 1}/{total_pages}")
-    page_info_label.pack()
+def show_chart1():
+    # Xóa nội dung hiện tại trong phần content_frame
+    for widget in content_frame.winfo_children():
+        widget.destroy()
 
-    # Nút điều hướng phân trang
-    navigation_frame = ttk.Frame(answers_tab)
-    navigation_frame.pack(fill="x", pady=10)
+    title_frame2 = tk.Frame(content_frame, bg="#f5e7df")
+    title_frame2.pack(fill=tk.X, padx=10, pady=5)
 
-    def update_navigation_buttons():
-        """Cập nhật trạng thái của nút điều hướng."""
-        prev_button["state"] = "normal" if current_page.get() > 0 else "disabled"
-        next_button["state"] = "normal" if current_page.get() < total_pages - 1 else "disabled"
-        page_info_label.config(text=f"{current_page.get() + 1}/{total_pages}")
-
-    def go_to_previous_page():
-        """Đi đến trang trước."""
-        if current_page.get() > 0:
-            current_page.set(current_page.get() - 1)
-            display_page(tree, data, current_page.get(), rows_per_page)
-            update_navigation_buttons()
-
-    def go_to_next_page():
-        """Đi đến trang sau."""
-        if current_page.get() < total_pages - 1:
-            current_page.set(current_page.get() + 1)
-            display_page(tree, data, current_page.get(), rows_per_page)
-            update_navigation_buttons()
-
-    def refresh_data():
-        """làm mới dữ liệu hiển thị trong bảng"""
-        # Tính toán lại tổng số trang
-        total_pages = (len(data) + rows_per_page - 1) // rows_per_page
-        current_page.set(0)  # Reset về trang đầu tiên
-
-        for column in tree["columns"]:
-            tree.heading(column, text="")  # Xóa tiêu đề
-            tree.column(column, width=0)   # Ẩn cột
-        tree["columns"] = ()  # Reset cấu trúc cột
-        tree.delete(*tree.get_children())  # Xóa toàn bộ dữ liệu
-
-        tree["columns"] = ["STT"] + headers
-        tree.heading("STT", text="STT")
-        tree.column("STT", width=50, anchor="center")
-
-        for header in headers:
-            tree.heading(header, text=header)
-            column_width = max(len(header)*8, 10)  # Sử dụng độ rộng cột ban đầu
-            tree.column(header, width=column_width, anchor="w")
+    tk.Button(title_frame2, text="Thống Kê Mô Tả", bg="#ffffff", fg="#000000", font=("Arial", 14, "bold"), width=15, command=show_chart1).pack(side=tk.LEFT, padx=10)
+    tk.Button(title_frame2, text="PT Quan Hệ", bg="#E072A4", font=("Arial", 14, "bold"), fg="#333333", width=15, command=show_chart2).pack(side=tk.LEFT, padx=10)
+    tk.Button(title_frame2, text="PT Tương Quan", bg="#FF4B3E", font=("Arial", 14, "bold"), fg="#333333", width=15, command=show_chart3).pack(side=tk.LEFT, padx=10)
     
-        display_page(tree, data, current_page.get(), rows_per_page)
+    # Canvas để đặt các biểu đồ
+    canvas = tk.Canvas(content_frame)
+    canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
 
-        tree.configure(yscrollcommand=vertical_scrollbar.set, xscrollcommand=horizontal_scrollbar.set)
+    # Thanh cuộn dọc
+    scrollbar = ttk.Scrollbar(content_frame, orient=tk.VERTICAL, command=canvas.yview)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-        # Cập nhật thông tin số trang
-        page_info_label.config(text=f"{current_page.get() + 1}/{total_pages}")
+    # Kết nối canvas với thanh cuộn
+    canvas.configure(yscrollcommand=scrollbar.set)
+    canvas.bind(
+        "<Configure>",
+        lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+    )
 
-        # Cập nhật trạng thái nút điều hướng
-        update_navigation_buttons()
+    # Frame trong canvas để chứa các widget
+    second_frame = tk.Frame(canvas)
+    canvas.create_window((0, 0), window=second_frame, anchor="nw")
 
-        # Thông báo làm mới thành công
-        messagebox.showinfo("Success", "Data has been refreshed!")
-          
-    prev_button = ttk.Button(navigation_frame, text="Trang trước", command=go_to_previous_page)
-    prev_button.pack(side="left", padx=5)
+    plots_and_insights = list(zip(plot_one, insight_one))
 
-    refresh_button = ttk.Button(navigation_frame, text="Refresh", command=refresh_data)
-    refresh_button.pack(side="left", padx=5, expand=True)
-
-    next_button = ttk.Button(navigation_frame, text="Trang sau", command=go_to_next_page)
-    next_button.pack(side="right", padx=5)
-
-    # Hiển thị dữ liệu trang đầu tiên
-    update_navigation_buttons()
-    display_page(tree, data, current_page.get(), rows_per_page)
-
-# ===== Tab 3: Quản lý dữ liệu =====
-    def add_data():
-        """Thêm thông tin khảo sát mới."""
+    # Thêm biểu đồ vào Frame
+    for plot, insight in plots_and_insights:
         try:
-            subprocess.run(["python", "SurveyForm.py"], check=True) # Gọi chương trình SurveyForm.py
-        except subprocess.CalledProcessError as e:
-            messagebox.showerror("Error", f"Error running the external program: {e}")
- 
-    def update_data():
-        row_num = selected_row_num.get()
+            fig = plot()  # Gọi hàm vẽ biểu đồ
+            canvas_chart = FigureCanvasTkAgg(fig, master=second_frame)
+            canvas_chart.draw()
+            widget = canvas_chart.get_tk_widget()
+            widget.config(width=1300, height=700)
+            widget.pack()  # Thêm khoảng cách giữa các biểu đồ
 
-        if row_num == -1:  # Kiểm tra nếu chưa có dòng nào được chọn
-            messagebox.showwarning("No Selection", "No row has been selected for deletion.")
-            return
+            insi = insight()
+            label = tk.Label(second_frame, text=insi, font=("Arial", 10), wraplength=800, justify="left")
+            label.pack(pady=10)
+        except Exception as e:
+            print(f"Error while plotting: {e}")
 
-        updated_datas = []
-        errors = []
+def show_chart2():
+    # Xóa nội dung hiện tại trong phần content_frame
+    for widget in content_frame.winfo_children():
+        widget.destroy()
 
-        for attribute, widget in input_widgets.items():
-            value = widget.get()
+    title_frame2 = tk.Frame(content_frame, bg="#f5e7df")
+    title_frame2.pack(fill=tk.X, padx=10, pady=5)
 
-            if isinstance(widget, ttk.Combobox):
-                updated_datas.append(widget.get())
-            elif attribute in ("Hours_Studied", "Sleep_Hours", "Attendance", "Previous_Scores", "Tutoring_Sessions", "Physical_Activity", "Exam_Score"):
-                try:
-                    number = float(value)
-                    if number < 0:
-                        errors.append(f"'{attribute}' must be a non-negative number.")
-                    else:
-                        updated_datas.append(widget.get())
-                except ValueError:
-                    errors.append(f"'{attribute}' must be a valid number.")
+    tk.Button(title_frame2, text="Thống Kê Mô Tả", bg="#61C9A8", font=("Arial", 14, "bold"), fg="#333333", width=15, command=show_chart1).pack(side=tk.LEFT, padx=10)
+    tk.Button(title_frame2, text="PT Quan Hệ", bg="#ffffff", fg="#000000", font=("Arial", 14, "bold"), width=15, command=show_chart2).pack(side=tk.LEFT, padx=10)
+    tk.Button(title_frame2, text="PT Tương Quan", bg="#FF4B3E", font=("Arial", 14, "bold"), fg="#333333", width=15, command=show_chart3).pack(side=tk.LEFT, padx=10)
 
-        # Nếu có lỗi, hiển thị thông báo và dừng xử lý
-        if errors:
-            messagebox.showerror("Invalid Input", "\n".join(errors))
-            return
+    # Canvas để đặt các biểu đồ
+    canvas = tk.Canvas(content_frame)
+    canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
 
-        # Kiểm tra chỉ số hợp lệ
-        if row_num < 0 or row_num >= len(data):
-            messagebox.showerror("Error", "Invalid row number selected.")
-            return
-        
-        # Cập nhật dữ liệu trong danh sách attributes_data
-        data[row_num - 1][0:] = updated_datas  # Chỉ cập nhật phần giá trị, không sửa "Attribute"
+    # Thanh cuộn dọc
+    scrollbar = ttk.Scrollbar(content_frame, orient=tk.VERTICAL, command=canvas.yview)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-        # Cập nhật lại bảng
-        selected_item = treeba.selection()
-        treeba.item(selected_item, values=data[row_num] + updated_datas)
-        
-        # Lưu thay đổi vào file CSV
-        write_csv_data(csv_file, headers, data)
-        # Hiển thị thông báo thành công
-        messagebox.showinfo("Success", "Row updated successfully!")
+    # Kết nối canvas với thanh cuộn
+    canvas.configure(yscrollcommand=scrollbar.set)
+    canvas.bind(
+        "<Configure>",
+        lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+    )
 
-        display_row()
+    # Frame trong canvas để chứa các widget
+    second_frame = tk.Frame(canvas)
+    canvas.create_window((0, 0), window=second_frame, anchor="nw")
+
+    # Thêm biểu đồ vào Frame
+    for (plot, insight) in plots_and_insights_two:
+        try:
+            fig = plot()  # Gọi hàm vẽ biểu đồ
+            canvas_chart = FigureCanvasTkAgg(fig, master=second_frame)
+            canvas_chart.draw()
+            widget = canvas_chart.get_tk_widget()
+            widget.pack(pady=10)  # Thêm khoảng cách giữa các biểu đồ
+
+            if insight is not None:
+                insi = insight()
+                label = tk.Label(second_frame, text=insi, font=("Arial", 10), wraplength=800, justify="left")
+                label.pack(pady=10)
+        except Exception as e:
+            print(f"Error while plotting: {plot.__name__}")
+
+def show_chart3():
+    # Xóa nội dung hiện tại trong phần content_frame
+    for widget in content_frame.winfo_children():
+        widget.destroy()
+
+    title_frame2 = tk.Frame(content_frame, bg="#f5e7df")
+    title_frame2.pack(fill=tk.X, padx=10, pady=5)
     
-    def delete_data():
-        """Xóa 1 hoặc nhiều hàng."""
-        # Yêu cầu người dùng nhập các chỉ số dòng muốn xóa
-        row_indices_str = simpledialog.askstring("Input", "Nhập chỉ số dòng cần xóa (phân cách bằng dấu phẩy:")
-        if not row_indices_str:
-            messagebox.showwarning("Invalid Input", "Vui lòng nhập các chỉ số dòng hợp lệ!")
-            return
+    tk.Button(title_frame2, text="Thống Kê Mô Tả", bg="#61C9A8", font=("Arial", 14, "bold"), fg="#333333", width=15, command=show_chart1).pack(side=tk.LEFT, padx=10)
+    tk.Button(title_frame2, text="PT Quan Hệ", bg="#E072A4", font=("Arial", 14, "bold"), fg="#333333", width=15, command=show_chart2).pack(side=tk.LEFT, padx=10)
+    tk.Button(title_frame2, text="PT Tương Quan", bg="#ffffff", fg="#000000", font=("Arial", 14, "bold"), width=15, command=show_chart3).pack(side=tk.LEFT, padx=10)
 
-        try:
-            # Chuyển đổi các chỉ số dòng nhập vào thành danh sách các số nguyên
-            row_indices = list(map(int, row_indices_str.split(',')))
-        except ValueError:
-            messagebox.showwarning("Invalid Input", "Chỉ được nhập số!")
-            return
+    # Canvas để đặt các biểu đồ
+    canvas = tk.Canvas(content_frame)
+    canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
 
-        # Kiểm tra nếu chỉ số dòng hợp lệ (không vượt quá số dòng trong data)
-        max_index = len(data)
-        invalid_indices = [idx for idx in row_indices if idx < 1 or idx > max_index]
-            
-        if invalid_indices:
-            messagebox.showwarning("Invalid Row Indices", f"The following indices are out of range: {', '.join(map(str, invalid_indices))}")
-            return
-            
-        # Hiển thị các dòng được chọn trong bảng Treeba
-        treeba.delete(*treeba.get_children())  # Xóa dữ liệu cũ trong bảng
-        selected_rows = [data[idx - 1] for idx in row_indices]  # Lấy dữ liệu dòng được chọn
-        for row in selected_rows:
-            treeba.insert("", "end", values= row)
+    # Thanh cuộn dọc
+    scrollbar = ttk.Scrollbar(content_frame, orient=tk.VERTICAL, command=canvas.yview)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-        # Hỏi người dùng xác nhận xóa
-        confirm = messagebox.askyesno(
-            "Confirm Deletion", 
-            f"Do you want to delete the selected rows: {', '.join(map(str, row_indices))}?"
+    # Kết nối canvas với thanh cuộn
+    canvas.configure(yscrollcommand=scrollbar.set)
+    canvas.bind(
+        "<Configure>",
+        lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+    )
+
+    # Frame trong canvas để chứa các widget
+    second_frame = tk.Frame(canvas)
+    canvas.create_window((0, 0), window=second_frame, anchor="nw")
+
+    # Thêm biểu đồ vào Frame
+    try:
+            fig = data_visualization.heatmap()  # Gọi hàm vẽ biểu đồ
+            canvas_chart = FigureCanvasTkAgg(fig, master=second_frame)
+            canvas_chart.draw()
+            widget = canvas_chart.get_tk_widget()
+            widget.config(width=1300, height=700)
+            widget.pack(fill=tk.BOTH, expand=True)
+    except Exception as e:
+            print(f"Error while plotting {data_visualization.heatmap.__name__}: {e}")
+
+def main_page():
+    """Hàm thiết lập giao diện chính với các nút danh mục."""
+    # Header area for file categories
+    categories_frame = tk.Frame(root, bg="#f5e7df")
+    categories_frame.pack(fill=tk.X, padx=10, pady=10)
+
+    # Sử dụng lưới để chia đều các nút
+    categories_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)  # 4 cột với kích thước đều nhau
+
+    for i, (category, color) in enumerate(categories):
+        category_colors[category] = color
+        button = tk.Button(
+            categories_frame,
+            text=category,
+            font=("Arial", 12, "bold"),
+            command=lambda c=category: show_category(c),
+            bg=color,
+            fg="#FFFFFF",
+            relief=tk.FLAT,
+            width=70,
+            height=2,
         )
-        if not confirm:
-            return
+        button.grid(row=0, column=i, padx=10, pady=10, sticky="nsew")
 
-        # Xóa các dòng trong data và Treeview
-        for idx in sorted(row_indices, reverse=True):  # Xóa từ cuối lên để tránh thay đổi chỉ số
-            del data[idx - 1]  # Xóa dữ liệu khỏi data
+        buttons[category] = button
 
-        # Xóa tất cả dữ liệu khỏi Treeview và hiển thị lại sau khi xóa
-        treeba.delete(*treeba.get_children())
+    # Hiển thị Recent Files ban đầu
+    show_category("QUẢN LÍ")
 
-        messagebox.showinfo("Success", "Deleted successfully!")
-        # Cập nhật lại dữ liệu trong file CSV
-        write_csv_data(csv_file, headers, data)
+# Main application
+root = tk.Tk()
+root.title("File Manager")
+root.geometry("900x500")
+root.configure(bg="#F2F4F8")
 
-    # Nút điều khiển
-    button_frame = ttk.Frame(manage_tab)
-    button_frame.pack(fill="x", pady=10)
+category_colors = {}
+rows_per_page = 200  # Số dòng mỗi trang
 
-    add_button = ttk.Button(button_frame, text="Add Data", command=add_data)
-    add_button.pack(side="left", padx=5)
+# Content frame (phần thay đổi nội dung)
+content_frame = tk.Frame(root, bg="#f5e7df", bd=1, relief=tk.GROOVE)
+content_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-    update_button = ttk.Button(button_frame, text="Update Data", command=update_data)
-    update_button.pack(side="left", padx=5)
+# Load main page
+main_page()
 
-    delete_button = ttk.Button(button_frame, text="Delete Data", command=delete_data)
-    delete_button.pack(side="left", padx=5)
-
-    # Entry nhập số dòng
-    input_frame = ttk.Frame(manage_tab)
-    input_frame.pack(pady=10)
-
-    row_num_label = ttk.Label(input_frame, text="Enter row number to display:")
-    row_num_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
-
-    row_num_entry = ttk.Entry(input_frame)
-    row_num_entry.grid(row=0, column=1, padx=5, pady=5, sticky="w")
-
-    # Hiển thị bảng 1 dòng
-    table_frameba = ttk.Frame(manage_tab)
-    table_frameba.pack(fill="both", expand=True, padx=10, pady=10)
-
-    treeba = ttk.Treeview(table_frameba,
-                        columns=headers,
-                        show="headings",
-                        height=7)  
-    for header in headers:
-         treeba.heading(header, text=header)
-         treeba.column(header, width=150, anchor="w")
-    treeba.pack(fill="x", padx=10, pady=5)
-
-    # Thanh cuộn ngang
-    horizontal_scrollbar_ba = ttk.Scrollbar(table_frameba, orient="horizontal", command=treeba.xview)
-    horizontal_scrollbar_ba.pack(side="top", fill="x")
-
-    # Kết nối thanh cuộn với Treeview
-    treeba.configure(xscrollcommand=horizontal_scrollbar_ba.set)
-
-    selected_row_num = tk.IntVar(value=-1)  # Biến lưu trạng thái dòng được chọn (mặc định là -1)
-
-    def display_row(event=None):
-        """Hiển thị dòng dữ liệu theo số thứ tự đã nhập."""
-        try:
-            row_num = int(row_num_entry.get())  # Lấy số hàng người dùng nhập
-        except ValueError:
-            messagebox.showwarning("Invalid Input", "Please enter a valid number!")
-            return
-
-        # Kiểm tra số thứ tự hàng hợp lệ
-        if row_num < 1 or row_num > len(data):
-            messagebox.showwarning("Invalid Row", f"Row number must be between 1 and {len(data)}.")
-            return
-        
-        # Lưu số thứ tự dòng được chọn
-        selected_row_num.set(row_num)
-
-        # Lấy dòng dữ liệu tương ứng và hiển thị trên bảng
-        treeba.delete(*treeba.get_children())  # Xóa dữ liệu cũ
-        treeba.insert("", "end", values=data[row_num - 1])  # Hiển thị dòng dữ liệu
-
-        # Hiển thị dữ liệu trong các ô nhập liệu
-        row_values = data[row_num - 1]
-        for header, value in zip(headers, row_values):
-            widget = input_widgets.get(header)
-
-            if isinstance(widget, ttk.Combobox):
-                if value and value in widget['values']:  # Kiểm tra giá trị hợp lệ
-                    widget.set(value)  # Đặt giá trị của Combobox
-                else:
-                    widget.set("")  # Nếu không có giá trị, để ô Combobox trống
-            else:
-                # Nếu widget không phải là Combobox, sử dụng Entry để hiển thị
-                widget.delete(0, tk.END)
-                widget.insert(0, value)
-
-    # Hiển thị
-    row_num_entry.bind("<Return>", display_row)  # Khi nhấn Enter, gọi hàm display_row()
-
-    input_widgets = {}  # Dictionary lưu các Entry tương ứng với cột
-
-    # Frame chứa các ô nhập liệu
-    entry_frame = ttk.Frame(manage_tab)
-    entry_frame.pack(fill="x", padx=10, pady=10)
-        
-    for i, (attribute, description) in enumerate(attributes_data):
-        row = i // 5  # Tính hàng dựa trên chỉ số
-        col = i % 5   # Tính cột dựa trên chỉ số
-
-        # Nhãn cho từng ô
-        label = ttk.Label(entry_frame, text=attribute)
-        label.grid(row=row * 2, column=col, padx=5, pady=5, sticky="n")
-        
-        # Tạo các ô nhập liệu dựa trên dữ liệu
-        if "Yes" in description or "Low" in description or "Male" in description or "Public" in description or "Positive" in description or "Near" in description or "High School" in description:
-            options = []
-            if "Yes, No" in description:
-                options = ["Yes", "No"]
-            elif "Low, Medium, High" in description:
-                options = ["Low", "Medium", "High"]
-            elif "Male, Female" in description:
-                options = ["Male", "Female"]
-            elif "Public, Private" in description:
-                options = ["Public", "Private"]
-            elif "Positive, Neutral, Negative" in description:
-                options = ["Positive", "Neutral", "Negative"]
-            elif "Near, Moderate, Far" in description:
-                options = ["Near", "Moderate", "Far"]
-            elif "High School, College, Postgraduate" in description:
-                options = ["High School", "College", "Postgraduate"]
-
-            combobox = ttk.Combobox(entry_frame, values=options, state="readonly", width=22)
-            combobox.grid(row=row * 2 + 1, column=col, padx=5, pady=5, sticky="n")
-            input_widgets[attribute] = combobox
-        else:
-            # Entry cho dữ liệu tự do
-            entry = ttk.Entry(entry_frame, width=25)
-            entry.grid(row=row * 2 + 1, column=col, padx=5, pady=5, sticky="n")
-            input_widgets[attribute] = entry
-            
-    # ===== Tab 4: Bảng biểu đồ =====
-    # Tạo thanh Menu
-    menu_frame4 = tk.Frame(chart_tab, bg="lightgrey")
-    menu_frame4.pack(fill="x", pady=5) 
-
-    menu4 = Menu(menu_frame4, tearoff=0)
-
-    chart_frame = tk.Frame(chart_tab)
-    chart_frame.pack(side="top", fill="both", expand=True)
-
-    label = ttk.Label(chart_frame, text="Biểu đồ sẽ hiển thị ở đây", font=50)
-    label.pack(expand=True)
-
-    def plot_on_canvas(plot_function):
-        # Xóa tất cả trước khi vẽ lại
-        for widget in chart_frame.winfo_children():
-            widget.destroy()
-
-        # Tạo biểu đồ mới từ hàm plot_function
-        fig = plot_function()
-
-        canvas = FigureCanvasTkAgg(fig, master=chart_frame)
-        canvas.draw()
-        
-        cw = canvas.get_tk_widget()
-        cw.config(width=1300, height=700)
-        cw.pack()
-
-    # Tạo một menu con trong menu bar
-    file1_menu = tk.Menu(menu4, tearoff=0)  # tearoff=0 để không cho phép menu rời khỏi thanh menu
-    file1_menu.add_command(label="Hours_Studied", command=lambda: plot_on_canvas(visualization_for_GUI.plot_hours_studied_distribution))
-    file1_menu.add_command(label="Attendance", command=lambda: plot_on_canvas(visualization_for_GUI.plot_attendance_distribution))
-    file1_menu.add_command(label="Parental_Involvement", command=lambda: plot_on_canvas(visualization_for_GUI.plot_parental_involvement_distribution))
-    file1_menu.add_command(label="Access_to_Resources", command=lambda: plot_on_canvas(visualization_for_GUI.plot_access_to_resources_distribution))
-    file1_menu.add_command(label="Extracurricular_Activities", command=lambda: plot_on_canvas(visualization_for_GUI.plot_extracurricular_activities_distribution))
-    file1_menu.add_command(label="Sleep_Hours", command=lambda: plot_on_canvas(visualization_for_GUI.plot_sleep_hours_distribution))
-    file1_menu.add_command(label="Previous_Scores", command=lambda: plot_on_canvas(visualization_for_GUI.plot_previous_scores_distribution))
-    file1_menu.add_command(label="Motivation_Level", command=lambda: plot_on_canvas(visualization_for_GUI.plot_motivation_level_distribution))
-    file1_menu.add_command(label="Internet_Access", command=lambda: plot_on_canvas(visualization_for_GUI.plot_internet_access_distribution))
-    file1_menu.add_command(label="Tutoring_Sessions", command=lambda: plot_on_canvas(visualization_for_GUI.plot_tutoring_sessions_distribution))
-    file1_menu.add_command(label="Family_Income	", command=lambda: plot_on_canvas(visualization_for_GUI.plot_family_income_distribution))
-    file1_menu.add_command(label="Teacher_Quality", command=lambda: plot_on_canvas(visualization_for_GUI.plot_teacher_quality_distribution))
-    file1_menu.add_command(label="School_Type", command=lambda: plot_on_canvas(visualization_for_GUI.plot_school_type_distribution))
-    file1_menu.add_command(label="Peer_Influence", command=lambda: plot_on_canvas(visualization_for_GUI.plot_peer_influence_distribution))
-    file1_menu.add_command(label="Physical_Activity	", command=lambda: plot_on_canvas(visualization_for_GUI.plot_physical_activity_distribution))
-    file1_menu.add_command(label="Learning_Disabilities", command=lambda: plot_on_canvas(visualization_for_GUI.plot_learning_disabilities_distribution))
-    file1_menu.add_command(label="Parental_Education_Level", command=lambda: plot_on_canvas(visualization_for_GUI.plot_parental_education_level_distribution))
-    file1_menu.add_command(label="Distance_from_Home", command=lambda: plot_on_canvas(visualization_for_GUI.plot_distance_from_home_distribution))
-    file1_menu.add_command(label="Gender", command=lambda: plot_on_canvas(visualization_for_GUI.plot_gender_distribution))
-    file1_menu.add_command(label="Exam_Score", command=lambda: plot_on_canvas(visualization_for_GUI.plot_exam_score_distribution))
-    
-
-    file2_menu = tk.Menu(menu4, tearoff=0)  # tearoff=0 để không cho phép menu rời khỏi thanh menu
-    file2_menu.add_command(label="Vẽ biểu đồ phân tán Hours Studied và Exam Score", command=lambda: plot_on_canvas(visualization_for_GUI.scatterplot_Hours_Studied_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ phân tán Attendance và Exam Score", command=lambda: plot_on_canvas(visualization_for_GUI.scatterplot_Attendance_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ phân tán Previous Scores và Exam Score", command=lambda: plot_on_canvas(visualization_for_GUI.scatterplot_Previous_Scores_and_Exam_Score))
-    file2_menu.add_command(label="Xây dựng sơ đồ phân tán dựa trên các đặc điểm số (tính đến các hoạt động ngoại khóa)", command=lambda: plot_on_canvas(visualization_for_GUI.scatterplot_Numcol_and_Exam_Score_with_Extracurricular_Activities))
-    file2_menu.add_command(label="Xây dựng sơ đồ phân tán dựa trên các đặc điểm số (tính đến giới tính)", command=lambda: plot_on_canvas(visualization_for_GUI.scatterplot_Numcol_and_Exam_Score_with_Gender))
-    file2_menu.add_command(label="Xây dựng sơ đồ phân tán dựa trên các đặc điểm số (tính đến việc truy cập Internet)", command=lambda: plot_on_canvas(visualization_for_GUI.scatterplot_Numcol_and_Exam_Score_with_Internet_Access))
-    file2_menu.add_command(label="Xây dựng sơ đồ phân tán dựa trên các đặc điểm số (tính đến Khuyết tật học tập)", command=lambda: plot_on_canvas(visualization_for_GUI.scatterplot_Numcol_and_Exam_Score_with_Learning_Disabilities))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Parental Involvement", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Parental_Involvement_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Access_to_Resources", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Access_to_Resources_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Extracurricular_Activities", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Extracurricular_Activities_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Sleep_Hours", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Sleep_Hours_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Motivation_Level", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Motivation_Level_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Internet_Access", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Internet_Access_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Tutoring_Sessions", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Tutoring_Sessions_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Family_Income", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Family_Income_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Teacher_Quality", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Teacher_Quality_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot cho Exam_Score và School_Type", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_School_Type_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Peer_Influence", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Peer_Influence_and_Exam_Score))   
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Physical_Activity", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Physical_Activity_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot cho Exam_Score và Learning_Disabilities", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Learning_Disabilities_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Parental_Education_Level", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Parental_Education_Level_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot Exam_Score và Distance_from_Home", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Distance_from_Home_and_Exam_Score))
-    file2_menu.add_command(label="Vẽ biểu đồ boxplot cho Exam_Score và Gender", command=lambda: plot_on_canvas(visualization_for_GUI.boxplot_Gender_and_Exam_Score))
-
-     
-    menu4.add_cascade(label="BIỂU ĐỒ TẦN SUẤT VÀ CỘT CHO CÁC THUỘC TÍNH ĐƠN LẺ", menu=file1_menu)
-    menu4.add_cascade(label="BIỂU ĐỒ BIỂU DIỄN QUAN HỆ PHÂN TÁN (SỐ) VÀ BIỂU ĐỒ HỘP (PHÂN LOẠI) VỚI BIẾN MỤC TIÊU EXAM_SCORE", menu=file2_menu)
-    menu4.add_command(label="HEATMAP", command=lambda: plot_on_canvas(visualization_for_GUI.heatmap))
-
-    # Menu Button hiển thị menu
-    menubutton4 = ttk.Menubutton(menu_frame4, text="Menu", menu=menu4)
-    menubutton4.pack(side="left", padx=10, pady=5)
-
-    makecenter(root, 1000, 600)
-    root.mainloop() 
-
-# Chạy ứng dụng
-create_gui()
+makecenter(root, 1000, 600)
+root.mainloop()

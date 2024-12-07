@@ -1,9 +1,8 @@
-﻿import numpy as np
-import pandas as pd
+﻿import pandas as pd
 from pandas.api.types import CategoricalDtype
 
 # Đọc dữ liệu từ file CSV gốc trong thư mục data
-df = pd.read_csv('data_source/StudentPerformanceFactors.csv')
+df = pd.read_csv('data_source//StudentPerformanceFactors.csv')
 
 print(f"Ma trận DataFrame: {df.shape}")
 
@@ -37,8 +36,6 @@ print(df_cleaned.describe())
 # Kiểm tra từng cột thuộc tính không phải số (categorical hoặc object)
 for col in df_cleaned.select_dtypes(exclude=['number']).columns:
     print(f"Unique values in '{col}': {df_cleaned[col].unique()}")
-
-df_cleaned = df.copy()  # Tạo bản sao độc lập của df_cleaned
 
 Parental_Involvement_Type = CategoricalDtype(categories=["Low", "Medium", "High"], ordered=True)
 df_cleaned["Parental_Involvement"] =  df_cleaned["Parental_Involvement"].astype(Parental_Involvement_Type)
@@ -74,11 +71,11 @@ cat_col = ['Parental_Involvement', 'Access_to_Resources', 'Sleep_Hours', 'Extrac
            'Distance_from_Home', 'Gender']
 target = 'Exam_Score'
 
-print("\nKiểm tra kiểu dữ liệu")
+print("\nKiểm tra kiểu dữ liệu các nhóm và biến mục tiêu:")
 print(df_cleaned[num_col].dtypes)
 print(df_cleaned[cat_col].dtypes)
-print(df_cleaned[target].dtype)
+print(df_cleaned[target].dtypes)
 
 # Xuất DataFrame đã làm sạch thành file CSV mới
-df_cleaned.to_csv('data_source/cleaned_data.csv', index=False)
+df_cleaned.to_csv('data_source//cleaned_data.csv', index=False)
 print("\nFile cleaned_data.csv đã được lưu vào thư mục data.")

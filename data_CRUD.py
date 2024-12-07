@@ -54,7 +54,7 @@ def add_student_record():
         'Access_to_Resources': input_str("Access to Resources (Mức độ có sẵn các tài nguyên học tập): ", valid_options=['Low', 'Medium', 'High']),
         'Extracurricular_Activities': input_str("Extracurricular Activities (Có tham gia hoạt động ngoại khóa hay không?): ", valid_options=['Yes', 'No']),
         'Sleep_Hours': input_float("Sleep Hours (Số giờ ngủ trung bình mỗi đêm): ", 0, 24),  # Giả định số giờ ngủ tối đa là 24
-        'Previous_Scores': input_float("Previous Scores (Điểm số bài kiểm tra trước đó 0-100): ", 0, 100), #điểm số tối đa 100
+        'Previous_Scores': input_float("Previous Scores (Điểm số bài kiểm tra trước đó 0-100): ", 0, 100), # điểm số tối đa 100
         'Motivation_Level': input_str("Motivation Level (Mức độ động lực của sinh viên): ", valid_options=['Low', 'Medium', 'High']),
         'Internet_Access': input_str("Internet Access (Có sử dụng Internet không?): ", valid_options=['Yes', 'No']),
         'Tutoring_Sessions': input_int("Number of Tutoring Sessions (Số buổi học thêm mỗi tháng): ",0,10),
@@ -199,7 +199,7 @@ def display_valid_row_range():
     """Hiển thị khoảng chỉ số dòng hợp lệ có thể in."""
     total_rows = len(data)
     print(f"Có tổng cộng {total_rows} dòng dữ liệu.")
-    print(f"Bạn có thể nhập từ dòng 0 đến dòng {total_rows - 1} .")
+    print(f"Bạn có thể nhập từ dòng 0 đến dòng {total_rows - 1}.")
 
 def print_rows_range(start, end, page_size=100):
     """Hiển thị các dòng trong khoảng với phân trang."""
@@ -468,7 +468,7 @@ def sort_numeric_column_desc():
             print("Dữ liệu không hợp lệ. Vui lòng nhập một số nguyên.")
 
 # Lọc theo thuộc tính có giá trị chữ.
-def search_by_attribute(data):
+def filter_text_attributes(data):
     def input_str(prompt, valid_options=None):
         #Hàm nhập chuỗi với kiểm tra giá trị hợp lệ.
         if valid_options:
@@ -695,7 +695,7 @@ def filter_multiple_values():
         print("\nKết quả lọc dữ liệu:")
         paginate(filtered_data)
 
-def numeric_filter_menu():
+def filter_numeric_attributes():
     """Hiển thị menu lọc dữ liệu theo cột số."""
     while True:
         print("\nChọn một chức năng lọc:")
@@ -770,17 +770,17 @@ if __name__ == "__main__":
         elif choice == '7':
             display_valid_row_range()
             while True:
-                start = input_int("Nhập chỉ số dòng bắt đầu: ", 1, len(data)-1)
-                end = input_int("Nhập chỉ số dòng kết thúc: ", 1, len(data)-1)
+                start = input_int("Nhập chỉ số dòng bắt đầu: ", 0, len(data)-1)
+                end = input_int("Nhập chỉ số dòng kết thúc: ", 0, len(data)-1)
                 if start <= end:
                     break
                 else:
                     print("Chỉ số dòng bắt đầu phải bé hơn hoặc bằng chỉ số dòng kết thúc")
             print_rows_range(start, end)
         elif choice == '8':
-            numeric_filter_menu()    
+            filter_numeric_attributes()    
         elif choice == '9':
-            search_by_attribute(data)          
+            filter_text_attributes(data)          
         elif choice == '10':
             update_student_record(data)          
         elif choice == '11':
