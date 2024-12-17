@@ -238,7 +238,7 @@ def delete_selected_rows():
 def add_data():
     """Thêm thông tin khảo sát mới."""
     try:
-        subprocess.run(["python", "New_survey.py"], check=True) # Gọi chương trình New_survey.py
+        subprocess.run(["python", "SurveyForm.py"], check=True) # Gọi chương trình SurveyForm.py
     except subprocess.CalledProcessError as e:
         messagebox.showerror("Error", f"Error running the external program: {e}")
 
@@ -745,9 +745,16 @@ def show_specific_columns_with_rows():
             tk.messagebox.showwarning("Thông báo", "Vui lòng chọn ít nhất một cột!")
             return
         
-        num_rows = int(rows_entry.get())
-        if num_rows < 1:
-            raise ValueError("Number of rows must be greater than 0!")
+        num_rows = rows_entry.get()
+
+        try:
+            num_rows = int(num_rows)
+            if num_rows < 1 or num_rows > len(recent_files_data) :
+                tk.messagebox.showwarning("Lỗi", f"Số dòng phải 1 đến {len(recent_files_data)}")
+                return
+        except ValueError:
+            tk.messagebox.showwarning("Lỗi", "Vui lòng nhập đúng định dạng số nguyên.")
+            return
 
         column_window.destroy()
         # Hiển thị dữ liệu các cột được chọn
@@ -771,8 +778,8 @@ def show_specific_columns_with_rows():
 def show_specific_rows():
         global edited_data, current_page, total_pages
         recent_files_data = pd.read_csv(file_path)
-        """Hiển thị các dòng mong muốn."""
-        input_range = simpledialog.askstring("Hiển thị các dòng mong muốn", "Nhập khoảng dòng (ví dụ: 5-15):")
+        """Hiển thị các dòng cụ thể."""
+        input_range = simpledialog.askstring("Hiển thị các dòng cụ thể", "Nhập khoảng dòng (ví dụ: 5-15):")
         if not input_range:
             return
 
